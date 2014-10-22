@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{D38A55EA-715A-4006-98D2-06CB1F8C67C6}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>BuildDependencyManager</RootNamespace>
+    <AssemblyName>BuildDependencyManager</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="Xwt, Version=0.1.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
+      <Package>monodevelop</Package>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Xwt.Gtk, Version=0.1.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
+      <Package>monodevelop</Package>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
+    <Reference Include="RestSharp">
+      <HintPath>..\packages\RestSharp.104.5.0\lib\net4\RestSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BuildDependencyManagerDialog.cs" />
+    <Compile Include="ImportDialog.cs" />
+    <Compile Include="TeamCity\TeamCityApi.cs" />
+    <Compile Include="TeamCity\RestClasses\BuildType.cs" />
+    <Compile Include="TeamCity\RestClasses\Project.cs" />
+    <Compile Include="TeamCity\RestClasses\Projects.cs" />
+    <Compile Include="TeamCity\RestClasses\ArtifactDependency.cs" />
+    <Compile Include="TeamCity\RestClasses\Property.cs" />
+    <Compile Include="TeamCity\RestClasses\ArtifactProperties.cs" />
+    <Compile Include="TeamCity\RestClasses\Properties.cs" />
+    <Compile Include="ImportDialogModel.cs" />
+    <Compile Include="Artifact.cs" />
+    <Compile Include="Widgets\TableCell.cs" />
+    <Compile Include="AddOrEditArtifactDependency.cs" />
+    <Compile Include="Widgets\MultiLineTextEntry.cs" />
+    <Compile Include="DependencyFile.cs" />
+    <Compile Include="TeamCity\RestClasses\BuildTagType.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <None Include="Xwt.Gtk.dll.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TeamCity\" />
+    <Folder Include="Widgets\" />
+    <Folder Include="Dialogs\" />
+  </ItemGroup>
+</Project>

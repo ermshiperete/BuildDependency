@@ -1,0 +1,7 @@
+*~
+*.swp
+*.userprefs
+bin/
+obj/
+/packages/
+/testing/
