@@ -11,6 +11,7 @@ namespace BuildDependencyManager.Dialogs
 	public class ImportDialog: Dialog
 	{
 		private ImportDialogModel _model;
+		private readonly ComboBox _serversCombo;
 		private readonly ComboBox _projectCombo;
 		private readonly ComboBox _configCombo;
 		private readonly ListView _listView;
@@ -23,7 +24,7 @@ namespace BuildDependencyManager.Dialogs
 
 		public ImportDialog(List<Server> servers)
 		{
-			_model = new ImportDialogModel(servers[0] as TeamCityApi);
+			_model = new ImportDialogModel();
 			Title = "Import dependencies from TeamCity";
 			Width = 600;
 			Height = 400;
@@ -32,9 +33,20 @@ namespace BuildDependencyManager.Dialogs
 			Buttons.Add(new DialogButton("Cancel", Command.Cancel));
 
 			var vbox = new VBox();
+			var hbox = new HBox();
+			vbox.PackStart(hbox);
+			hbox.PackStart(new Label("Server:"));
+			_serversCombo = new ComboBox();
+			_serversCombo.SelectionChanged += OnServerChanged;
+			foreach (var server in servers)
+			{
+				_serversCombo.Items.Add(server);
+			}
+			_serversCombo.SelectedIndex = 0;
+			hbox.PackStart(_serversCombo);
 
 			vbox.PackStart(new Label("Condition to apply to all dependencies:"));
-			var hbox = new HBox();
+			hbox = new HBox();
 			vbox.PackStart(hbox);
 			_windows = new CheckBox("Windows") { State = CheckBoxState.On };
 			hbox.PackStart(_windows);
@@ -73,6 +85,16 @@ namespace BuildDependencyManager.Dialogs
 			_listView.DataSource = _store;
 
 			_model.GetProjects(_projectCombo.Items);
+		}
+
+		private void OnServerChanged (object sender, EventArgs e)
+		{
+			_model.TeamCity = _serversCombo.SelectedItem as TeamCityApi;
+			_projectCombo.Items.Clear();
+			_configCombo.Items.Clear();
+			_model.GetProjects(_projectCombo.Items);
+			_projectCombo.SelectedIndex = 0;
+			OnProjectChanged(this, EventArgs.Empty);
 		}
 
 		private void OnProjectChanged(object sender, EventArgs e)

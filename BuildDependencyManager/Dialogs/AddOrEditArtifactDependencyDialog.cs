@@ -30,7 +30,7 @@ namespace BuildDependencyManager.Dialogs
 
 		public AddOrEditArtifactDependencyDialog(bool isAddDialog, List<Server> servers)
 		{
-			_model = new ImportDialogModel(servers[0] as TeamCityApi);
+			_model = new ImportDialogModel();
 			Title = isAddDialog ? "Add New Artifact Dependency" : "Edit Artifact Dependency";
 			Width = 600;
 			Height = 400;
@@ -42,9 +42,10 @@ namespace BuildDependencyManager.Dialogs
 			_table = new Table();
 			_table.Add(new Label("Server:"), 0, row);
 			_serversCombo = new ComboBox();
+			_serversCombo.SelectionChanged += OnServerChanged;
 			foreach (var server in servers)
 			{
-				_serversCombo.Items.Add(server, server.Name);
+				_serversCombo.Items.Add(server);
 			}
 			_serversCombo.SelectedIndex = 0;
 
@@ -96,6 +97,11 @@ namespace BuildDependencyManager.Dialogs
 			Content = _table;
 
 			_model.GetProjects(_projectCombo.Items);
+		}
+
+		private void OnServerChanged (object sender, EventArgs e)
+		{
+			_model.TeamCity = _serversCombo.SelectedItem as TeamCityApi;
 		}
 
 		public AddOrEditArtifactDependencyDialog(List<Server> servers, Artifact artifact)

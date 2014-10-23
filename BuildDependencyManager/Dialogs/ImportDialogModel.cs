@@ -10,18 +10,18 @@ namespace BuildDependencyManager.Dialogs
 {
 	public class ImportDialogModel: IListDataSource
 	{
-		private TeamCityApi _teamCity;
 		private List<ArtifactProperties> _Artifacts;
 
-		public ImportDialogModel(TeamCityApi server)
+		public ImportDialogModel()
 		{
-			_teamCity = server;
 		}
+
+		public TeamCityApi TeamCity { get; set; }
 
 		public void GetProjects(ItemCollection projects)
 		{
 			projects.Clear();
-			foreach (var proj in _teamCity.GetAllProjects())
+			foreach (var proj in TeamCity.GetAllProjects())
 			{
 				projects.Add(proj, proj.Name);
 			}
@@ -31,7 +31,7 @@ namespace BuildDependencyManager.Dialogs
 		{
 			configs.Clear();
 
-			foreach (var config in _teamCity.GetBuildTypesForProject(projectId))
+			foreach (var config in TeamCity.GetBuildTypesForProject(projectId))
 			{
 				configs.Add(config, config.Name);
 			}
@@ -40,19 +40,19 @@ namespace BuildDependencyManager.Dialogs
 		public void GetArtifactDependencies(string configId, ItemCollection dependencies)
 		{
 			dependencies.Clear();
-			foreach (var dep in _teamCity.GetArtifactDependencies(configId))
+			foreach (var dep in TeamCity.GetArtifactDependencies(configId))
 			{
 				var prop = new ArtifactProperties(dep.Properties);
 				var tag = prop.RevisionName == "buildTag" ? prop.RevisionValue.Substring(0, prop.RevisionValue.Length - ".tcbuildtag".Length) : prop.RevisionName;
 				dependencies.Add(string.Format("id: {0}, pathRules: {1},\n buildType: {2} ({6}),\nrevName: {3}, revValue: {4} ({5})", dep.Id,
-						prop.PathRules, prop.SourceBuildTypeId, prop.RevisionName, prop.RevisionValue, tag, _teamCity.BuildTypes [prop.SourceBuildTypeId].Name));
+						prop.PathRules, prop.SourceBuildTypeId, prop.RevisionName, prop.RevisionValue, tag, TeamCity.BuildTypes [prop.SourceBuildTypeId].Name));
 			}
 		}
 
 		public IListDataSource GetArtifactsDataSource(string configId)
 		{
 			_Artifacts = new List<ArtifactProperties>();
-			foreach (var dep in _teamCity.GetArtifactDependencies(configId))
+			foreach (var dep in TeamCity.GetArtifactDependencies(configId))
 			{
 				_Artifacts.Add(new ArtifactProperties(dep.Properties));
 			}
@@ -77,7 +77,7 @@ namespace BuildDependencyManager.Dialogs
 			var artifact = _Artifacts[row];
 			if (column == 0)
 			{
-				return string.Format("{0}\n({1})", _teamCity.BuildTypes[artifact.SourceBuildTypeId].Name,
+				return string.Format("{0}\n({1})", TeamCity.BuildTypes[artifact.SourceBuildTypeId].Name,
 					artifact.TagLabel);
 			}
 			return artifact.PathRules;
