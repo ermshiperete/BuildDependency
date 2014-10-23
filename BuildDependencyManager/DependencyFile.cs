@@ -88,7 +88,8 @@ namespace BuildDependencyManager
 						ServerType type;
 						if (Enum.TryParse<ServerType>(parts[1], out type))
 						{
-							server = new Server(type) { Name = name };
+							server = Server.CreateServer(type);
+							server.Name = name;
 							_servers.Add(name, server);
 						}
 						else
@@ -125,9 +126,10 @@ namespace BuildDependencyManager
 						{
 							var tc = parts[0];
 							var configId = parts[2];
-							var config = TeamCityApi.Singleton.GetBuildTypes().First(type => type.Id == configId);
-							var proj = TeamCityApi.Singleton.GetAllProjects().First(project => project.Id == config.ProjectId);
-							artifact = new Artifact(_servers[tc], proj, configId);
+							var server = _servers[tc] as TeamCityApi;
+							var config = server.GetBuildTypes().First(type => type.Id == configId);
+							var proj = server.GetAllProjects().First(project => project.Id == config.ProjectId);
+							artifact = new Artifact(server, proj, configId);
 							artifacts.Add(artifact);
 						}
 						else

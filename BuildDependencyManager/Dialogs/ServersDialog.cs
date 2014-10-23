@@ -99,7 +99,7 @@ namespace BuildDependencyManager.Dialogs
 			if (server == null)
 			{
 				var selectedIndex = _serversCombo.SelectedIndex;
-				_serversCombo.Items.Insert(selectedIndex, new Server(ServerType.TeamCity));
+				_serversCombo.Items.Insert(selectedIndex, Server.CreateServer(ServerType.TeamCity));
 				_serversCombo.SelectedIndex = selectedIndex;
 				_serverType.SelectedIndex = 0;
 				_name.Text = string.Empty;

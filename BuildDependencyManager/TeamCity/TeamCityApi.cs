@@ -9,27 +9,16 @@ namespace BuildDependencyManager.TeamCity
 {
 	public class TeamCityApi: Server
 	{
-		private static TeamCityApi _singleton;
-
-		public static TeamCityApi Singleton
-		{
-			get
-			{
-				if (_singleton == null)
-					_singleton = new TeamCityApi("http://build.palaso.org");
-				return _singleton;
-			}
-		}
-
-		private readonly string BaseUrl;
 		private Dictionary<string, BuildType> _buildTypes;
 		private Dictionary<string, Project> _projects;
 
-		public TeamCityApi(string serverName) : base(ServerType.TeamCity)
+		public TeamCityApi() : base(ServerType.TeamCity)
 		{
-			Name = "TC";
-			Url = serverName;
-			BaseUrl = string.Format("{0}/guestAuth/app/rest/7.0", Url);
+		}
+
+		private string BaseUrl
+		{
+			get { return string.Format("{0}/guestAuth/app/rest/7.0", Url); }
 		}
 
 		private T Execute<T>(RestRequest request) where T : new()

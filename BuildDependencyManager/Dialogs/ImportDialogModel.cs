@@ -13,9 +13,9 @@ namespace BuildDependencyManager.Dialogs
 		private TeamCityApi _teamCity;
 		private List<ArtifactProperties> _Artifacts;
 
-		public ImportDialogModel()
+		public ImportDialogModel(TeamCityApi server)
 		{
-			_teamCity = TeamCityApi.Singleton;
+			_teamCity = server;
 		}
 
 		public void GetProjects(ItemCollection projects)

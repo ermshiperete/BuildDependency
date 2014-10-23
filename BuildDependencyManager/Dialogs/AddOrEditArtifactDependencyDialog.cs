@@ -4,32 +4,33 @@ using System;
 using System.Collections.Generic;
 using Xwt;
 using BuildDependencyManager.RestClasses;
+using BuildDependencyManager.TeamCity;
 using BuildDependencyManager.TeamCity.RestClasses;
 using BuildDependencyManager.Widgets;
-using GLib;
 
 namespace BuildDependencyManager.Dialogs
 {
 	public class AddOrEditArtifactDependencyDialog: Dialog
 	{
-		private ImportDialogModel _model = new ImportDialogModel();
+		private ImportDialogModel _model;
 		private readonly ComboBox _serversCombo;
 		private readonly ComboBox _projectCombo;
 		private readonly ComboBox _configCombo;
 		private readonly ComboBox _buildTagType;
-		private MultiLineTextEntry _textView;
+		private readonly MultiLineTextEntry _textView;
 		private Label _buildTagEntryLabel;
-		private TextEntry _buildTagEntry;
+		private readonly TextEntry _buildTagEntry;
 		private Table _table;
 		private string _buildNumber;
 		private string _buildTag;
 		private int _currentBuildSourceIndex;
-		private CheckBox _windows;
-		private CheckBox _linux32;
-		private CheckBox _linux64;
+		private readonly CheckBox _windows;
+		private readonly CheckBox _linux32;
+		private readonly CheckBox _linux64;
 
 		public AddOrEditArtifactDependencyDialog(bool isAddDialog, List<Server> servers)
 		{
+			_model = new ImportDialogModel(servers[0] as TeamCityApi);
 			Title = isAddDialog ? "Add New Artifact Dependency" : "Edit Artifact Dependency";
 			Width = 600;
 			Height = 400;

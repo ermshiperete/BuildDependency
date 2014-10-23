@@ -1,14 +1,16 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
+using System.Collections.Generic;
 using Xwt;
 using BuildDependencyManager.TeamCity.RestClasses;
+using BuildDependencyManager.TeamCity;
 
 namespace BuildDependencyManager.Dialogs
 {
 	public class ImportDialog: Dialog
 	{
-		private ImportDialogModel _model = new ImportDialogModel();
+		private ImportDialogModel _model;
 		private readonly ComboBox _projectCombo;
 		private readonly ComboBox _configCombo;
 		private readonly ListView _listView;
@@ -19,8 +21,9 @@ namespace BuildDependencyManager.Dialogs
 		private CheckBox _linux32;
 		private CheckBox _linux64;
 
-		public ImportDialog()
+		public ImportDialog(List<Server> servers)
 		{
+			_model = new ImportDialogModel(servers[0] as TeamCityApi);
 			Title = "Import dependencies from TeamCity";
 			Width = 600;
 			Height = 400;

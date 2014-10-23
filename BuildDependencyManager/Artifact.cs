@@ -26,15 +26,15 @@ namespace BuildDependencyManager
 			Condition = Conditions.All;
 		}
 
-		public Artifact(ArtifactProperties artifact)
+		public Artifact(Server server, ArtifactProperties artifact)
 		{
-			Server = TeamCityApi.Singleton;
+			Server = server;
 			PathRules = artifact.PathRules;
 			RevisionName = artifact.RevisionName;
 			RevisionValue = artifact.RevisionValue;
 			SourceBuildTypeId = artifact.SourceBuildTypeId;
 			CleanDestinationDirectory = artifact.CleanDestinationDirectory;
-			Project = TeamCityApi.Singleton.Projects[Config.ProjectId];
+			Project = ((TeamCityApi)server).Projects[Config.ProjectId];
 			Condition = Conditions.All;
 		}
 
@@ -48,7 +48,7 @@ namespace BuildDependencyManager
 
 		public BuildType Config
 		{
-			get { return TeamCityApi.Singleton.BuildTypes[SourceBuildTypeId]; }
+			get { return ((TeamCityApi)Server).BuildTypes[SourceBuildTypeId]; }
 		}
 
 		public Conditions Condition { get; set; }

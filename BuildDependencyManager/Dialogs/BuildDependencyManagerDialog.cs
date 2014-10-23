@@ -137,7 +137,10 @@ namespace BuildDependencyManager.Dialogs
 			_store.Clear();
 			_artifacts = new List<Artifact>();
 			_servers = new List<Server>();
-			_servers.Add(new Server(ServerType.TeamCity) { Name = "TC", Url = "http://build.palaso.org" });
+			var server = Server.CreateServer(ServerType.TeamCity);
+			server.Name = "TC";
+			server.Url = "http://build.palaso.org";
+			_servers.Add(server);
 		}
 
 		private void OnFileOpen(object sender, EventArgs e)
@@ -188,16 +191,17 @@ namespace BuildDependencyManager.Dialogs
 
 		private void OnFileImport(object sender, EventArgs e)
 		{
-			using (var dlg = new ImportDialog())
+			using (var dlg = new ImportDialog(_servers))
 			{
 				if (dlg.Run() == Command.Ok)
 				{
 					var configId = dlg.SelectedBuildConfig;
 					var condition = dlg.Condition;
 
-					foreach (var dep in TeamCityApi.Singleton.GetArtifactDependencies(configId))
+					var server = ((TeamCityApi)_servers[0]);
+					foreach (var dep in server.GetArtifactDependencies(configId))
 					{
-						var artifact = new Artifact(new ArtifactProperties(dep.Properties));
+						var artifact = new Artifact(server, new ArtifactProperties(dep.Properties));
 						artifact.Condition = condition;
 						_artifacts.Add(artifact);
 						int row = _store.AddRow();
