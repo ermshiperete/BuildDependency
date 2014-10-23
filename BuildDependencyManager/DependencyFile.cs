@@ -3,29 +3,60 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
-using System.IO;
-using BuildDependencyManager.TeamCity.RestClasses;
-using BuildDependencyManager.TeamCity;
 using System.Linq;
 using System.Text;
-
+using BuildDependencyManager.TeamCity;
+using BuildDependencyManager.TeamCity.RestClasses;
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.InteropServices;
 
 namespace BuildDependencyManager
 {
-	public static class DependencyFile
+	public class DependencyFile
 	{
-		public static void SaveFile(string fileName, List<Artifact> artifacts)
+		private static DependencyFile _instance;
+		private Dictionary<string, Server> _servers;
+
+		private DependencyFile()
+		{
+			_servers = new Dictionary<string, Server>();
+		}
+
+		private static DependencyFile Instance
+		{
+			get
+			{
+				if (_instance == null)
+					_instance = new DependencyFile();
+				return _instance;
+			}
+		}
+
+		public static void SaveFile(string fileName, List<Server> servers, List<Artifact> artifacts)
+		{
+			Instance.InternalSaveFile(fileName, servers, artifacts);
+		}
+
+		public static List<Artifact> LoadFile(string fileName)
+		{
+			return Instance.InternalLoadFile(fileName);
+		}
+
+		private void InternalSaveFile(string fileName, List<Server> servers, List<Artifact> artifacts)
 		{
 			using (var file = new StreamWriter(fileName))
 			{
-				file.WriteLine("[[TC]]");
-				file.WriteLine("url=build.palaso.org");
-				file.WriteLine();
+				foreach (var server in servers)
+				{
+					file.WriteLine("[[{0}]]", server.Name);
+					file.WriteLine("Type={0}", server.ServerType);
+					file.WriteLine("Url={0}", server.Url);
+					file.WriteLine();
+				}
 
 				foreach (var artifact in artifacts)
 				{
-					file.WriteLine("[TC::{0}]", artifact.Config.Id);
+					file.WriteLine("[{0}::{1}]", artifact.Server.Name, artifact.Config.Id);
 					file.WriteLine("Name={0}", artifact.ConfigName);
 					file.WriteLine("RevisionName={0}", artifact.RevisionName);
 					file.WriteLine("RevisionValue={0}", artifact.RevisionValue);
@@ -36,7 +67,43 @@ namespace BuildDependencyManager
 			}
 		}
 
-		public static List<Artifact> LoadFile(string fileName)
+		private int ReadServer(StreamReader file, string line)
+		{
+			var name = line.Trim('[', ']');
+			var lineCount = 0;
+			Server server = null;
+
+			while (!file.EndOfStream)
+			{
+				line = file.ReadLine();
+				lineCount++;
+				if (string.IsNullOrEmpty(line.Trim()))
+					break;
+
+				var parts = line.Split(new [] { '=' }, 2);
+				if (parts.Length == 2)
+				{
+					if (parts[0] == "Type")
+					{
+						ServerType type;
+						if (Enum.TryParse<ServerType>(parts[1], out type))
+						{
+							server = new Server(type) { Name = name };
+							_servers.Add(name, server);
+						}
+						else
+							Console.WriteLine("Can't interpret type {0}", parts[1]);
+					}
+					else if (parts[0] == "Url" && server != null)
+					{
+						server.Url = parts[1];
+					}
+				}
+			}
+			return lineCount;
+		}
+
+		private List<Artifact> InternalLoadFile(string fileName)
 		{
 			var artifacts = new List<Artifact>();
 			int lineNumber = 0;
@@ -47,14 +114,11 @@ namespace BuildDependencyManager
 				{
 					var line = file.ReadLine();
 					lineNumber++;
-					if (line == "[[TC]]")
+					if (line.StartsWith("[["))
 					{
-						line = file.ReadLine();
-						lineNumber++;
-						// skip this for now
-						line = file.ReadLine();
+						lineNumber += ReadServer(file, line);
 					}
-					if (line.StartsWith("["))
+					else if (line.StartsWith("["))
 					{
 						var parts = line.Trim('[', ']').Split(new[] { ':' }, 3);
 						if (parts.Length > 2)
@@ -63,7 +127,7 @@ namespace BuildDependencyManager
 							var configId = parts[2];
 							var config = TeamCityApi.Singleton.GetBuildTypes().First(type => type.Id == configId);
 							var proj = TeamCityApi.Singleton.GetAllProjects().First(project => project.Id == config.ProjectId);
-							artifact = new Artifact(proj, configId);
+							artifact = new Artifact(_servers[tc], proj, configId);
 							artifacts.Add(artifact);
 						}
 						else

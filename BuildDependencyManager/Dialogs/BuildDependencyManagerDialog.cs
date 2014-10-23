@@ -1,28 +1,22 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
-using Xwt;
 using System.Collections.Generic;
+using Xwt;
 using BuildDependencyManager.TeamCity;
 using BuildDependencyManager.TeamCity.RestClasses;
-using BuildDependencyManager.Widgets;
-using Xwt.GtkBackend;
-using Xwt.Backends;
-using Xwt.Drawing;
-using System.Globalization;
+using GLib;
 
-namespace BuildDependencyManager
+namespace BuildDependencyManager.Dialogs
 {
 	public class BuildDependencyManagerDialog: Dialog
 	{
 		private List<Artifact> _artifacts;
+		private List<Server> _servers;
 		private ListStore _store;
 		private readonly ListView _listView;
-		private readonly Table _table;
 		private DataField<string> _artifactsSource;
 		private DataField<string> _artifactsPath;
-
-		private int _rowCount;
 
 		public BuildDependencyManagerDialog()
 		{
@@ -30,15 +24,14 @@ namespace BuildDependencyManager
 			Width = 700;
 			Height = 400;
 
-			var menu = new Menu();
-			MainMenu = menu;
+			var mainMenu = new Menu();
+			MainMenu = mainMenu;
 			var fileMenu = new MenuItem("_File");
 			fileMenu.SubMenu = new Menu();
 
-			var collection = fileMenu.SubMenu.Items;
 			var menuItem = new MenuItem("_New");
 			menuItem.Clicked += OnFileNew;
-			collection.Add(menuItem);
+			fileMenu.SubMenu.Items.Add(menuItem);
 			menuItem = new MenuItem("_Open");
 			menuItem.Clicked += OnFileOpen;
 			fileMenu.SubMenu.Items.Add(menuItem);
@@ -46,13 +39,20 @@ namespace BuildDependencyManager
 			menuItem.Clicked += OnFileSave;
 			fileMenu.SubMenu.Items.Add(menuItem);
 			menuItem = new MenuItem("_Import");
-			menuItem.Clicked += OnImport;
+			menuItem.Clicked += OnFileImport;
 			fileMenu.SubMenu.Items.Add(menuItem);
 			menuItem = new MenuItem("E_xit");
 			menuItem.Clicked += (sender, e) => Close();
 			fileMenu.SubMenu.Items.Add(menuItem);
+			mainMenu.Items.Add(fileMenu);
 
-			menu.Items.Add(fileMenu);
+			var toolsMenu = new MenuItem("_Tools");
+			toolsMenu.SubMenu = new Menu();
+
+			menuItem = new MenuItem("_Servers");
+			menuItem.Clicked += OnToolsServers;
+			toolsMenu.SubMenu.Items.Add(menuItem);
+			mainMenu.Items.Add(toolsMenu);
 
 			var button = new DialogButton("Add Artifact");
 			button.Clicked += OnAddArtifact;
@@ -80,6 +80,8 @@ namespace BuildDependencyManager
 			vbox.PackStart(_listView, true);
 
 			Content = vbox;
+
+			OnFileNew(this, EventArgs.Empty);
 		}
 
 		private void AddArtifactToStore(int row, Artifact artifact)
@@ -93,7 +95,7 @@ namespace BuildDependencyManager
 
 		private void OnAddArtifact(object sender, EventArgs e)
 		{
-			using (var dlg = new AddOrEditArtifactDependency(true))
+			using (var dlg = new AddOrEditArtifactDependencyDialog(true, _servers))
 			{
 				if (dlg.Run() == Command.Ok)
 				{
@@ -111,7 +113,7 @@ namespace BuildDependencyManager
 			Console.WriteLine("Editing row {0}", row);
 			if (row >= _artifacts.Count)
 				return;
-			using (var dlg = new AddOrEditArtifactDependency(_artifacts[row]))
+			using (var dlg = new AddOrEditArtifactDependencyDialog(_servers, _artifacts[row]))
 			{
 				if (dlg.Run() == Command.Ok)
 				{
@@ -134,6 +136,8 @@ namespace BuildDependencyManager
 		{
 			_store.Clear();
 			_artifacts = new List<Artifact>();
+			_servers = new List<Server>();
+			_servers.Add(new Server(ServerType.TeamCity) { Name = "TC", Url = "http://build.palaso.org" });
 		}
 
 		private void OnFileOpen(object sender, EventArgs e)
@@ -177,12 +181,12 @@ namespace BuildDependencyManager
 
 				if (dlg.Run())
 				{
-					DependencyFile.SaveFile(dlg.FileName, _artifacts);
+					DependencyFile.SaveFile(dlg.FileName, _servers, _artifacts);
 				}
 			}
 		}
 
-		private void OnImport(object sender, EventArgs e)
+		private void OnFileImport(object sender, EventArgs e)
 		{
 			using (var dlg = new ImportDialog())
 			{
@@ -204,21 +208,15 @@ namespace BuildDependencyManager
 			}
 		}
 
-		private void AddTableRow(Artifact artifact)
+		private void OnToolsServers (object sender, EventArgs e)
 		{
-			//_table.InsertRow(_rowCount, _rowCount + 1);
-			//_table.Add(new TextEntry { ReadOnly = true, Text = string.Format("{0}\n({1})", artifact.ConfigName, artifact.Tag) }, 0, _rowCount);
-			_table.Add(new TableCell<Label>(new Label { Text = string.Format("{0}\n({1})", artifact.ConfigName, artifact.TagLabel) }), 0, _rowCount);
-			_table.Add(new TableCell<Label>(new Label { Text = artifact.PathRules }), 1, _rowCount);
-			var linkLabel = new LinkLabel { Text = "Edit" };
-			linkLabel.Tag = _rowCount;
-			linkLabel.LinkClicked += (sender, e) => Console.WriteLine("Edit row {0}!", _rowCount);
-			_table.Add(new TableCell<LinkLabel>(linkLabel, 50), 2, _rowCount);
-			linkLabel = new LinkLabel { Text = "Delete" };
-			linkLabel.Tag = _rowCount;
-			linkLabel.LinkClicked += (sender, e) => Console.WriteLine("Delete row {0}!", _rowCount);
-			_table.Add(new TableCell<LinkLabel>(linkLabel, 50), 3, _rowCount);
-			_rowCount++;
+			using (var dlg = new ServersDialog(_servers))
+			{
+				if (dlg.Run() == Command.Ok)
+				{
+					_servers = dlg.Servers;
+				}
+			}
 		}
 
 		private void HandleButtonPressed(object sender, ButtonEventArgs e)

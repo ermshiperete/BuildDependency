@@ -1,14 +1,13 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
+using System.Collections.Generic;
 using RestSharp;
 using BuildDependencyManager.TeamCity.RestClasses;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace BuildDependencyManager.TeamCity
 {
-	public class TeamCityApi
+	public class TeamCityApi: Server
 	{
 		private static TeamCityApi _singleton;
 
@@ -17,7 +16,7 @@ namespace BuildDependencyManager.TeamCity
 			get
 			{
 				if (_singleton == null)
-					_singleton = new TeamCityApi("build.palaso.org");
+					_singleton = new TeamCityApi("http://build.palaso.org");
 				return _singleton;
 			}
 		}
@@ -26,9 +25,11 @@ namespace BuildDependencyManager.TeamCity
 		private Dictionary<string, BuildType> _buildTypes;
 		private Dictionary<string, Project> _projects;
 
-		public TeamCityApi(string serverName)
+		public TeamCityApi(string serverName) : base(ServerType.TeamCity)
 		{
-			BaseUrl = string.Format("http://{0}/guestAuth/app/rest/7.0", serverName);
+			Name = "TC";
+			Url = serverName;
+			BaseUrl = string.Format("{0}/guestAuth/app/rest/7.0", Url);
 		}
 
 		private T Execute<T>(RestRequest request) where T : new()

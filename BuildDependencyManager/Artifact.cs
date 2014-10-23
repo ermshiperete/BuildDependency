@@ -3,7 +3,6 @@
 using System;
 using BuildDependencyManager.TeamCity;
 using BuildDependencyManager.TeamCity.RestClasses;
-using System.Text;
 
 namespace BuildDependencyManager
 {
@@ -19,8 +18,9 @@ namespace BuildDependencyManager
 			All = Windows | Linux32 | Linux64
 		}
 
-		public Artifact(Project project, string buildTypeId)
+		public Artifact(Server server, Project project, string buildTypeId)
 		{
+			Server = server;
 			Project = project;
 			SourceBuildTypeId = buildTypeId;
 			Condition = Conditions.All;
@@ -28,6 +28,7 @@ namespace BuildDependencyManager
 
 		public Artifact(ArtifactProperties artifact)
 		{
+			Server = TeamCityApi.Singleton;
 			PathRules = artifact.PathRules;
 			RevisionName = artifact.RevisionName;
 			RevisionValue = artifact.RevisionValue;
@@ -53,6 +54,8 @@ namespace BuildDependencyManager
 		public Conditions Condition { get; set; }
 
 		public Project Project { get; set; }
+
+		public Server Server { get; set; }
 	}
 }
 

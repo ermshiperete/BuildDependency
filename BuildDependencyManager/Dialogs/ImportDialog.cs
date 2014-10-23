@@ -2,11 +2,9 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using Xwt;
-using BuildDependencyManager.TeamCity;
 using BuildDependencyManager.TeamCity.RestClasses;
-using System.Text;
 
-namespace BuildDependencyManager
+namespace BuildDependencyManager.Dialogs
 {
 	public class ImportDialog: Dialog
 	{
@@ -103,7 +101,7 @@ namespace BuildDependencyManager
 		{
 			get
 			{
-				return AddOrEditArtifactDependency.GetConditionFromCheckBox(_windows, _linux32, _linux64);
+				return AddOrEditArtifactDependencyDialog.GetConditionFromCheckBox(_windows, _linux32, _linux64);
 			}
 		}
 	}

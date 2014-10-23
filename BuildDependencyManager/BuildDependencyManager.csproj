@@ -49,8 +49,8 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BuildDependencyManagerDialog.cs" />
-    <Compile Include="ImportDialog.cs" />
+    <Compile Include="Dialogs\BuildDependencyManagerDialog.cs" />
+    <Compile Include="Dialogs\ImportDialog.cs" />
     <Compile Include="TeamCity\TeamCityApi.cs" />
     <Compile Include="TeamCity\RestClasses\BuildType.cs" />
     <Compile Include="TeamCity\RestClasses\Project.cs" />
@@ -59,13 +59,15 @@
     <Compile Include="TeamCity\RestClasses\Property.cs" />
     <Compile Include="TeamCity\RestClasses\ArtifactProperties.cs" />
     <Compile Include="TeamCity\RestClasses\Properties.cs" />
-    <Compile Include="ImportDialogModel.cs" />
+    <Compile Include="Dialogs\ImportDialogModel.cs" />
     <Compile Include="Artifact.cs" />
-    <Compile Include="Widgets\TableCell.cs" />
-    <Compile Include="AddOrEditArtifactDependency.cs" />
     <Compile Include="Widgets\MultiLineTextEntry.cs" />
     <Compile Include="DependencyFile.cs" />
     <Compile Include="TeamCity\RestClasses\BuildTagType.cs" />
+    <Compile Include="Dialogs\AddOrEditArtifactDependencyDialog.cs" />
+    <Compile Include="Dialogs\ServersDialog.cs" />
+    <Compile Include="Server.cs" />
+    <Compile Include="ServerType.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
