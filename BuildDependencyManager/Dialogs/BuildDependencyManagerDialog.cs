@@ -51,6 +51,11 @@ namespace BuildDependencyManager.Dialogs
 			menuItem = new MenuItem("_Servers");
 			menuItem.Clicked += OnToolsServers;
 			toolsMenu.SubMenu.Items.Add(menuItem);
+			menuItem = new MenuItem("S_ort");
+			menuItem.Clicked += OnToolsSort;
+			;
+			toolsMenu.SubMenu.Items.Add(menuItem);
+
 			mainMenu.Items.Add(toolsMenu);
 
 			var button = new DialogButton("Add Artifact");
@@ -85,7 +90,7 @@ namespace BuildDependencyManager.Dialogs
 
 		private void AddArtifactToStore(int row, Artifact artifact)
 		{
-			var source = string.Format("{0}\n({1})", artifact.ConfigName, artifact.TagLabel);
+			var source = string.Format("{0}::{1}\n({2})", artifact.Server.Name, artifact.ConfigName, artifact.TagLabel);
 			if ((artifact.Condition & Artifact.Conditions.All) != Artifact.Conditions.All && artifact.Condition != Artifact.Conditions.None)
 				source = string.Format("{0}\nCondition: {1}", source, artifact.Condition);
 			_store.SetValue<string>(row, _artifactsSource, source);
@@ -211,7 +216,7 @@ namespace BuildDependencyManager.Dialogs
 			}
 		}
 
-		private void OnToolsServers (object sender, EventArgs e)
+		private void OnToolsServers(object sender, EventArgs e)
 		{
 			using (var dlg = new ServersDialog(_servers))
 			{
@@ -219,6 +224,17 @@ namespace BuildDependencyManager.Dialogs
 				{
 					_servers = dlg.Servers;
 				}
+			}
+		}
+
+		private void OnToolsSort(object sender, EventArgs e)
+		{
+			_artifacts.Sort((x, y) => x.ConfigName.CompareTo(y.ConfigName));
+			_store.Clear();
+			foreach (var artifact in _artifacts)
+			{
+				int row = _store.AddRow();
+				AddArtifactToStore(row, artifact);
 			}
 		}
 
