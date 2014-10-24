@@ -3,7 +3,9 @@
 using System;
 using Xwt;
 using Xwt.Formats;
+#if __MonoCS__
 using Xwt.GtkBackend;
+#endif
 
 namespace BuildDependencyManager.Widgets
 {
@@ -22,12 +24,14 @@ namespace BuildDependencyManager.Widgets
 		{
 			get
 			{ 
+#if __MonoCS__
 				var backend = BackendHost.Backend as RichTextViewBackend;
 				if (backend != null)
 				{
 					var textView = backend.Widget as Gtk.TextView;
 					return textView.Buffer.Text;
 				}
+#endif
 				return _text; 
 			}
 			set
@@ -43,6 +47,7 @@ namespace BuildDependencyManager.Widgets
 			set
 			{
 				_readOnly = value;
+#if __MonoCS__
 				var backend = BackendHost.Backend as RichTextViewBackend;
 
 				if (backend != null)
@@ -50,6 +55,7 @@ namespace BuildDependencyManager.Widgets
 					var textView = backend.Widget as Gtk.TextView;
 					textView.Editable = !value;
 				}
+#endif
 			}
 		}
 

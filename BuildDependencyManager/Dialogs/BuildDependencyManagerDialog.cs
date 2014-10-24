@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Xwt;
 using BuildDependencyManager.TeamCity;
 using BuildDependencyManager.TeamCity.RestClasses;
-using GLib;
 
 namespace BuildDependencyManager.Dialogs
 {

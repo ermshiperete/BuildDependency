@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using Xwt;
-using GLib;
 
 namespace BuildDependencyManager.Dialogs
 {
