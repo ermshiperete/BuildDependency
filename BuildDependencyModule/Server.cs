@@ -1,9 +1,9 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
-using BuildDependencyManager.TeamCity;
+using BuildDependency.TeamCity;
 
-namespace BuildDependencyManager
+namespace BuildDependency
 {
 	public class Server
 	{

@@ -3,12 +3,12 @@
 using System;
 using System.Collections.Generic;
 using Xwt;
-using BuildDependencyManager.RestClasses;
-using BuildDependencyManager.TeamCity;
-using BuildDependencyManager.TeamCity.RestClasses;
-using BuildDependencyManager.Widgets;
+using BuildDependency.RestClasses;
+using BuildDependency.TeamCity;
+using BuildDependency.TeamCity.RestClasses;
+using BuildDependency.Widgets;
 
-namespace BuildDependencyManager.Dialogs
+namespace BuildDependency.Dialogs
 {
 	public class AddOrEditArtifactDependencyDialog: Dialog
 	{
@@ -104,26 +104,26 @@ namespace BuildDependencyManager.Dialogs
 			_model.TeamCity = _serversCombo.SelectedItem as TeamCityApi;
 		}
 
-		public AddOrEditArtifactDependencyDialog(List<Server> servers, Artifact artifact)
+		public AddOrEditArtifactDependencyDialog(List<Server> servers, ArtifactTemplate artifact)
 			: this(false, servers)
 		{
 			LoadArtifact(artifact);
 		}
 
-		private void SetCheckBox(CheckBox checkBox, Artifact artifact, Artifact.Conditions condition)
+		private void SetCheckBox(CheckBox checkBox, ArtifactTemplate artifact, Conditions condition)
 		{
 			checkBox.State = (artifact.Condition & condition) == condition ? CheckBoxState.On : CheckBoxState.Off;
 		}
 
-		private void LoadArtifact(Artifact artifact)
+		private void LoadArtifact(ArtifactTemplate artifact)
 		{
 			_serversCombo.SelectedItem = artifact.Server;
 			_projectCombo.SelectedItem = artifact.Project;
 			_configCombo.SelectedItem = artifact.Config;
 			_textView.Text = artifact.PathRules;
-			SetCheckBox(_windows, artifact, Artifact.Conditions.Windows);
-			SetCheckBox(_linux32, artifact, Artifact.Conditions.Linux32);
-			SetCheckBox(_linux64, artifact, Artifact.Conditions.Linux64);
+			SetCheckBox(_windows, artifact, Conditions.Windows);
+			SetCheckBox(_linux32, artifact, Conditions.Linux32);
+			SetCheckBox(_linux64, artifact, Conditions.Linux64);
 			BuildTagType revisionName;
 			Enum.TryParse(artifact.RevisionName, out revisionName);
 			switch (revisionName)
@@ -185,24 +185,24 @@ namespace BuildDependencyManager.Dialogs
 			var dataSource = _model.GetArtifactsDataSource(config.Id);
 		}
 
-		public static Artifact.Conditions GetConditionFromCheckBox(CheckBox windows, CheckBox linux32, CheckBox linux64)
+		public static Conditions GetConditionFromCheckBox(CheckBox windows, CheckBox linux32, CheckBox linux64)
 		{
-			return (GetCheckBoxState(windows, Artifact.Conditions.Windows) |
-				GetCheckBoxState(linux32, Artifact.Conditions.Linux32) |
-				GetCheckBoxState(linux64, Artifact.Conditions.Linux64));
+			return (GetCheckBoxState(windows, Conditions.Windows) |
+				GetCheckBoxState(linux32, Conditions.Linux32) |
+				GetCheckBoxState(linux64, Conditions.Linux64));
 		}
 
-		private static Artifact.Conditions GetCheckBoxState(CheckBox checkBox, Artifact.Conditions condition)
+		private static Conditions GetCheckBoxState(CheckBox checkBox, Conditions condition)
 		{
-			return checkBox.State == CheckBoxState.On ? condition : Artifact.Conditions.None;
+			return checkBox.State == CheckBoxState.On ? condition : Conditions.None;
 		}
 
-		public Artifact GetArtifact()
+		public ArtifactTemplate GetArtifact()
 		{
 			var server = _serversCombo.SelectedItem as Server;
 			var proj = _projectCombo.SelectedItem as Project;
 			var config = _configCombo.SelectedItem as BuildType;
-			var artifact = new Artifact(server, proj, config.Id);
+			var artifact = new ArtifactTemplate(server, proj, config.Id);
 			artifact.PathRules = _textView.Text;
 			artifact.Condition = GetConditionFromCheckBox(_windows, _linux32, _linux64);
 

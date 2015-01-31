@@ -7,7 +7,7 @@ using Xwt.Formats;
 using Xwt.GtkBackend;
 #endif
 
-namespace BuildDependencyManager.Widgets
+namespace BuildDependency.Widgets
 {
 	public class MultiLineTextEntry: RichTextView
 	{

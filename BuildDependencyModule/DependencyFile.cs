@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using BuildDependencyManager.TeamCity;
-using BuildDependencyManager.TeamCity.RestClasses;
+using BuildDependency.TeamCity;
+using BuildDependency.TeamCity.RestClasses;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.InteropServices;
+using BuildDependency.Artifacts;
 
-namespace BuildDependencyManager
+namespace BuildDependency
 {
 	public class DependencyFile
 	{
@@ -32,17 +33,17 @@ namespace BuildDependencyManager
 			}
 		}
 
-		public static void SaveFile(string fileName, List<Server> servers, List<Artifact> artifacts)
+		public static void SaveFile(string fileName, List<Server> servers, List<ArtifactTemplate> artifacts)
 		{
-			Instance.InternalSaveFile(fileName, servers, artifacts);
+			InternalSaveFile(fileName, servers, artifacts);
 		}
 
-		public static List<Artifact> LoadFile(string fileName)
+		public static List<ArtifactTemplate> LoadFile(string fileName)
 		{
 			return Instance.InternalLoadFile(fileName);
 		}
 
-		private void InternalSaveFile(string fileName, List<Server> servers, List<Artifact> artifacts)
+		private static void InternalSaveFile(string fileName, List<Server> servers, List<ArtifactTemplate> artifactTemplates)
 		{
 			using (var file = new StreamWriter(fileName))
 			{
@@ -54,14 +55,14 @@ namespace BuildDependencyManager
 					file.WriteLine();
 				}
 
-				foreach (var artifact in artifacts)
+				foreach (var template in artifactTemplates)
 				{
-					file.WriteLine("[{0}::{1}]", artifact.Server.Name, artifact.Config.Id);
-					file.WriteLine("Name={0}", artifact.ConfigName);
-					file.WriteLine("RevisionName={0}", artifact.RevisionName);
-					file.WriteLine("RevisionValue={0}", artifact.RevisionValue);
-					file.WriteLine("Condition={0}", artifact.Condition);
-					file.WriteLine("Path={0}", artifact.PathRules);
+					file.WriteLine("[{0}::{1}]", template.Server.Name, template.Config.Id);
+					file.WriteLine("Name={0}", template.ConfigName);
+					file.WriteLine("RevisionName={0}", template.RevisionName);
+					file.WriteLine("RevisionValue={0}", template.RevisionValue);
+					file.WriteLine("Condition={0}", template.Condition);
+					file.WriteLine("Path={0}", template.PathRules);
 					file.WriteLine();
 				}
 			}
@@ -104,11 +105,11 @@ namespace BuildDependencyManager
 			return lineCount;
 		}
 
-		private List<Artifact> InternalLoadFile(string fileName)
+		private List<ArtifactTemplate> InternalLoadFile(string fileName)
 		{
-			var artifacts = new List<Artifact>();
+			var artifacts = new List<ArtifactTemplate>();
 			int lineNumber = 0;
-			Artifact artifact = null;
+			ArtifactTemplate artifact = null;
 			using (var file = new StreamReader(fileName))
 			{
 				while (!file.EndOfStream)
@@ -129,7 +130,7 @@ namespace BuildDependencyManager
 							var server = _servers[tc] as TeamCityApi;
 							var config = server.GetBuildTypes().First(type => type.Id == configId);
 							var proj = server.GetAllProjects().First(project => project.Id == config.ProjectId);
-							artifact = new Artifact(server, proj, configId);
+							artifact = new ArtifactTemplate(server, proj, configId);
 							artifacts.Add(artifact);
 						}
 						else
@@ -158,8 +159,8 @@ namespace BuildDependencyManager
 								artifact.RevisionValue = parts[1];
 								break;
 							case "Condition":
-								Artifact.Conditions condition;
-								if (Enum.TryParse<Artifact.Conditions>(parts[1], out condition))
+								Conditions condition;
+								if (Enum.TryParse<Conditions>(parts[1], out condition))
 									artifact.Condition = condition;
 								else
 									Console.WriteLine("Can't interpret condition on line {0}. Skipping {1}", lineNumber, line);

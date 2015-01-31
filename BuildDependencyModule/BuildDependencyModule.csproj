@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FC592AFA-2172-45AA-B6EC-16D40D699AF0}</ProjectGuid>
+    <OutputType>Module</OutputType>
+    <RootNamespace>BuildDependency</RootNamespace>
+    <AssemblyName>BuildDependencyModule</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="RestSharp">
+      <HintPath>..\packages\RestSharp.105.0.1\lib\net4\RestSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Artifacts\ArtifactRule.cs" />
+    <Compile Include="Artifacts\DownloadFileJob.cs" />
+    <Compile Include="Artifacts\DownloadZipJob.cs" />
+    <Compile Include="Artifacts\IJob.cs" />
+    <Compile Include="Artifacts\UnzipFilesJob.cs" />
+    <Compile Include="TeamCity\RestClasses\Artifact.cs" />
+    <Compile Include="TeamCity\RestClasses\ArtifactDependency.cs" />
+    <Compile Include="TeamCity\RestClasses\ArtifactProperties.cs" />
+    <Compile Include="TeamCity\RestClasses\BuildTagType.cs" />
+    <Compile Include="TeamCity\RestClasses\BuildType.cs" />
+    <Compile Include="TeamCity\RestClasses\IvyModule.cs" />
+    <Compile Include="TeamCity\RestClasses\Project.cs" />
+    <Compile Include="TeamCity\RestClasses\Projects.cs" />
+    <Compile Include="TeamCity\RestClasses\Properties.cs" />
+    <Compile Include="TeamCity\RestClasses\Property.cs" />
+    <Compile Include="TeamCity\TeamCityApi.cs" />
+    <Compile Include="Tools\DownloadFile.cs" />
+    <Compile Include="Tools\FileHelper.cs" />
+    <Compile Include="ArtifactTemplate.cs" />
+    <Compile Include="Conditions.cs" />
+    <Compile Include="DependencyFile.cs" />
+    <Compile Include="JobsFile.cs" />
+    <Compile Include="Server.cs" />
+    <Compile Include="ServerType.cs" />
+    <Compile Include="Artifacts\ILog.cs" />
+    <Compile Include="Tools\WildcardToRegex.cs" />
+    <Compile Include="Tools\ConditionHelper.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

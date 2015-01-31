@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BuildDependencyManager.TeamCity.RestClasses
+namespace BuildDependency.TeamCity.RestClasses
 {
 	public class Property
 	{

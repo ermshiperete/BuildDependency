@@ -1,15 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{D38A55EA-715A-4006-98D2-06CB1F8C67C6}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3C10C2D6-138D-4DC7-9C6E-B42EAAC25E32}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <RootNamespace>BuildDependency</RootNamespace>
-    <AssemblyName>BuildDependencyManager</AssemblyName>
+    <AssemblyName>BuildDependencyTasks</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -17,33 +17,22 @@
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Externalconsole>true</Externalconsole>
-    <PlatformTarget>x86</PlatformTarget>
+    <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Xwt, Version=0.1.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
-      <HintPath>..\libs\Xwt.dll</HintPath>
+    <Reference Include="Microsoft.Build.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Xwt.Gtk, Version=0.1.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" Condition="'$(OS)'!='Windows_NT'">
-      <Package>monodevelop</Package>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" Condition="'$(OS)'!='Windows_NT'" />
-    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" Condition="'$(OS)'!='Windows_NT'" />
-    <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" Condition="'$(OS)'!='Windows_NT'" />
-    <Reference Include="Xwt.WPF" Condition="'$(OS)'=='Windows_NT'">
-      <HintPath>..\libs\Xwt.WPF.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="RestSharp">
       <HintPath>..\packages\RestSharp.105.0.1\lib\net4\RestSharp.dll</HintPath>
     </Reference>
@@ -52,31 +41,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Dialogs\BuildDependencyManagerDialog.cs" />
-    <Compile Include="Dialogs\ImportDialog.cs" />
-    <Compile Include="Dialogs\ImportDialogModel.cs" />
-    <Compile Include="Widgets\MultiLineTextEntry.cs" />
-    <Compile Include="Dialogs\AddOrEditArtifactDependencyDialog.cs" />
-    <Compile Include="Dialogs\ServersDialog.cs" />
-    <Compile Include="..\BuildDependencyModule\ArtifactTemplate.cs">
-      <Link>ArtifactTemplate.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Conditions.cs">
-      <Link>Conditions.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\DependencyFile.cs">
-      <Link>DependencyFile.cs</Link>
-    </Compile>
+    <Compile Include="Dependencies.cs" />
     <Compile Include="..\BuildDependencyModule\JobsFile.cs">
       <Link>JobsFile.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Server.cs">
-      <Link>Server.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\ServerType.cs">
-      <Link>ServerType.cs</Link>
     </Compile>
     <Compile Include="..\BuildDependencyModule\Artifacts\ArtifactRule.cs">
       <Link>Artifacts\ArtifactRule.cs</Link>
@@ -92,6 +60,18 @@
     </Compile>
     <Compile Include="..\BuildDependencyModule\Artifacts\UnzipFilesJob.cs">
       <Link>Artifacts\UnzipFilesJob.cs</Link>
+    </Compile>
+    <Compile Include="..\BuildDependencyModule\DependencyFile.cs">
+      <Link>DependencyFile.cs</Link>
+    </Compile>
+    <Compile Include="..\BuildDependencyModule\Conditions.cs">
+      <Link>Conditions.cs</Link>
+    </Compile>
+    <Compile Include="..\BuildDependencyModule\Server.cs">
+      <Link>Server.cs</Link>
+    </Compile>
+    <Compile Include="..\BuildDependencyModule\ServerType.cs">
+      <Link>ServerType.cs</Link>
     </Compile>
     <Compile Include="..\BuildDependencyModule\TeamCity\TeamCityApi.cs">
       <Link>TeamCity\TeamCityApi.cs</Link>
@@ -126,12 +106,13 @@
     <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\Property.cs">
       <Link>TeamCity\RestClasses\Property.cs</Link>
     </Compile>
-    <Compile Include="..\BuildDependencyModule\Tools\DownloadFile.cs">
-      <Link>Tools\DownloadFile.cs</Link>
-    </Compile>
     <Compile Include="..\BuildDependencyModule\Tools\FileHelper.cs">
       <Link>Tools\FileHelper.cs</Link>
     </Compile>
+    <Compile Include="..\BuildDependencyModule\ArtifactTemplate.cs">
+      <Link>ArtifactTemplate.cs</Link>
+    </Compile>
+    <Compile Include="Tools\LogWrapper.cs" />
     <Compile Include="..\BuildDependencyModule\Artifacts\ILog.cs">
       <Link>Artifacts\ILog.cs</Link>
     </Compile>
@@ -144,15 +125,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="Xwt.Gtk.dll.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
     <Folder Include="Artifacts\" />
     <Folder Include="TeamCity\" />
     <Folder Include="Tools\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

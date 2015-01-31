@@ -2,7 +2,7 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 
-namespace BuildDependencyManager.TeamCity.RestClasses
+namespace BuildDependency.TeamCity.RestClasses
 {
 	public class Project
 	{

@@ -3,11 +3,11 @@
 using System;
 using System.Collections.Generic;
 
-namespace BuildDependencyManager.TeamCity.RestClasses
+namespace BuildDependency.TeamCity.RestClasses
 {
-	public class Properties
+	public class Projects
 	{
-		public List<Property> Property { get; set; }
+		public List<Project> Project { get; set; }
 	}
 }
 

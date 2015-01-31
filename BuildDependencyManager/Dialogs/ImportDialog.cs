@@ -3,10 +3,10 @@
 using System;
 using System.Collections.Generic;
 using Xwt;
-using BuildDependencyManager.TeamCity.RestClasses;
-using BuildDependencyManager.TeamCity;
+using BuildDependency.TeamCity.RestClasses;
+using BuildDependency.TeamCity;
 
-namespace BuildDependencyManager.Dialogs
+namespace BuildDependency.Dialogs
 {
 	public class ImportDialog: Dialog
 	{
@@ -122,7 +122,7 @@ namespace BuildDependencyManager.Dialogs
 
 		public string SelectedBuildConfig { get; private set; }
 
-		public Artifact.Conditions Condition
+		public Conditions Condition
 		{
 			get
 			{

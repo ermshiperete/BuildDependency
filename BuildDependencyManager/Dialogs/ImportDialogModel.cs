@@ -3,10 +3,10 @@
 using System;
 using System.Collections.Generic;
 using Xwt;
-using BuildDependencyManager.TeamCity;
-using BuildDependencyManager.TeamCity.RestClasses;
+using BuildDependency.TeamCity;
+using BuildDependency.TeamCity.RestClasses;
 
-namespace BuildDependencyManager.Dialogs
+namespace BuildDependency.Dialogs
 {
 	public class ImportDialogModel: IListDataSource
 	{

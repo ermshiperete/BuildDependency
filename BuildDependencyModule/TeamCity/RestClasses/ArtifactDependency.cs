@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BuildDependencyManager.TeamCity.RestClasses
+namespace BuildDependency.TeamCity.RestClasses
 {
 	//<artifact-dependency id="0" type="artifact_dependency"><properties><property name="cleanDestinationDirectory" value="false"/>
 	// <property name="pathRules" value="*.zip!*.*"/><property name="revisionName" value="lastSuccessful"/>

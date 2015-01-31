@@ -3,9 +3,10 @@
 using System;
 using System.Collections.Generic;
 using RestSharp;
-using BuildDependencyManager.TeamCity.RestClasses;
+using BuildDependency.TeamCity.RestClasses;
+using BuildDependency.RestClasses;
 
-namespace BuildDependencyManager.TeamCity
+namespace BuildDependency.TeamCity
 {
 	public class TeamCityApi: Server
 	{
@@ -21,10 +22,15 @@ namespace BuildDependencyManager.TeamCity
 			get { return string.Format("{0}/guestAuth/app/rest/7.0", Url); }
 		}
 
-		private T Execute<T>(RestRequest request) where T : new()
+		public string BaseRepoUrl
+		{
+			get { return string.Format("{0}/guestAuth/repository", Url); }
+		}
+
+		private T Execute<T>(string baseUrl, RestRequest request) where T : new()
 		{
 			var client = new RestClient();
-			client.BaseUrl = BaseUrl;
+			client.BaseUrl = new Uri(baseUrl);
 			var response = client.Execute<T>(request);
 
 			if (response.ErrorException != null)
@@ -35,13 +41,23 @@ namespace BuildDependencyManager.TeamCity
 			return response.Data;
 		}
 
+		private T ExecuteApi<T>(RestRequest request) where T : new()
+		{
+			return Execute<T>(BaseUrl, request);
+		}
+
+		private T ExecuteRepo<T>(RestRequest request) where T : new()
+		{
+			return Execute<T>(BaseRepoUrl, request);
+		}
+
 		public List<Project> GetAllProjects()
 		{
 			var request = new RestRequest();
 			request.Resource = "/projects";
 			request.RootElement = "projects";
 
-			return Execute<Projects>(request).Project;
+			return ExecuteApi<Projects>(request).Project;
 		}
 
 		public List<BuildType> GetBuildTypes()
@@ -50,7 +66,7 @@ namespace BuildDependencyManager.TeamCity
 			request.Resource = string.Format("/buildTypes");
 			request.RootElement = "buildType";
 
-			return Execute<List<BuildType>>(request);
+			return ExecuteApi<List<BuildType>>(request);
 		}
 
 		public List<BuildType> GetBuildTypesForProject(string projectId)
@@ -59,7 +75,7 @@ namespace BuildDependencyManager.TeamCity
 			request.Resource = string.Format("/projects/id:{0}/buildTypes", projectId);
 			request.RootElement = "buildType";
 
-			return Execute<List<BuildType>>(request);
+			return ExecuteApi<List<BuildType>>(request);
 		}
 
 		public List<ArtifactDependency> GetArtifactDependencies(string buildTypeId)
@@ -68,7 +84,17 @@ namespace BuildDependencyManager.TeamCity
 			request.Resource = string.Format("/buildTypes/id:{0}/artifact-dependencies", buildTypeId);
 			request.RootElement = "artifact-dependency";
 
-			return Execute<List<ArtifactDependency>>(request);
+			return ExecuteApi<List<ArtifactDependency>>(request);
+		}
+
+		public List<Artifact> GetArtifacts(ArtifactTemplate template)
+		{
+			var request = new RestRequest();
+			request.Resource = string.Format("/download/{0}/{1}/teamcity-ivy.xml", template.Config.Id, template.RevisionValue);
+			request.RootElement = "publications";
+
+			var artifacts = ExecuteRepo<List<Artifact>>(request);
+			return artifacts;
 		}
 
 		public Dictionary<string, BuildType> BuildTypes

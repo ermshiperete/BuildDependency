@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using Xwt;
 
-namespace BuildDependencyManager.Dialogs
+namespace BuildDependency.Dialogs
 {
 	public class ServersDialog: Dialog
 	{

@@ -1,13 +1,12 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
-using System.Collections.Generic;
 
-namespace BuildDependencyManager.TeamCity.RestClasses
+namespace BuildDependency
 {
-	public class Projects
+	public enum ServerType
 	{
-		public List<Project> Project { get; set; }
+		TeamCity
 	}
 }
 

@@ -2,14 +2,12 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 
-namespace BuildDependencyManager.RestClasses
+namespace BuildDependency.Artifacts
 {
-	public enum BuildTagType
+	public interface IJob
 	{
-		lastSuccessful,
-		lastPinned,
-		lastFinished,
-		buildNumber,
-		buildTag
+		Conditions Conditions { get; }
+		bool Execute(ILog log, string workDir);
+		string ToString();
 	}
 }

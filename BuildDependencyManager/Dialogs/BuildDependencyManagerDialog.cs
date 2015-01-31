@@ -3,14 +3,15 @@
 using System;
 using System.Collections.Generic;
 using Xwt;
-using BuildDependencyManager.TeamCity;
-using BuildDependencyManager.TeamCity.RestClasses;
+using BuildDependency.TeamCity;
+using BuildDependency.TeamCity.RestClasses;
+using System.IO;
 
-namespace BuildDependencyManager.Dialogs
+namespace BuildDependency.Dialogs
 {
 	public class BuildDependencyManagerDialog: Dialog
 	{
-		private List<Artifact> _artifacts;
+		private List<ArtifactTemplate> _artifacts;
 		private List<Server> _servers;
 		private ListStore _store;
 		private readonly ListView _listView;
@@ -78,7 +79,7 @@ namespace BuildDependencyManager.Dialogs
 			_listView.ButtonPressed += HandleButtonPressed;
 
 			_store = new ListStore(_artifactsSource, _artifactsPath);
-			_artifacts = new List<Artifact>();
+			_artifacts = new List<ArtifactTemplate>();
 			_listView.DataSource = _store;
 
 			vbox.PackStart(_listView, true);
@@ -88,10 +89,10 @@ namespace BuildDependencyManager.Dialogs
 			OnFileNew(this, EventArgs.Empty);
 		}
 
-		private void AddArtifactToStore(int row, Artifact artifact)
+		private void AddArtifactToStore(int row, ArtifactTemplate artifact)
 		{
 			var source = string.Format("{0}::{1}\n({2})", artifact.Server.Name, artifact.ConfigName, artifact.TagLabel);
-			if ((artifact.Condition & Artifact.Conditions.All) != Artifact.Conditions.All && artifact.Condition != Artifact.Conditions.None)
+			if ((artifact.Condition & Conditions.All) != Conditions.All && artifact.Condition != Conditions.None)
 				source = string.Format("{0}\nCondition: {1}", source, artifact.Condition);
 			_store.SetValue<string>(row, _artifactsSource, source);
 			_store.SetValue<string>(row, _artifactsPath, artifact.PathRules);
@@ -139,7 +140,7 @@ namespace BuildDependencyManager.Dialogs
 		private void OnFileNew(object sender, EventArgs e)
 		{
 			_store.Clear();
-			_artifacts = new List<Artifact>();
+			_artifacts = new List<ArtifactTemplate>();
 			_servers = new List<Server>();
 			var server = Server.CreateServer(ServerType.TeamCity);
 			server.Name = "TC";
@@ -188,7 +189,11 @@ namespace BuildDependencyManager.Dialogs
 
 				if (dlg.Run())
 				{
-					DependencyFile.SaveFile(dlg.FileName, _servers, _artifacts);
+					var fileName = dlg.FileName;
+					if (string.IsNullOrEmpty(Path.GetExtension(fileName)))
+						fileName += ".dep";
+					DependencyFile.SaveFile(fileName, _servers, _artifacts);
+					JobsFile.WriteJobsFile(Path.ChangeExtension(fileName, ".files"), _artifacts);
 				}
 			}
 		}
@@ -205,7 +210,7 @@ namespace BuildDependencyManager.Dialogs
 					var server = ((TeamCityApi)_servers[0]);
 					foreach (var dep in server.GetArtifactDependencies(configId))
 					{
-						var artifact = new Artifact(server, new ArtifactProperties(dep.Properties));
+						var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.Properties));
 						artifact.Condition = condition;
 						_artifacts.Add(artifact);
 						int row = _store.AddRow();
