@@ -25,6 +25,11 @@ namespace BuildDependency.Dialogs
 		public ImportDialog(List<Server> servers)
 		{
 			_model = new ImportDialogModel();
+			_serversCombo = new ComboBox();
+			_listView = new ListView();
+			_projectCombo = new ComboBox();
+			_configCombo = new ComboBox();
+
 			Title = "Import dependencies from TeamCity";
 			Width = 600;
 			Height = 400;
@@ -36,7 +41,6 @@ namespace BuildDependency.Dialogs
 			var hbox = new HBox();
 			vbox.PackStart(hbox);
 			hbox.PackStart(new Label("Server:"));
-			_serversCombo = new ComboBox();
 			_serversCombo.SelectionChanged += OnServerChanged;
 			foreach (var server in servers)
 			{
@@ -56,17 +60,17 @@ namespace BuildDependency.Dialogs
 			hbox.PackStart(_linux64);
 
 			vbox.PackStart(new Label("Project"));
-			_projectCombo = new ComboBox();
 			_projectCombo.SelectionChanged += OnProjectChanged;
 			vbox.PackStart(_projectCombo);
 			vbox.PackStart(new Label("Build Configurations"));
-			_configCombo = new ComboBox();
 			_configCombo.SelectionChanged += OnConfigChanged;
 			vbox.PackStart(_configCombo);
 			vbox.PackStart(new Label("Dependencies"));
-			_listView = new ListView();
 			_artifactsSource = new DataField<string>();
 			_artifactsPath = new DataField<string>();
+
+			_store = new ListStore(_artifactsSource, _artifactsPath);
+			_listView.DataSource = _store;
 
 			_listView.Columns.Add(new ListViewColumn("Artifacts source", new TextCellView { TextField = _artifactsSource }));
 			_listView.Columns.Add(new ListViewColumn("Artifacts path", new TextCellView { TextField = _artifactsPath }));
@@ -80,9 +84,6 @@ namespace BuildDependency.Dialogs
 			vbox.PackStart(new Label("Click Import to import the dependencies of the selected configuration."));
 
 			Content = vbox;
-
-			_store = new ListStore(_artifactsSource, _artifactsPath);
-			_listView.DataSource = _store;
 
 			_model.GetProjects(_projectCombo.Items);
 		}
@@ -115,9 +116,10 @@ namespace BuildDependency.Dialogs
 			for (int i = 0; i < dataSource.RowCount; i++)
 			{
 				int row = _store.AddRow();
-				_store.SetValue<string>(row, _artifactsSource, (string)dataSource.GetValue(row, 0));
-				_store.SetValue<string>(row, _artifactsPath, (string)dataSource.GetValue(row, 1));
+				_store.SetValue(row, _artifactsSource, (string)dataSource.GetValue(row, 0));
+				_store.SetValue(row, _artifactsPath, (string)dataSource.GetValue(row, 1));
 			}
+
 		}
 
 		public string SelectedBuildConfig { get; private set; }
