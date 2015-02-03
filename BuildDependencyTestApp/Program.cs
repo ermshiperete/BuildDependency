@@ -14,7 +14,7 @@ namespace BuildDependencyTestApp
 			var task = new Dependencies();
 			task.DependencyFile = "/tmp/test.dep";
 			task.JobsFile = "/tmp/test.files";
-			task.UseDependencyFile = false;
+			task.UseDependencyFile = true;
 			task.KeepJobsFile = true;
 			task.WorkingDir = "/tmp/bla";
 			Directory.CreateDirectory("/tmp/bla");

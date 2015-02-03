@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using RestSharp;
 using BuildDependency.TeamCity.RestClasses;
 using BuildDependency.RestClasses;
+using System.Threading.Tasks;
 
 namespace BuildDependency.TeamCity
 {
@@ -53,6 +54,11 @@ namespace BuildDependency.TeamCity
 
 		public List<Project> GetAllProjects()
 		{
+			return GetAllProjectsAsync().Result;
+		}
+
+		public async Task<List<Project>> GetAllProjectsAsync()
+		{
 			var request = new RestRequest();
 			request.Resource = "/projects";
 			request.RootElement = "projects";
@@ -61,6 +67,11 @@ namespace BuildDependency.TeamCity
 		}
 
 		public List<BuildType> GetBuildTypes()
+		{
+			return GetBuildTypesAsync().Result;
+		}
+
+		public async Task<List<BuildType>> GetBuildTypesAsync()
 		{
 			var request = new RestRequest();
 			request.Resource = string.Format("/buildTypes");
@@ -71,6 +82,11 @@ namespace BuildDependency.TeamCity
 
 		public List<BuildType> GetBuildTypesForProject(string projectId)
 		{
+			return GetBuildTypesForProjectAsync(projectId).Result;
+		}
+
+		public async Task<List<BuildType>> GetBuildTypesForProjectAsync(string projectId)
+		{
 			var request = new RestRequest();
 			request.Resource = string.Format("/projects/id:{0}/buildTypes", projectId);
 			request.RootElement = "buildType";
@@ -80,6 +96,11 @@ namespace BuildDependency.TeamCity
 
 		public List<ArtifactDependency> GetArtifactDependencies(string buildTypeId)
 		{
+			return GetArtifactDependenciesAsync(buildTypeId).Result;
+		}
+
+		public async Task<List<ArtifactDependency>> GetArtifactDependenciesAsync(string buildTypeId)
+		{
 			var request = new RestRequest();
 			request.Resource = string.Format("/buildTypes/id:{0}/artifact-dependencies", buildTypeId);
 			request.RootElement = "artifact-dependency";
@@ -88,6 +109,11 @@ namespace BuildDependency.TeamCity
 		}
 
 		public List<Artifact> GetArtifacts(ArtifactTemplate template)
+		{
+			return GetArtifactsAsync(template).Result;
+		}
+
+		public async Task<List<Artifact>> GetArtifactsAsync(ArtifactTemplate template)
 		{
 			var request = new RestRequest();
 			request.Resource = string.Format("/download/{0}/{1}/teamcity-ivy.xml", template.Config.Id, template.RevisionValue);

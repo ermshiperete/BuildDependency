@@ -10,6 +10,7 @@ using BuildDependency.TeamCity.RestClasses;
 using System.Runtime.Serialization.Formatters;
 using System.Runtime.InteropServices;
 using BuildDependency.Artifacts;
+using System.Threading.Tasks;
 
 namespace BuildDependency
 {
@@ -40,7 +41,7 @@ namespace BuildDependency
 
 		public static List<ArtifactTemplate> LoadFile(string fileName)
 		{
-			return Instance.InternalLoadFile(fileName);
+			return Instance.InternalLoadFile(fileName).Result;
 		}
 
 		private static void InternalSaveFile(string fileName, List<Server> servers, List<ArtifactTemplate> artifactTemplates)
@@ -105,7 +106,7 @@ namespace BuildDependency
 			return lineCount;
 		}
 
-		private List<ArtifactTemplate> InternalLoadFile(string fileName)
+		private async Task<List<ArtifactTemplate>> InternalLoadFile(string fileName)
 		{
 			var artifacts = new List<ArtifactTemplate>();
 			int lineNumber = 0;
@@ -128,8 +129,12 @@ namespace BuildDependency
 							var tc = parts[0];
 							var configId = parts[2];
 							var server = _servers[tc] as TeamCityApi;
-							var config = server.GetBuildTypes().First(type => type.Id == configId);
-							var proj = server.GetAllProjects().First(project => project.Id == config.ProjectId);
+							var buildTypesTask = server.GetBuildTypesAsync();
+							var projectsTask = server.GetAllProjectsAsync();
+							var buildTypes = await buildTypesTask;
+							var projects = await projectsTask;
+							var config = buildTypes.First(type => type.Id == configId);
+							var proj = projects.First(project => project.Id == config.ProjectId);
 							artifact = new ArtifactTemplate(server, proj, configId);
 							artifacts.Add(artifact);
 						}
