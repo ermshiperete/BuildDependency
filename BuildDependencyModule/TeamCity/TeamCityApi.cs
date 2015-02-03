@@ -14,7 +14,8 @@ namespace BuildDependency.TeamCity
 		private Dictionary<string, BuildType> _buildTypes;
 		private Dictionary<string, Project> _projects;
 
-		public TeamCityApi() : base(ServerType.TeamCity)
+		public TeamCityApi()
+			: base(ServerType.TeamCity)
 		{
 		}
 
@@ -28,7 +29,7 @@ namespace BuildDependency.TeamCity
 			get { return string.Format("{0}/guestAuth/repository", Url); }
 		}
 
-		private T Execute<T>(string baseUrl, RestRequest request) where T : new()
+		private T Execute<T>(string baseUrl, RestRequest request, bool throwException = true) where T : new()
 		{
 			var client = new RestClient();
 			client.BaseUrl = new Uri(baseUrl);
@@ -36,15 +37,19 @@ namespace BuildDependency.TeamCity
 
 			if (response.ErrorException != null)
 			{
-				const string message = "Error retrieving response.  Check inner details for more info.";
-				throw new ApplicationException(message, response.ErrorException);
+				if (throwException)
+				{
+					const string message = "Error retrieving response.  Check inner details for more info.";
+					throw new ApplicationException(message, response.ErrorException);
+				}
+				return default(T);
 			}
 			return response.Data;
 		}
 
-		private T ExecuteApi<T>(RestRequest request) where T : new()
+		private T ExecuteApi<T>(RestRequest request, bool throwException = true) where T : new()
 		{
-			return Execute<T>(BaseUrl, request);
+			return Execute<T>(BaseUrl, request, throwException);
 		}
 
 		private T ExecuteRepo<T>(RestRequest request) where T : new()
@@ -105,7 +110,7 @@ namespace BuildDependency.TeamCity
 			request.Resource = string.Format("/buildTypes/id:{0}/artifact-dependencies", buildTypeId);
 			request.RootElement = "artifact-dependency";
 
-			return ExecuteApi<List<ArtifactDependency>>(request);
+			return ExecuteApi<List<ArtifactDependency>>(request, false);
 		}
 
 		public List<Artifact> GetArtifacts(ArtifactTemplate template)

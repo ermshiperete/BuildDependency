@@ -52,9 +52,13 @@ namespace BuildDependency.Dialogs
 		public IListDataSource GetArtifactsDataSource(string configId)
 		{
 			_Artifacts = new List<ArtifactProperties>();
-			foreach (var dep in TeamCity.GetArtifactDependencies(configId))
+			var deps = TeamCity.GetArtifactDependencies(configId);
+			if (deps != null)
 			{
-				_Artifacts.Add(new ArtifactProperties(dep.Properties));
+				foreach (var dep in deps)
+				{
+					_Artifacts.Add(new ArtifactProperties(dep.Properties));
+				}
 			}
 			return this;
 		}

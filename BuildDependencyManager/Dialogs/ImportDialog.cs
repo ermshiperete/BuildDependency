@@ -29,6 +29,9 @@ namespace BuildDependency.Dialogs
 			_listView = new ListView();
 			_projectCombo = new ComboBox();
 			_configCombo = new ComboBox();
+			_artifactsSource = new DataField<string>();
+			_artifactsPath = new DataField<string>();
+			_store = new ListStore(_artifactsSource, _artifactsPath);
 
 			Title = "Import dependencies from TeamCity";
 			Width = 600;
@@ -66,10 +69,6 @@ namespace BuildDependency.Dialogs
 			_configCombo.SelectionChanged += OnConfigChanged;
 			vbox.PackStart(_configCombo);
 			vbox.PackStart(new Label("Dependencies"));
-			_artifactsSource = new DataField<string>();
-			_artifactsPath = new DataField<string>();
-
-			_store = new ListStore(_artifactsSource, _artifactsPath);
 			_listView.DataSource = _store;
 
 			_listView.Columns.Add(new ListViewColumn("Artifacts source", new TextCellView { TextField = _artifactsSource }));
@@ -86,6 +85,7 @@ namespace BuildDependency.Dialogs
 			Content = vbox;
 
 			_model.GetProjects(_projectCombo.Items);
+			_projectCombo.SelectedIndex = 0;
 		}
 
 		private void OnServerChanged (object sender, EventArgs e)
@@ -101,6 +101,8 @@ namespace BuildDependency.Dialogs
 		private void OnProjectChanged(object sender, EventArgs e)
 		{
 			var project = _projectCombo.SelectedItem as Project;
+			if (project == null)
+				return;
 			_model.GetConfigurationsForProject(project.Id, _configCombo.Items);
 			_configCombo.SelectedIndex = 0;
 			OnConfigChanged(this, EventArgs.Empty);
@@ -109,6 +111,9 @@ namespace BuildDependency.Dialogs
 		private void OnConfigChanged(object sender, EventArgs e)
 		{
 			var config = _configCombo.SelectedItem as BuildType;
+			if (config == null)
+				return;
+
 			SelectedBuildConfig = config.Id;
 
 			var dataSource = _model.GetArtifactsDataSource(config.Id);
