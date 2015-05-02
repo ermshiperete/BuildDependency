@@ -33,7 +33,20 @@ namespace BuildDependency.TeamCity
 		{
 			var client = new RestClient();
 			client.BaseUrl = new Uri(baseUrl);
-			var response = client.Execute<T>(request);
+			IRestResponse<T> response = null;
+//			try
+//			{
+			response = client.Execute<T>(request);
+//			}
+//			catch (Exception e)
+//			{
+//				if (throwException)
+//					throw;
+//				return default(T);
+//			}
+//
+//			if (response == null)
+//				return default(T);
 
 			if (response.ErrorException != null)
 			{

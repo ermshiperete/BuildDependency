@@ -11,8 +11,8 @@ namespace BuildDependency.Artifacts
 		{
 		}
 
-		public DownloadZipJob(Conditions condition, string url, string downloadDir)
-			: base(condition, url, downloadDir)
+		public DownloadZipJob(Conditions condition, string sourceFile, string url, string downloadDir)
+			: base(condition, sourceFile, url, downloadDir)
 		{
 		}
 

@@ -12,6 +12,7 @@ namespace BuildDependency.Artifacts
 	public class ArtifactRule
 	{
 		private string _repoUrl;
+		private FileHelper _fileHelper;
 
 		public ArtifactRule(Conditions conditions, string repoUrl, string rule)
 		{
@@ -37,7 +38,7 @@ namespace BuildDependency.Artifacts
 
 		public bool IsMatch(string filename)
 		{
-			return Include && FileHelper.FilenameMatch(SourcePath, filename, false);
+			return Include && _fileHelper.IsFilenameMatch(filename);
 		}
 
 		public string GetTarget(string filename)
@@ -45,12 +46,7 @@ namespace BuildDependency.Artifacts
 			if (!IsMatch(filename))
 				return null;
 
-			var wildcard = SourcePath.IndexOfAny(new[] { '*', '?' });
-			if (wildcard > -1 && filename.Length > wildcard)
-			{
-				return Path.Combine(DestinationPath, SourcePath.Substring(0, wildcard) + filename.Substring(wildcard));
-			}
-			return Path.Combine(DestinationPath, filename);
+			return Path.Combine(DestinationPath, _fileHelper.GetPathStartingAtWildcard(filename));
 		}
 
 		private string GetSourceUrl(string fileName)
@@ -64,11 +60,11 @@ namespace BuildDependency.Artifacts
 			if (!IsMatch(filename))
 				return null;
 			if (string.IsNullOrEmpty(ArchivePath))
-				list.Add(new DownloadFileJob(Conditions, GetSourceUrl(filename), GetTarget(filename)));
+				list.Add(new DownloadFileJob(Conditions, filename, GetSourceUrl(filename), GetTarget(filename)));
 			else
 			{
 				var zipFile = Path.Combine(/*TODO*/ "Downloads", filename);
-				list.Add(new DownloadZipJob(Conditions, GetSourceUrl(filename), zipFile));
+				list.Add(new DownloadZipJob(Conditions, filename, GetSourceUrl(filename), zipFile));
 				list.Add(new UnzipFilesJob(Conditions, zipFile, ArchivePath, DestinationPath));
 			}
 
@@ -83,6 +79,7 @@ namespace BuildDependency.Artifacts
 			if (!string.IsNullOrEmpty(include) && include[0] == '-')
 				Include = false;
 			SourcePath = match.Groups["source"].Value.Trim();
+			_fileHelper = new FileHelper(SourcePath, false);
 			var archive = match.Groups["archive"].Value;
 			ArchivePath = archive.Trim().TrimStart('!');
 			var dest = match.Groups["dest"].Value;

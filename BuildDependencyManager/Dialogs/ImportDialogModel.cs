@@ -10,18 +10,20 @@ namespace BuildDependency.Dialogs
 {
 	public class ImportDialogModel: IListDataSource
 	{
-		private List<ArtifactProperties> _Artifacts;
-
 		public ImportDialogModel()
 		{
 		}
 
 		public TeamCityApi TeamCity { get; set; }
 
+		public List<ArtifactProperties> Artifacts { get; private set; }
+
 		public void GetProjects(ItemCollection projects)
 		{
 			projects.Clear();
-			foreach (var proj in TeamCity.GetAllProjects())
+			var allProjects = TeamCity.GetAllProjects();
+			allProjects.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
+			foreach (var proj in allProjects)
 			{
 				projects.Add(proj, proj.Name);
 			}
@@ -51,13 +53,13 @@ namespace BuildDependency.Dialogs
 
 		public IListDataSource GetArtifactsDataSource(string configId)
 		{
-			_Artifacts = new List<ArtifactProperties>();
+			Artifacts = new List<ArtifactProperties>();
 			var deps = TeamCity.GetArtifactDependencies(configId);
 			if (deps != null)
 			{
 				foreach (var dep in deps)
 				{
-					_Artifacts.Add(new ArtifactProperties(dep.Properties));
+					Artifacts.Add(new ArtifactProperties(dep.Properties));
 				}
 			}
 			return this;
@@ -76,9 +78,9 @@ namespace BuildDependency.Dialogs
 
 		public object GetValue(int row, int column)
 		{
-			if (row >= _Artifacts.Count)
+			if (row >= Artifacts.Count)
 				return null;
-			var artifact = _Artifacts[row];
+			var artifact = Artifacts[row];
 			if (column == 0)
 			{
 				return string.Format("{0}\n({1})", TeamCity.BuildTypes[artifact.SourceBuildTypeId].Name,
@@ -96,7 +98,7 @@ namespace BuildDependency.Dialogs
 		{
 			get
 			{
-				return _Artifacts.Count;
+				return Artifacts.Count;
 			}
 		}
 

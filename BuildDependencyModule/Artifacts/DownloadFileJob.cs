@@ -22,11 +22,12 @@ namespace BuildDependency.Artifacts
 			TargetFile = parts[3];
 		}
 
-		public DownloadFileJob(Conditions conditions, string url, string targetFile)
+		public DownloadFileJob(Conditions conditions, string sourceFile, string url, string targetFile)
 		{
 			Conditions = conditions;
 			Url = url;
 			TargetFile = targetFile;
+			SourceFile = sourceFile;
 		}
 
 		protected virtual string JobTypeMarker { get { return "F"; } }
@@ -34,6 +35,8 @@ namespace BuildDependency.Artifacts
 		public string Url { get; private set; }
 
 		public string TargetFile { get; private set; }
+
+		public string SourceFile { get; private set; }
 
 		#region IJob implementation
 

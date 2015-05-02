@@ -2,8 +2,8 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using NUnit.Framework;
-using BuildDependencyManager;
-using BuildDependencyModule.Tools;
+using BuildDependency;
+using BuildDependency.Tools;
 
 namespace BuildDependencyTests.Tools
 {
