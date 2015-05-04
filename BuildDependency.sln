@@ -34,8 +34,6 @@ Global
 		{D38A55EA-715A-4006-98D2-06CB1F8C67C6}.Release|x86.ActiveCfg = Release|x86
 		{D38A55EA-715A-4006-98D2-06CB1F8C67C6}.Release|x86.Build.0 = Release|x86
 		{FC592AFA-2172-45AA-B6EC-16D40D699AF0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FC592AFA-2172-45AA-B6EC-16D40D699AF0}.Debug|x86.Build.0 = Debug|Any CPU
 		{FC592AFA-2172-45AA-B6EC-16D40D699AF0}.Release|x86.ActiveCfg = Release|Any CPU
-		{FC592AFA-2172-45AA-B6EC-16D40D699AF0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
