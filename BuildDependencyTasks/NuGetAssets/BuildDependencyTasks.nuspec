@@ -1,0 +1,20 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata minClientVersion="2.8">
+    <id>BuildDependencyTasks</id>
+    <version>$version$</version>
+    <title>BuildDependencyTasks</title>
+    <authors>Eberhard Beilharz</authors>
+    <owners>Eberhard Beilharz</owners>
+    <developmentDependency>true</developmentDependency>
+    <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
+    <projectUrl>http://github.com/ermshiperete/BuildDependency</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Provides a small msbuild task named "dependencies" that allows to download
+    dependencies from a TeamCity server.</description>
+    <language>en-US</language>
+    <tags>msbuild, dependencies, teamcity</tags>
+    <dependencies>
+    </dependencies>
+  </metadata>
+</package>

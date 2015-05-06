@@ -124,12 +124,28 @@
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets" Condition="Exists('..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets')" />
   <ItemGroup>
     <Folder Include="Artifacts\" />
     <Folder Include="TeamCity\" />
     <Folder Include="Tools\" />
+    <Folder Include="NuGetAssets\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="NuGetAssets\BuildDependencyTasks.nuspec" />
+    <None Include="NuGetAssets\BuildDependencyTasks.targets" />
   </ItemGroup>
+  <Target Name="AfterBuild">
+    <ItemGroup>
+      <FilesToDelete Include="$(SolutionDir)NuGetBuild\**\*.*" />
+      <FilesToCopy Include="$(TargetDir)*.*" />
+    </ItemGroup>
+    <Delete Files="@(FilesToDelete)" />
+    <MakeDir Directories="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).nuspec" DestinationFolder="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).targets" DestinationFolder="$(SolutionDir)NuGetBuild\build" />
+    <PepitaPackage.CreatePackageTask NuGetBuildDirectory="$(SolutionDir)NuGetBuild" MetadataAssembly="$(TargetPath)" />
+  </Target>
 </Project>
