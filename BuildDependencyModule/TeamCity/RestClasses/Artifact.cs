@@ -12,7 +12,7 @@ namespace BuildDependency.RestClasses
 
 		public override string ToString()
 		{
-			return string.Format("{0}.{1}", Name, Ext);
+			return string.Format("{0}{1}{2}", Name, string.IsNullOrEmpty(Ext) ? "" : ".", Ext);
 		}
 	}
 }

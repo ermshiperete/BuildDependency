@@ -30,6 +30,21 @@ namespace BuildDependency
 		{
 			return Name;
 		}
+
+		public override bool Equals(object obj)
+		{
+			var otherServer = obj as Server;
+			if (otherServer == null)
+				return false;
+
+			return ServerType == otherServer.ServerType && Name == otherServer.Name &&
+				Url == otherServer.Url;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode() ^ ServerType.GetHashCode() ^ Name.GetHashCode() ^ Url.GetHashCode();
+		}
 	}
 }
 

@@ -68,6 +68,7 @@ namespace BuildDependencyTests
 		[TestCase("a/b/c/**d/*.dll=>dlls", "a/b/c/e/f/d/g.dll", Result = "dlls/e/f/d/g.dll")]
 		[TestCase("*.txt=>lib", "blatxt", Result = null)]
 		[TestCase("abc.dll*=>lib", "abc.dll.config", Result = "lib/abc.dll.config")]
+		[TestCase("**", "README", Result = "README")]
 		public string GetTarget(string rule, string fileName)
 		{
 			var artifactRule = new ArtifactRule(0, null, rule);
@@ -75,16 +76,18 @@ namespace BuildDependencyTests
 		}
 
 		[Test]
-		public void GetJobs_DownloadFile()
+		[TestCase("*.txt=>lib", "bla.txt", Result = "lib/bla.txt")]
+		[TestCase("**", "README", Result = "README")]
+		public string GetJobs_DownloadFile(string rule, string file)
 		{
-			var artifactRule = new ArtifactRule(0, "http://example.com/download", "*.txt=>lib");
-			var jobs = artifactRule.GetJobs("bla.txt");
+			var artifactRule = new ArtifactRule(0, "http://example.com/download", rule);
+			var jobs = artifactRule.GetJobs(file);
 
 			Assert.That(jobs.Count, Is.EqualTo(1));
 			Assert.That(jobs[0], Is.TypeOf<DownloadFileJob>());
 			var downloadJob = jobs[0] as DownloadFileJob;
-			Assert.That(downloadJob.Url, Is.EqualTo("http://example.com/download/bla.txt"));
-			Assert.That(downloadJob.TargetFile, Is.EqualTo("lib/bla.txt"));
+			Assert.That(downloadJob.Url, Is.EqualTo("http://example.com/download/" + file));
+			return downloadJob.TargetFile;
 		}
 
 		[Test]

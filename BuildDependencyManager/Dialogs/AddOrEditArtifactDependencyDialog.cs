@@ -22,8 +22,8 @@ namespace BuildDependency.Dialogs
 		private readonly ComboBox _projectCombo;
 		private readonly ComboBox _configCombo;
 		private readonly ComboBox _buildTagType;
-		private readonly MultiLineTextEntry _textView;
-		private readonly MultiLineTextEntry _preview;
+		private readonly MultiLineTextEntry _rulesTextBox;
+		private readonly ListBox _preview;
 		private Label _buildTagEntryLabel;
 		private readonly TextEntry _buildTagEntry;
 		private Table _table;
@@ -34,6 +34,7 @@ namespace BuildDependency.Dialogs
 		private readonly CheckBox _linux32;
 		private readonly CheckBox _linux64;
 		private List<Artifact> _artifacts;
+		private ArtifactTemplate _artifactToLoad;
 
 		public AddOrEditArtifactDependencyDialog(bool isAddDialog, List<Server> servers)
 		{
@@ -84,11 +85,11 @@ namespace BuildDependency.Dialogs
 			_table.Add(_buildTagEntry, 1, row++);
 
 			_table.Add(new Label("Artifact rules:"), 0, row, vpos: WidgetPlacement.Start);
-			_textView = new MultiLineTextEntry();
-			_textView.MinHeight = 200;
-			_textView.HorizontalPlacement = WidgetPlacement.Start;
-			_textView.KeyReleased += (sender, e) => UpdatePreview();
-			_table.Add(_textView, 1, row++, hexpand: true, vexpand: true, vpos: WidgetPlacement.Start);
+			_rulesTextBox = new MultiLineTextEntry();
+			_rulesTextBox.MinHeight = 200;
+			_rulesTextBox.HorizontalPlacement = WidgetPlacement.Start;
+			_rulesTextBox.KeyReleased += (sender, e) => UpdatePreview();
+			_table.Add(_rulesTextBox, 1, row++, hexpand: true, vexpand: true, vpos: WidgetPlacement.Start);
 
 			_table.Add(new Label("Newline-delimited set or rules in the form of\n[+:|-:]SourcePath[!ArchivePath][=>DestinationPath]"), 1, row++);
 
@@ -103,11 +104,10 @@ namespace BuildDependency.Dialogs
 			hbox.PackStart(_linux64);
 
 			_table.Add(new Label("Preview:"), 0, row, vpos: WidgetPlacement.Start);
-			_preview = new MultiLineTextEntry();
+			_preview = new ListBox();
 			_preview.MinHeight = 200;
 			_preview.HeightRequest = 200;
 			_preview.HorizontalPlacement = WidgetPlacement.Start;
-			_preview.ReadOnly = true;
 			_preview.BackgroundColor = Colors.LightGray;
 			_table.Add(_preview, 1, row++, hexpand: true, vexpand: false, vpos: WidgetPlacement.Start);
 
@@ -119,7 +119,13 @@ namespace BuildDependency.Dialogs
 		public AddOrEditArtifactDependencyDialog(List<Server> servers, ArtifactTemplate artifact)
 			: this(false, servers)
 		{
-			LoadArtifact(artifact);
+			_artifactToLoad = artifact;
+		}
+
+		protected override void OnShown()
+		{
+			base.OnShown();
+			LoadArtifact(_artifactToLoad);
 		}
 
 		private void OnServerChanged(object sender, EventArgs e)
@@ -137,7 +143,8 @@ namespace BuildDependency.Dialogs
 			_serversCombo.SelectedItem = artifact.Server;
 			_projectCombo.SelectedItem = artifact.Project;
 			_configCombo.SelectedItem = artifact.Config;
-			_textView.Text = artifact.PathRules;
+			_rulesTextBox.Text = artifact.PathRules;
+			UpdatePreview();
 			SetCheckBox(_windows, artifact, Conditions.Windows);
 			SetCheckBox(_linux32, artifact, Conditions.Linux32);
 			SetCheckBox(_linux64, artifact, Conditions.Linux64);
@@ -200,7 +207,6 @@ namespace BuildDependency.Dialogs
 			// this updates _textView.Text
 			var config = _configCombo.SelectedItem as BuildType;
 			var dataSource = _model.GetArtifactsDataSource(config.Id);
-
 			var server = _serversCombo.SelectedItem as Server;
 			var tcServer = server as TeamCityApi;
 			if (tcServer != null)
@@ -208,14 +214,13 @@ namespace BuildDependency.Dialogs
 				var template = GetArtifact();
 				_artifacts = tcServer.GetArtifacts(template);
 			}
-
 			UpdatePreview();
 		}
 
 		private void UpdatePreview()
 		{
+			_preview.Items.Clear();
 			var template = GetArtifact();
-			var bldr = new StringBuilder();
 			var jobs = template.GetJobs();
 			var jobsByFile = new Dictionary<string, List<IJob>>();
 			foreach (var job in jobs.OfType<DownloadFileJob>())
@@ -228,16 +233,15 @@ namespace BuildDependency.Dialogs
 			{
 				List<IJob> jobsForThisFile;
 				if (!jobsByFile.TryGetValue(artifact.ToString(), out jobsForThisFile))
-					bldr.AppendFormat("* {0}\n", artifact);
+					_preview.Items.Add(string.Format("**{0}**", artifact));
 				else
 				{
 					foreach (var job in jobsForThisFile)
 					{
-						bldr.AppendFormat("* {0} {1}\n", artifact, GetTarget(job));
+						_preview.Items.Add(string.Format("{0} {1}", artifact, GetTarget(job)));
 					}
 				}
 			}
-			_preview.Text = bldr.ToString();
 		}
 
 		private string GetTarget(IJob job)
@@ -267,7 +271,7 @@ namespace BuildDependency.Dialogs
 			var proj = _projectCombo.SelectedItem as Project;
 			var config = _configCombo.SelectedItem as BuildType;
 			var artifact = new ArtifactTemplate(server, proj, config.Id);
-			artifact.PathRules = _textView.Text;
+			artifact.PathRules = _rulesTextBox.Text;
 			artifact.Condition = GetConditionFromCheckBox(_windows, _linux32, _linux64);
 
 			artifact.RevisionName = Enum.GetName(typeof(BuildTagType), _buildTagType.SelectedIndex);

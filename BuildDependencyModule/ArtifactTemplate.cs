@@ -63,6 +63,8 @@ namespace BuildDependency
 			var rules = new List<ArtifactRule>();
 			foreach (var ruleString in PathRules.Split('\n'))
 			{
+				if (string.IsNullOrEmpty(ruleString.Trim()))
+					continue;
 				rules.Add(new ArtifactRule(Condition, RepoUrl, ruleString));
 			}
 
