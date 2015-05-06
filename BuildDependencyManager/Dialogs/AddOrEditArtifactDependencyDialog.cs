@@ -12,7 +12,6 @@ using Xwt.Drawing;
 using BuildDependency.Artifacts;
 using System.Diagnostics;
 using System.Linq;
-using GLib;
 
 namespace BuildDependency.Dialogs
 {
