@@ -99,8 +99,16 @@ namespace BuildDependency
 			if (string.IsNullOrEmpty(JobsFile))
 				JobsFile = Path.ChangeExtension(DependencyFile, ".files");
 
-			if ((UseDependencyFile && !(KeepJobsFile && File.Exists(JobsFile))) ||
-				!File.Exists(JobsFile))
+			var replaceJobsFile = (UseDependencyFile && !(KeepJobsFile && File.Exists(JobsFile))) ||
+				!File.Exists(JobsFile);
+			if (UseDependencyFile && File.Exists(JobsFile))
+			{
+				var depFile = new FileInfo(DependencyFile);
+				var jobsFile = new FileInfo(JobsFile);
+				if (depFile.LastWriteTimeUtc > jobsFile.LastWriteTimeUtc)
+					replaceJobsFile = true;
+			}
+			if (replaceJobsFile)
 			{
 				var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile);
 				BuildDependency.JobsFile.WriteJobsFile(JobsFile, artifactTemplates);
