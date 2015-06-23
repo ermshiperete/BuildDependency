@@ -2,6 +2,7 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
+using BuildDependency.Interfaces;
 using Xwt;
 using BuildDependency.TeamCity.RestClasses;
 using BuildDependency.TeamCity;
@@ -22,7 +23,7 @@ namespace BuildDependency.Dialogs
 		private CheckBox _linux32;
 		private CheckBox _linux64;
 
-		public ImportDialog(List<Server> servers)
+		public ImportDialog(IEnumerable<IServerApi> servers)
 		{
 			_model = new ImportDialogModel();
 			_serversCombo = new ComboBox();
@@ -90,7 +91,7 @@ namespace BuildDependency.Dialogs
 
 		private void OnServerChanged (object sender, EventArgs e)
 		{
-			_model.TeamCity = _serversCombo.SelectedItem as TeamCityApi;
+			_model.ServerApi = _serversCombo.SelectedItem as IServerApi;
 			_projectCombo.Items.Clear();
 			_configCombo.Items.Clear();
 			_model.GetProjects(_projectCombo.Items);

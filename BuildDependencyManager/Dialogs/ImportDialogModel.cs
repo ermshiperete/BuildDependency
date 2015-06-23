@@ -3,25 +3,21 @@
 using System;
 using System.Collections.Generic;
 using Xwt;
-using BuildDependency.TeamCity;
+using BuildDependency.Interfaces;
 using BuildDependency.TeamCity.RestClasses;
 
 namespace BuildDependency.Dialogs
 {
 	public class ImportDialogModel: IListDataSource
 	{
-		public ImportDialogModel()
-		{
-		}
-
-		public TeamCityApi TeamCity { get; set; }
+		public IServerApi ServerApi { get; set; }
 
 		public List<ArtifactProperties> Artifacts { get; private set; }
 
 		public void GetProjects(ItemCollection projects)
 		{
 			projects.Clear();
-			var allProjects = TeamCity.GetAllProjects();
+			var allProjects = ServerApi.GetAllProjects();
 			allProjects.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
 			foreach (var proj in allProjects)
 			{
@@ -33,7 +29,7 @@ namespace BuildDependency.Dialogs
 		{
 			configs.Clear();
 
-			foreach (var config in TeamCity.GetBuildTypesForProject(projectId))
+			foreach (var config in ServerApi.GetBuildJobsForProject(projectId))
 			{
 				configs.Add(config, config.Name);
 			}
@@ -42,24 +38,24 @@ namespace BuildDependency.Dialogs
 		public void GetArtifactDependencies(string configId, ItemCollection dependencies)
 		{
 			dependencies.Clear();
-			foreach (var dep in TeamCity.GetArtifactDependencies(configId))
+			foreach (var dep in ServerApi.GetArtifactDependencies(configId))
 			{
-				var prop = new ArtifactProperties(dep.Properties);
+				var prop = new ArtifactProperties(dep.ArtifactProperties);
 				var tag = prop.RevisionName == "buildTag" ? prop.RevisionValue.Substring(0, prop.RevisionValue.Length - ".tcbuildtag".Length) : prop.RevisionName;
 				dependencies.Add(string.Format("id: {0}, pathRules: {1},\n buildType: {2} ({6}),\nrevName: {3}, revValue: {4} ({5})", dep.Id,
-						prop.PathRules, prop.SourceBuildTypeId, prop.RevisionName, prop.RevisionValue, tag, TeamCity.BuildTypes [prop.SourceBuildTypeId].Name));
+						prop.PathRules, prop.SourceBuildTypeId, prop.RevisionName, prop.RevisionValue, tag, ServerApi.BuildJobs [prop.SourceBuildTypeId].Name));
 			}
 		}
 
 		public IListDataSource GetArtifactsDataSource(string configId)
 		{
 			Artifacts = new List<ArtifactProperties>();
-			var deps = TeamCity.GetArtifactDependencies(configId);
+			var deps = ServerApi.GetArtifactDependencies(configId);
 			if (deps != null)
 			{
 				foreach (var dep in deps)
 				{
-					Artifacts.Add(new ArtifactProperties(dep.Properties));
+					Artifacts.Add(new ArtifactProperties(dep.ArtifactProperties));
 				}
 			}
 			return this;
@@ -83,7 +79,7 @@ namespace BuildDependency.Dialogs
 			var artifact = Artifacts[row];
 			if (column == 0)
 			{
-				return string.Format("{0}\n({1})", TeamCity.BuildTypes[artifact.SourceBuildTypeId].Name,
+				return string.Format("{0}\n({1})", ServerApi.BuildJobs[artifact.SourceBuildTypeId].Name,
 					artifact.TagLabel);
 			}
 			return artifact.PathRules;

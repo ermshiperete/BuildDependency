@@ -1,10 +1,11 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
+using BuildDependency.Interfaces;
 
-namespace BuildDependency.RestClasses
+namespace BuildDependency.TeamCity.RestClasses
 {
-	public class Artifact
+	public class TeamcityArtifact : IArtifact
 	{
 		public string Name { get; set; }
 		public string Type { get; set; }

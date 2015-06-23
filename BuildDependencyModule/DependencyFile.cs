@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using BuildDependency.Interfaces;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
 using System.Runtime.Serialization.Formatters;
@@ -17,11 +18,11 @@ namespace BuildDependency
 	public class DependencyFile
 	{
 		private static DependencyFile _instance;
-		private Dictionary<string, Server> _servers;
+		private Dictionary<string, IServerApi> _servers;
 
 		private DependencyFile()
 		{
-			_servers = new Dictionary<string, Server>();
+			_servers = new Dictionary<string, IServerApi>();
 		}
 
 		private static DependencyFile Instance
@@ -34,7 +35,7 @@ namespace BuildDependency
 			}
 		}
 
-		public static void SaveFile(string fileName, List<Server> servers, List<ArtifactTemplate> artifacts)
+		public static void SaveFile(string fileName, IEnumerable<IServerApi> servers, IEnumerable<ArtifactTemplate> artifacts)
 		{
 			InternalSaveFile(fileName, servers, artifacts);
 		}
@@ -44,7 +45,7 @@ namespace BuildDependency
 			return Instance.InternalLoadFile(fileName).Result;
 		}
 
-		private static void InternalSaveFile(string fileName, List<Server> servers, List<ArtifactTemplate> artifactTemplates)
+		private static void InternalSaveFile(string fileName, IEnumerable<IServerApi> servers, IEnumerable<ArtifactTemplate> artifactTemplates)
 		{
 			using (var file = new StreamWriter(fileName))
 			{
@@ -73,7 +74,7 @@ namespace BuildDependency
 		{
 			var name = line.Trim('[', ']');
 			var lineCount = 0;
-			Server server = null;
+			IServerApi server = null;
 
 			while (!file.EndOfStream)
 			{
@@ -129,7 +130,7 @@ namespace BuildDependency
 							var tc = parts[0];
 							var configId = parts[2];
 							var server = _servers[tc] as TeamCityApi;
-							var buildTypesTask = server.GetBuildTypesAsync();
+							var buildTypesTask = server.GetBuildJobsAsync();
 							var projectsTask = server.GetAllProjectsAsync();
 							var buildTypes = await buildTypesTask;
 							var projects = await projectsTask;

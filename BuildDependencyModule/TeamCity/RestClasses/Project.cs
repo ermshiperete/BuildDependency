@@ -1,10 +1,11 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
+using BuildDependency.Interfaces;
 
 namespace BuildDependency.TeamCity.RestClasses
 {
-	public class Project
+	public class Project : IProject
 	{
 		//<project id="project43" name="Adapt It" href="/guestAuth/app/rest/7.0/projects/id:project43"/>
 		public string Name { get; set; }
@@ -16,12 +17,12 @@ namespace BuildDependency.TeamCity.RestClasses
 			var otherProj = obj as Project;
 			if (otherProj != null)
 				return Id == otherProj.Id;
-			return base.Equals(obj);
+			return false;
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode() ^ Id.GetHashCode();
+			return Id.GetHashCode();
 		}
 
 		public override string ToString()

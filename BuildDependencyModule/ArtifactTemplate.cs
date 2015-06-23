@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using BuildDependency.Artifacts;
+using BuildDependency.Interfaces;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
 using System.IO;
@@ -11,7 +12,7 @@ namespace BuildDependency
 {
 	public class ArtifactTemplate: ArtifactProperties
 	{
-		public ArtifactTemplate(Server server, Project project, string buildTypeId)
+		public ArtifactTemplate(IServerApi server, IProject project, string buildTypeId)
 		{
 			Server = server;
 			Project = project;
@@ -19,7 +20,7 @@ namespace BuildDependency
 			Condition = Conditions.All;
 		}
 
-		public ArtifactTemplate(Server server, ArtifactProperties artifact)
+		public ArtifactTemplate(IServerApi server, ArtifactProperties artifact)
 		{
 			Server = server;
 			PathRules = artifact.PathRules;
@@ -39,16 +40,16 @@ namespace BuildDependency
 			}
 		}
 
-		public BuildType Config
+		public IBuildJob Config
 		{
-			get { return ((TeamCityApi)Server).BuildTypes[SourceBuildTypeId]; }
+			get { return Server.BuildJobs[SourceBuildTypeId]; }
 		}
 
 		public Conditions Condition { get; set; }
 
-		public Project Project { get; set; }
+		public IProject Project { get; set; }
 
-		public Server Server { get; set; }
+		public IServerApi Server { get; set; }
 
 		public string RepoUrl
 		{

@@ -2,6 +2,8 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using BuildDependency.Interfaces;
 using Xwt;
 
 namespace BuildDependency.Dialogs
@@ -14,7 +16,7 @@ namespace BuildDependency.Dialogs
 		private readonly TextEntry _url;
 		private bool _inSelectedServerChanged;
 
-		public ServersDialog(List<Server> servers)
+		public ServersDialog(IEnumerable<IServerApi> servers)
 		{
 			Buttons.Add(new DialogButton("OK", Command.Ok));
 			Buttons.Add(new DialogButton("Cancel", Command.Cancel));
@@ -38,6 +40,7 @@ namespace BuildDependency.Dialogs
 			vbox.PackStart(new Label("Type:"));
 			_serverType = new ComboBox();
 			_serverType.Items.Add("TeamCity");
+			_serverType.Items.Add("Jenkins");
 			_serverType.SelectedIndex = 0;
 			_serverType.SelectionChanged += OnServerTypeChanged;
 			vbox.PackStart(_serverType);
@@ -114,18 +117,11 @@ namespace BuildDependency.Dialogs
 			Application.MainLoop.DispatchPendingEvents();
 		}
 
-		public List<Server> Servers
+		public List<IServerApi> Servers
 		{
 			get
 			{
-				var servers = new List<Server>();
-				foreach (var obj in _serversCombo.Items)
-				{
-					var server = obj as Server;
-					if (server != null)
-						servers.Add(server);
-				}
-				return servers;
+				return _serversCombo.Items.OfType<IServerApi>().ToList();
 			}
 		}
 	}

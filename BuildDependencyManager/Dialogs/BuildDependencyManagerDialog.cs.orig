@@ -2,18 +2,17 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Xwt;
-using BuildDependency.Interfaces;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
+using System.IO;
 
 namespace BuildDependency.Dialogs
 {
 	public class BuildDependencyManagerDialog: Dialog
 	{
 		private List<ArtifactTemplate> _artifacts;
-		private List<IServerApi> _servers;
+		private List<Server> _servers;
 		private ListStore _store;
 		private readonly ListView _listView;
 		private DataField<string> _artifactsSource;
@@ -70,18 +69,28 @@ namespace BuildDependency.Dialogs
 			_artifactsSource = new DataField<string>();
 			_artifactsPath = new DataField<string>();
 
+			_store = new ListStore(_artifactsSource, _artifactsPath);
+			_artifacts = new List<Artifact>();
+			_listView.DataSource = _store;
+
 			_listView.Columns.Add(new ListViewColumn("Artifacts source", new TextCellView { TextField = _artifactsSource }));
 			_listView.Columns.Add(new ListViewColumn("Artifacts path", new TextCellView { TextField = _artifactsPath }));
 			_listView.GridLinesVisible = GridLines.Both;
 			_listView.HeadersVisible = true;
 			_listView.HeightRequest = 300;
 			_listView.VerticalPlacement = WidgetPlacement.Fill;
+<<<<<<< Updated upstream
 			_listView.ExpandVertical = true;
 			_listView.ButtonPressed += HandleButtonPressed;
 
 			_store = new ListStore(_artifactsSource, _artifactsPath);
 			_artifacts = new List<ArtifactTemplate>();
 			_listView.DataSource = _store;
+=======
+			//_listView.ExpandVertical = true;
+			_listView.SelectionMode = SelectionMode.Single;
+			_listView.ButtonReleased += HandleButtonReleased;
+>>>>>>> Stashed changes
 
 			vbox.PackStart(_listView, true);
 
@@ -142,14 +151,10 @@ namespace BuildDependency.Dialogs
 		{
 			_store.Clear();
 			_artifacts = new List<ArtifactTemplate>();
-			_servers = new List<IServerApi>();
+			_servers = new List<Server>();
 			var server = Server.CreateServer(ServerType.TeamCity);
 			server.Name = "TC";
 			server.Url = "http://build.palaso.org";
-			_servers.Add(server);
-			server = Server.CreateServer(ServerType.Jenkins);
-			server.Name = "Jenkins";
-			server.Url = "https://jenkins.lsdev.sil.org";
 			_servers.Add(server);
 		}
 
@@ -215,7 +220,7 @@ namespace BuildDependency.Dialogs
 					var server = ((TeamCityApi)_servers[0]);
 					foreach (var dep in server.GetArtifactDependencies(configId))
 					{
-						var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.ArtifactProperties));
+						var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.Properties));
 						artifact.Condition = condition;
 						_artifacts.Add(artifact);
 						int row = _store.AddRow();
@@ -237,6 +242,7 @@ namespace BuildDependency.Dialogs
 			}
 		}
 
+<<<<<<< Updated upstream
 		private void OnToolsSort(object sender, EventArgs e)
 		{
 			_artifacts.Sort((x, y) => x.ConfigName.CompareTo(y.ConfigName));
@@ -249,6 +255,9 @@ namespace BuildDependency.Dialogs
 		}
 
 		private void HandleButtonPressed(object sender, ButtonEventArgs e)
+=======
+		private void HandleButtonReleased(object sender, ButtonEventArgs e)
+>>>>>>> Stashed changes
 		{
 			if (e.Button != PointerButton.Right)
 				return;

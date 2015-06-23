@@ -2,6 +2,8 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
+using BuildDependency.Interfaces;
+using BuildDependency.Tools;
 using RestSharp;
 using BuildDependency.TeamCity.RestClasses;
 using BuildDependency.RestClasses;
@@ -9,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace BuildDependency.TeamCity
 {
-	public class TeamCityApi: Server
+	public class TeamCityApi: Server, IServerApi
 	{
-		private Dictionary<string, BuildType> _buildTypes;
-		private Dictionary<string, Project> _projects;
+		private Dictionary<string, IBuildJob> _buildTypes;
+		private Dictionary<string, IProject> _projects;
 
 		public TeamCityApi()
 			: base(ServerType.TeamCity)
@@ -29,139 +31,119 @@ namespace BuildDependency.TeamCity
 			get { return string.Format("{0}/guestAuth/repository", Url); }
 		}
 
-		private T Execute<T>(string baseUrl, RestRequest request, bool throwException = true) where T : new()
-		{
-			var client = new RestClient();
-			client.BaseUrl = new Uri(baseUrl);
-			IRestResponse<T> response = null;
-//			try
-//			{
-			response = client.Execute<T>(request);
-//			}
-//			catch (Exception e)
-//			{
-//				if (throwException)
-//					throw;
-//				return default(T);
-//			}
-//
-//			if (response == null)
-//				return default(T);
-
-			if (response.ErrorException != null)
-			{
-				if (throwException)
-				{
-					const string message = "Error retrieving response.  Check inner details for more info.";
-					throw new ApplicationException(message, response.ErrorException);
-				}
-				return default(T);
-			}
-			return response.Data;
-		}
-
 		private T ExecuteApi<T>(RestRequest request, bool throwException = true) where T : new()
 		{
-			return Execute<T>(BaseUrl, request, throwException);
+			return RestHelper.Execute<T>(BaseUrl, request, throwException);
 		}
 
 		private T ExecuteRepo<T>(RestRequest request) where T : new()
 		{
-			return Execute<T>(BaseRepoUrl, request);
+			return RestHelper.Execute<T>(BaseRepoUrl, request);
 		}
 
-		public List<Project> GetAllProjects()
+		public List<IProject> GetAllProjects()
 		{
 			return GetAllProjectsAsync().Result;
 		}
 
-		public async Task<List<Project>> GetAllProjectsAsync()
+		public async Task<List<IProject>> GetAllProjectsAsync()
 		{
-			var request = new RestRequest();
-			request.Resource = "/projects";
-			request.RootElement = "projects";
+			var request = new RestRequest
+			{
+				Resource = "/projects",
+				RootElement = "projects"
+			};
 
-			return ExecuteApi<Projects>(request).Project;
+			return ExecuteApi<Projects>(request).IProject;
 		}
 
-		public List<BuildType> GetBuildTypes()
+		public List<IBuildJob> GetBuildJobs()
 		{
-			return GetBuildTypesAsync().Result;
+			return GetBuildJobsAsync().Result;
 		}
 
-		public async Task<List<BuildType>> GetBuildTypesAsync()
+		public async Task<List<IBuildJob>> GetBuildJobsAsync()
 		{
-			var request = new RestRequest();
-			request.Resource = string.Format("/buildTypes");
-			request.RootElement = "buildType";
+			var request = new RestRequest
+			{
+				Resource = string.Format("/buildTypes"),
+				RootElement = "buildTypes"
+			};
 
-			return ExecuteApi<List<BuildType>>(request);
+			return ExecuteApi<List<IBuildJob>>(request);
 		}
 
-		public List<BuildType> GetBuildTypesForProject(string projectId)
+		public List<IBuildJob> GetBuildJobsForProject(string projectId)
 		{
-			return GetBuildTypesForProjectAsync(projectId).Result;
+			return GetBuildJobsForProjectAsync(projectId).Result;
 		}
 
-		public async Task<List<BuildType>> GetBuildTypesForProjectAsync(string projectId)
+		public async Task<List<IBuildJob>> GetBuildJobsForProjectAsync(string projectId)
 		{
-			var request = new RestRequest();
-			request.Resource = string.Format("/projects/id:{0}/buildTypes", projectId);
-			request.RootElement = "buildType";
+			var request = new RestRequest
+			{
+				Resource = string.Format("/projects/id:{0}/buildTypes", projectId),
+				RootElement = "buildTypes"
+			};
 
-			return ExecuteApi<List<BuildType>>(request);
+			return ExecuteApi<BuildTypes>(request).BuildJobs;
 		}
 
-		public List<ArtifactDependency> GetArtifactDependencies(string buildTypeId)
+		public List<IArtifactDependency> GetArtifactDependencies(string buildTypeId)
 		{
 			return GetArtifactDependenciesAsync(buildTypeId).Result;
 		}
 
-		public async Task<List<ArtifactDependency>> GetArtifactDependenciesAsync(string buildTypeId)
+		public async Task<List<IArtifactDependency>> GetArtifactDependenciesAsync(string buildTypeId)
 		{
-			var request = new RestRequest();
-			request.Resource = string.Format("/buildTypes/id:{0}/artifact-dependencies", buildTypeId);
-			request.RootElement = "artifact-dependency";
+			var request = new RestRequest
+			{
+				Resource = string.Format("/buildTypes/id:{0}/artifact-dependencies", buildTypeId),
+				RootElement = "artifact-dependencies"
+			};
 
-			return ExecuteApi<List<ArtifactDependency>>(request, false);
+			var deps = ExecuteApi<List<IArtifactDependency>>(request, false);
+			return deps;
 		}
 
-		public List<Artifact> GetArtifacts(ArtifactTemplate template)
+		public List<IArtifact> GetArtifacts(ArtifactTemplate template)
 		{
 			return GetArtifactsAsync(template).Result;
 		}
 
-		public async Task<List<Artifact>> GetArtifactsAsync(ArtifactTemplate template)
+		public async Task<List<IArtifact>> GetArtifactsAsync(ArtifactTemplate template)
 		{
-			var request = new RestRequest();
-			request.Resource = string.Format("/download/{0}/{1}/teamcity-ivy.xml", template.Config.Id, template.RevisionValue);
-			request.RootElement = "publications";
+			var request = new RestRequest
+			{
+				Resource = string.Format("/download/{0}/{1}/teamcity-ivy.xml", template.Config.Id, template.RevisionValue),
+				RootElement = "publications"
+			};
 
-			var artifacts = ExecuteRepo<List<Artifact>>(request);
+			var artifacts = ExecuteRepo<List<IArtifact>>(request);
 			return artifacts;
 		}
 
-		public Dictionary<string, BuildType> BuildTypes
+		public Dictionary<string, IBuildJob> BuildJobs
 		{
 			get
 			{
 				if (_buildTypes == null)
 				{
-					_buildTypes = new Dictionary<string, BuildType>();
-					foreach (var buildType in GetBuildTypes())
+					_buildTypes = new Dictionary<string, IBuildJob>();
+					foreach (var buildType in GetBuildJobs())
 						_buildTypes.Add(buildType.Id, buildType);
 				}
 				return _buildTypes;
 			}
 		}
 
-		public Dictionary<string, Project> Projects
+		public Dictionary<string, IProject> Projects
 		{
 			get
 			{
 				if (_projects == null)
 				{
-					_projects = new Dictionary<string, Project>();
+					_projects = new Dictionary<string, IProject>();
 					foreach (var proj in GetAllProjects())
 						_projects.Add(proj.Id, proj);
 				}

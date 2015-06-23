@@ -2,6 +2,7 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
+using BuildDependency.Interfaces;
 
 namespace BuildDependency.TeamCity.RestClasses
 {
@@ -11,9 +12,13 @@ namespace BuildDependency.TeamCity.RestClasses
 		{
 		}
 
-		public ArtifactProperties(Properties properties)
+		public ArtifactProperties(Properties properties): this(properties.Property)
 		{
-			foreach (var prop in properties.Property)
+		}
+
+		public ArtifactProperties(IEnumerable<IProperty> properties)
+		{
+			foreach (var prop in properties)
 			{
 				switch (prop.Name)
 				{

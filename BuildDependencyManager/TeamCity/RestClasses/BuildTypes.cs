@@ -1,16 +1,14 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+﻿// Copyright (c) 2015 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
-using System;
 using System.Collections.Generic;
 using BuildDependency.Interfaces;
-using RestSharp.Serializers;
 
 namespace BuildDependency.TeamCity.RestClasses
 {
-	public class Properties
+	class BuildTypes
 	{
-		[SerializeAs(Name = "Property")]
-		public List<Property> Property { get; set; }
+		public List<BuildType> BuildType { get; set; }
+
+		public List<IBuildJob> BuildJobs { get { return BuildType.ConvertAll(j => j as IBuildJob); } }
 	}
 }
-

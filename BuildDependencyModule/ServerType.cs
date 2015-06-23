@@ -6,7 +6,8 @@ namespace BuildDependency
 {
 	public enum ServerType
 	{
-		TeamCity
+		TeamCity,
+		Jenkins
 	}
 }
 

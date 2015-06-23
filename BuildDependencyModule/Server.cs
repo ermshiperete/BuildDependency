@@ -1,16 +1,20 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
+using BuildDependency.Interfaces;
+using BuildDependency.Jenkins;
 using BuildDependency.TeamCity;
 
 namespace BuildDependency
 {
 	public class Server
 	{
-		public static Server CreateServer(ServerType type)
+		public static IServerApi CreateServer(ServerType type)
 		{
 			if (type == ServerType.TeamCity)
 				return new TeamCityApi();
+			if (type == ServerType.Jenkins)
+				return new JenkinsApi();
 			throw new ArgumentException("Unknown server type");
 		}
 
@@ -43,7 +47,7 @@ namespace BuildDependency
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode() ^ ServerType.GetHashCode() ^ Name.GetHashCode() ^ Url.GetHashCode();
+			return ServerType.GetHashCode() ^ Name.GetHashCode() ^ Url.GetHashCode();
 		}
 	}
 }

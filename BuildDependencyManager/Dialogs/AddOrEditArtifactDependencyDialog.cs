@@ -2,6 +2,7 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
+using BuildDependency.Interfaces;
 using Xwt;
 using BuildDependency.RestClasses;
 using BuildDependency.TeamCity;
@@ -33,11 +34,13 @@ namespace BuildDependency.Dialogs
 		private readonly CheckBox _windows;
 		private readonly CheckBox _linux32;
 		private readonly CheckBox _linux64;
-		private List<Artifact> _artifacts;
+		private List<IArtifact> _artifacts;
 		private ArtifactTemplate _artifactToLoad;
+		private bool _IgnoreEvents;
 
-		public AddOrEditArtifactDependencyDialog(bool isAddDialog, List<Server> servers)
+		public AddOrEditArtifactDependencyDialog(bool isAddDialog, IEnumerable<IServerApi> servers)
 		{
+			_IgnoreEvents = true;
 			_model = new ImportDialogModel();
 			Title = isAddDialog ? "Add New Artifact Dependency" : "Edit Artifact Dependency";
 			Width = 600;
@@ -113,10 +116,11 @@ namespace BuildDependency.Dialogs
 
 			Content = _table;
 
-			_model.GetProjects(_projectCombo.Items);
+			_IgnoreEvents = false;
+			OnServerChanged(this, EventArgs.Empty);
 		}
 
-		public AddOrEditArtifactDependencyDialog(List<Server> servers, ArtifactTemplate artifact)
+		public AddOrEditArtifactDependencyDialog(IEnumerable<IServerApi> servers, ArtifactTemplate artifact)
 			: this(false, servers)
 		{
 			_artifactToLoad = artifact;
@@ -130,7 +134,14 @@ namespace BuildDependency.Dialogs
 
 		private void OnServerChanged(object sender, EventArgs e)
 		{
-			_model.TeamCity = _serversCombo.SelectedItem as TeamCityApi;
+			if (_IgnoreEvents)
+				return;
+
+			_model.ServerApi = _serversCombo.SelectedItem as IServerApi;
+			_projectCombo.Items.Clear();
+			_configCombo.Items.Clear();
+			_model.GetProjects(_projectCombo.Items);
+			_projectCombo.SelectedIndex = 0;
 		}
 
 		private void SetCheckBox(CheckBox checkBox, ArtifactTemplate artifact, Conditions condition)
@@ -196,7 +207,11 @@ namespace BuildDependency.Dialogs
 
 		private void OnProjectChanged(object sender, EventArgs e)
 		{
-			var project = _projectCombo.SelectedItem as Project;
+			var project = _projectCombo.SelectedItem as IProject;
+			if (project == null)
+				return;
+
+			_configCombo.Items.Clear();
 			_model.GetConfigurationsForProject(project.Id, _configCombo.Items);
 			_configCombo.SelectedIndex = 0;
 			OnConfigChanged(this, EventArgs.Empty);
@@ -205,14 +220,16 @@ namespace BuildDependency.Dialogs
 		private void OnConfigChanged(object sender, EventArgs e)
 		{
 			// this updates _textView.Text
-			var config = _configCombo.SelectedItem as BuildType;
+			var config = _configCombo.SelectedItem as IBuildJob;
+			if (config == null)
+				return;
+
 			var dataSource = _model.GetArtifactsDataSource(config.Id);
-			var server = _serversCombo.SelectedItem as Server;
-			var tcServer = server as TeamCityApi;
-			if (tcServer != null)
+			var server = _serversCombo.SelectedItem as IServerApi;
+			if (server != null)
 			{
 				var template = GetArtifact();
-				_artifacts = tcServer.GetArtifacts(template);
+				_artifacts = server.GetArtifacts(template);
 			}
 			UpdatePreview();
 		}
@@ -267,14 +284,16 @@ namespace BuildDependency.Dialogs
 
 		public ArtifactTemplate GetArtifact()
 		{
-			var server = _serversCombo.SelectedItem as Server;
-			var proj = _projectCombo.SelectedItem as Project;
-			var config = _configCombo.SelectedItem as BuildType;
-			var artifact = new ArtifactTemplate(server, proj, config.Id);
-			artifact.PathRules = _rulesTextBox.Text;
-			artifact.Condition = GetConditionFromCheckBox(_windows, _linux32, _linux64);
+			var server = _serversCombo.SelectedItem as IServerApi;
+			var proj = _projectCombo.SelectedItem as IProject;
+			var config = _configCombo.SelectedItem as IBuildJob;
+			var artifact = new ArtifactTemplate(server, proj, config.Id)
+			{
+				PathRules = _rulesTextBox.Text,
+				Condition = GetConditionFromCheckBox(_windows, _linux32, _linux64),
+				RevisionName = Enum.GetName(typeof (BuildTagType), _buildTagType.SelectedIndex)
+			};
 
-			artifact.RevisionName = Enum.GetName(typeof(BuildTagType), _buildTagType.SelectedIndex);
 			switch (_buildTagType.SelectedIndex)
 			{
 				case 0:
