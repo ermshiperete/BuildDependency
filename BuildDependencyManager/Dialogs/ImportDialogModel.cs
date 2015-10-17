@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+﻿// Copyright (c) 2014-2015 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
@@ -10,10 +10,6 @@ namespace BuildDependency.Dialogs
 {
 	public class ImportDialogModel: IListDataSource
 	{
-		public ImportDialogModel()
-		{
-		}
-
 		public TeamCityApi TeamCity { get; set; }
 
 		public List<ArtifactProperties> Artifacts { get; private set; }
@@ -29,6 +25,17 @@ namespace BuildDependency.Dialogs
 			}
 		}
 
+		public List<Project> Projects
+		{
+			get
+			{
+				var allProjects = TeamCity.GetAllProjects();
+				if (allProjects != null)
+					allProjects.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
+				return allProjects;
+			}
+		}
+
 		public void GetConfigurationsForProject(string projectId, ItemCollection configs)
 		{
 			configs.Clear();
@@ -39,6 +46,11 @@ namespace BuildDependency.Dialogs
 			}
 		}
 
+		public List<BuildType> GetConfigurationsForProject(string projectId)
+		{
+			return TeamCity.GetBuildTypesForProject(projectId);
+		}
+
 		public void GetArtifactDependencies(string configId, ItemCollection dependencies)
 		{
 			dependencies.Clear();
@@ -47,7 +59,7 @@ namespace BuildDependency.Dialogs
 				var prop = new ArtifactProperties(dep.Properties);
 				var tag = prop.RevisionName == "buildTag" ? prop.RevisionValue.Substring(0, prop.RevisionValue.Length - ".tcbuildtag".Length) : prop.RevisionName;
 				dependencies.Add(string.Format("id: {0}, pathRules: {1},\n buildType: {2} ({6}),\nrevName: {3}, revValue: {4} ({5})", dep.Id,
-						prop.PathRules, prop.SourceBuildTypeId, prop.RevisionName, prop.RevisionValue, tag, TeamCity.BuildTypes [prop.SourceBuildTypeId].Name));
+						prop.PathRules, prop.SourceBuildTypeId, prop.RevisionName, prop.RevisionValue, tag, TeamCity.BuildTypes[prop.SourceBuildTypeId].Name));
 			}
 		}
 
@@ -65,6 +77,18 @@ namespace BuildDependency.Dialogs
 			return this;
 		}
 
+		public void LoadArtifacts(string configId)
+		{
+			Artifacts = new List<ArtifactProperties>();
+			var deps = TeamCity.GetArtifactDependencies(configId);
+			if (deps != null)
+			{
+				foreach (var dep in deps)
+				{
+					Artifacts.Add(new ArtifactProperties(dep.Properties));
+				}
+			}
+		}
 
 		#region IListDataSource implementation
 
@@ -109,6 +133,7 @@ namespace BuildDependency.Dialogs
 				return new[] { typeof(string), typeof(string) };
 			}
 		}
+
 		#endregion
 	}
 }

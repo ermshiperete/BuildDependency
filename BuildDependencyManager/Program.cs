@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
-using Xwt;
 using BuildDependency.Dialogs;
+using Eto.Forms;
 
 namespace BuildDependency
 {
@@ -11,12 +11,7 @@ namespace BuildDependency
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			Application.Initialize();
-			using (var dlg = new BuildDependencyManagerDialog())
-			{
-				dlg.Run();
-			}
-			Application.Dispose();
+			new Application().Run(new BuildDependencyManagerDialog());
 		}
 
 	}

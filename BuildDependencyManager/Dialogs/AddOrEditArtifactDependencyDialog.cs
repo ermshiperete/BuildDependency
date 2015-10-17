@@ -1,32 +1,29 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+﻿// Copyright (c) 2014-2015 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
-using Xwt;
+using System.Linq;
+using BuildDependency.Artifacts;
 using BuildDependency.RestClasses;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
-using BuildDependency.Widgets;
-using System.Text;
-using Xwt.Drawing;
-using BuildDependency.Artifacts;
-using System.Diagnostics;
-using System.Linq;
+using Eto.Drawing;
+using Eto.Forms;
 
 namespace BuildDependency.Dialogs
 {
-	public class AddOrEditArtifactDependencyDialog: Dialog
+	public class AddOrEditArtifactDependencyDialog: Dialog<bool>
 	{
 		private ImportDialogModel _model;
 		private readonly ComboBox _serversCombo;
 		private readonly ComboBox _projectCombo;
 		private readonly ComboBox _configCombo;
 		private readonly ComboBox _buildTagType;
-		private readonly MultiLineTextEntry _rulesTextBox;
+		private readonly TextBox _rulesTextBox;
 		private readonly ListBox _preview;
 		private Label _buildTagEntryLabel;
-		private readonly TextEntry _buildTagEntry;
-		private Table _table;
+		private readonly TextBox _buildTagEntry;
+		private TableLayout _table;
 		private string _buildNumber;
 		private string _buildTag;
 		private int _currentBuildSourceIndex;
@@ -41,34 +38,18 @@ namespace BuildDependency.Dialogs
 			_model = new ImportDialogModel();
 			Title = isAddDialog ? "Add New Artifact Dependency" : "Edit Artifact Dependency";
 			Width = 600;
-			Height = 400;
+			Height = 600;
+			Resizable = true;
 
-			Buttons.Add(new DialogButton("Save", Command.Ok));
-			Buttons.Add(new DialogButton("Cancel", Command.Cancel));
-
-			int row = 0;
-			_table = new Table();
-			_table.Add(new Label("Server:"), 0, row);
 			_serversCombo = new ComboBox();
-			_serversCombo.SelectionChanged += OnServerChanged;
-			foreach (var server in servers)
-			{
-				_serversCombo.Items.Add(server);
-			}
+			_serversCombo.SelectedIndexChanged += OnServerChanged;
+			_serversCombo.DataStore = servers;
 			_serversCombo.SelectedIndex = 0;
-
-			_table.Add(_serversCombo, 1, row++);
-
-			_table.Add(new Label("Depend on:"), 0, row);
 			_projectCombo = new ComboBox();
-			_projectCombo.SelectionChanged += OnProjectChanged;
-			_table.Add(_projectCombo, 1, row++, hexpand: true);
-
+			_projectCombo.DataStore = _model.Projects;
+			_projectCombo.SelectedIndexChanged += OnProjectChanged;
 			_configCombo = new ComboBox();
-			_configCombo.SelectionChanged += OnConfigChanged;
-			_table.Add(_configCombo, 1, row++, hexpand: true);
-
-			_table.Add(new Label("Get Artifacts from:"), 0, row);
+			_configCombo.SelectedIndexChanged += OnConfigChanged;
 			_buildTagType = new ComboBox();
 			_buildTagType.Items.Add("Last successful build");
 			_buildTagType.Items.Add("Last pinned build");
@@ -76,44 +57,75 @@ namespace BuildDependency.Dialogs
 			_buildTagType.Items.Add("Build with specified build number");
 			_buildTagType.Items.Add("Last finished build with specified tag");
 			_buildTagType.SelectedIndex = 0;
-			_buildTagType.SelectionChanged += OnArtifactSourceChanged;
-			_table.Add(_buildTagType, 1, row++, hexpand: true);
-
-			_buildTagEntryLabel = new Label("Build tag:") { TextAlignment = Alignment.End, Visible = false };
-			_table.Add(_buildTagEntryLabel, 0, row);
-			_buildTagEntry = new TextEntry() { Visible = false };
-			_table.Add(_buildTagEntry, 1, row++);
-
-			_table.Add(new Label("Artifact rules:"), 0, row, vpos: WidgetPlacement.Start);
-			_rulesTextBox = new MultiLineTextEntry();
-			_rulesTextBox.MinHeight = 200;
-			_rulesTextBox.HorizontalPlacement = WidgetPlacement.Start;
-			_rulesTextBox.KeyReleased += (sender, e) => UpdatePreview();
-			_table.Add(_rulesTextBox, 1, row++, hexpand: true, vexpand: true, vpos: WidgetPlacement.Start);
-
-			_table.Add(new Label("Newline-delimited set or rules in the form of\n[+:|-:]SourcePath[!ArchivePath][=>DestinationPath]"), 1, row++);
-
-			_table.Add(new Label("Condition:"), 0, row);
-			var hbox = new HBox();
-			_table.Add(hbox, 1, row++);
-			_windows = new CheckBox("Windows") { State = CheckBoxState.On };
-			hbox.PackStart(_windows);
-			_linux32 = new CheckBox("Linux 32-bit") { State = CheckBoxState.On };
-			hbox.PackStart(_linux32);
-			_linux64 = new CheckBox("Linux 64-bit") { State = CheckBoxState.On };
-			hbox.PackStart(_linux64);
-
-			_table.Add(new Label("Preview:"), 0, row, vpos: WidgetPlacement.Start);
+			_buildTagType.SelectedIndexChanged += OnArtifactSourceChanged;
+			_buildTagEntryLabel = new Label { Text = "Build tag:", TextAlignment = TextAlignment.Right, Visible = false };
+			_buildTagEntry = new TextBox { Visible = false };
+			_rulesTextBox = new TextBox();
+			_rulesTextBox.Height = 150;
+			//_rulesTextBox.HorizontalPlacement = HorizontalAlignment.Left;
+			_rulesTextBox.TextChanged += (sender, e) => UpdatePreview();
+			_windows = new CheckBox { Text = "Windows", Checked = true };
+			_linux32 = new CheckBox { Text = "Linux 32-bit", Checked = true };
+			_linux64 = new CheckBox { Text = "Linux 64-bit", Checked = true };
 			_preview = new ListBox();
-			_preview.MinHeight = 200;
-			_preview.HeightRequest = 200;
-			_preview.HorizontalPlacement = WidgetPlacement.Start;
-			_preview.BackgroundColor = Colors.LightGray;
-			_table.Add(_preview, 1, row++, hexpand: true, vexpand: false, vpos: WidgetPlacement.Start);
+			_preview.Height = 150;
+			//_preview.HeightRequest = 200;
+			//_preview.HorizontalPlacement = WidgetPlacement.Start;
+			_preview.BackgroundColor = Colors.LightGrey;
+			var okButton = new Button { Text = "Save" };
+			okButton.Click += (sender, e) =>
+			{
+				Result = true;
+				Close();
+			};
+			var cancelButton = new Button { Text = "Cancel" };
+			cancelButton.Click += (sender, e) => Close();
+
+			_table = new TableLayout
+			{
+				Padding = new Padding(10),
+				Spacing = new Size(5, 5),
+				Rows =
+				{
+					new TableRow("Server:", _serversCombo),
+					new TableRow("Depend on:", new StackLayout()
+						{
+							Orientation = Orientation.Vertical,
+							HorizontalContentAlignment = HorizontalAlignment.Stretch,
+							Items = { _projectCombo, _configCombo }
+						}),
+					new TableRow("Get Artifacts from:", _buildTagType),
+					new TableRow(_buildTagEntryLabel, _buildTagEntry),
+					new TableRow(new Label { Text = "Artifact rules:", VerticalAlignment = VerticalAlignment.Top },
+						new TableLayout
+						{
+							Rows =
+							{
+								new TableRow(_rulesTextBox) { ScaleHeight = true },
+								new TableRow(new Label { Text = "Newline-delimited set or rules in the form of\n[+:|-:]SourcePath[!ArchivePath][=>DestinationPath]" })
+							}
+						}) { ScaleHeight = true },
+					new TableRow("Condition:", new StackLayout
+						{
+							Spacing = 5,
+							Orientation = Orientation.Horizontal,
+							Items = { _windows, _linux32, _linux64 }
+						}),
+					new TableRow("Preview:", _preview),
+					new TableRow(null, new StackLayout
+						{
+							Orientation = Orientation.Horizontal,
+							Spacing = 5,
+
+							Items = { null, okButton, cancelButton }
+						})
+				}
+			};
+
+			DefaultButton = okButton;
+			AbortButton = cancelButton;
 
 			Content = _table;
-
-			_model.GetProjects(_projectCombo.Items);
 		}
 
 		public AddOrEditArtifactDependencyDialog(List<Server> servers, ArtifactTemplate artifact)
@@ -122,27 +134,28 @@ namespace BuildDependency.Dialogs
 			_artifactToLoad = artifact;
 		}
 
-		protected override void OnShown()
+		protected override void OnShown(EventArgs e)
 		{
-			base.OnShown();
-			LoadArtifact(_artifactToLoad);
+			base.OnShown(e);
+			if (_artifactToLoad != null)
+				LoadArtifact(_artifactToLoad);
 		}
 
 		private void OnServerChanged(object sender, EventArgs e)
 		{
-			_model.TeamCity = _serversCombo.SelectedItem as TeamCityApi;
+			_model.TeamCity = _serversCombo.SelectedValue as TeamCityApi;
 		}
 
-		private void SetCheckBox(CheckBox checkBox, ArtifactTemplate artifact, Conditions condition)
+		private static void SetCheckBox(CheckBox checkBox, ArtifactTemplate artifact, Conditions condition)
 		{
-			checkBox.State = (artifact.Condition & condition) == condition ? CheckBoxState.On : CheckBoxState.Off;
+			checkBox.Checked = (artifact.Condition & condition) == condition;
 		}
 
 		private void LoadArtifact(ArtifactTemplate artifact)
 		{
-			_serversCombo.SelectedItem = artifact.Server;
-			_projectCombo.SelectedItem = artifact.Project;
-			_configCombo.SelectedItem = artifact.Config;
+			_serversCombo.SelectedValue = artifact.Server;
+			_projectCombo.SelectedValue = artifact.Project;
+			_configCombo.SelectedValue = artifact.Config;
 			_rulesTextBox.Text = artifact.PathRules;
 			UpdatePreview();
 			SetCheckBox(_windows, artifact, Conditions.Windows);
@@ -196,8 +209,8 @@ namespace BuildDependency.Dialogs
 
 		private void OnProjectChanged(object sender, EventArgs e)
 		{
-			var project = _projectCombo.SelectedItem as Project;
-			_model.GetConfigurationsForProject(project.Id, _configCombo.Items);
+			var project = _projectCombo.SelectedValue as Project;
+			_configCombo.DataStore = _model.GetConfigurationsForProject(project.Id);
 			_configCombo.SelectedIndex = 0;
 			OnConfigChanged(this, EventArgs.Empty);
 		}
@@ -205,9 +218,9 @@ namespace BuildDependency.Dialogs
 		private void OnConfigChanged(object sender, EventArgs e)
 		{
 			// this updates _textView.Text
-			var config = _configCombo.SelectedItem as BuildType;
-			var dataSource = _model.GetArtifactsDataSource(config.Id);
-			var server = _serversCombo.SelectedItem as Server;
+			var config = _configCombo.SelectedValue as BuildType;
+			_model.LoadArtifacts(config.Id);
+			var server = _serversCombo.SelectedValue as Server;
 			var tcServer = server as TeamCityApi;
 			if (tcServer != null)
 			{
@@ -262,14 +275,14 @@ namespace BuildDependency.Dialogs
 
 		private static Conditions GetCheckBoxState(CheckBox checkBox, Conditions condition)
 		{
-			return checkBox.State == CheckBoxState.On ? condition : Conditions.None;
+			return checkBox.Checked.Value ? condition : Conditions.None;
 		}
 
 		public ArtifactTemplate GetArtifact()
 		{
-			var server = _serversCombo.SelectedItem as Server;
-			var proj = _projectCombo.SelectedItem as Project;
-			var config = _configCombo.SelectedItem as BuildType;
+			var server = _serversCombo.SelectedValue as Server;
+			var proj = _projectCombo.SelectedValue as Project;
+			var config = _configCombo.SelectedValue as BuildType;
 			var artifact = new ArtifactTemplate(server, proj, config.Id);
 			artifact.PathRules = _rulesTextBox.Text;
 			artifact.Condition = GetConditionFromCheckBox(_windows, _linux32, _linux64);
@@ -297,4 +310,3 @@ namespace BuildDependency.Dialogs
 		}
 	}
 }
-

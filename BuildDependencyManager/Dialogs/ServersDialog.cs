@@ -1,66 +1,87 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+﻿// Copyright (c) 2014-2015 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
-using Xwt;
+using Eto.Forms;
+using Eto.Drawing;
 
 namespace BuildDependency.Dialogs
 {
-	public class ServersDialog: Dialog
+	public class ServersDialog: Dialog<bool>
 	{
 		private readonly ComboBox _serversCombo;
 		private readonly ComboBox _serverType;
-		private readonly TextEntry _name;
-		private readonly TextEntry _url;
+		private readonly TextBox _name;
+		private readonly TextBox _url;
 		private bool _inSelectedServerChanged;
+		private readonly List<Server> _servers;
 
 		public ServersDialog(List<Server> servers)
 		{
-			Buttons.Add(new DialogButton("OK", Command.Ok));
-			Buttons.Add(new DialogButton("Cancel", Command.Cancel));
+			_servers = servers;
+			_servers.Insert(servers.Count, new NullServer());
 
-			var vbox = new VBox();
-			var hbox = new HBox();
-			hbox.PackStart(new Label("Available Servers:"));
-			_serversCombo = new ComboBox();
-			_serversCombo.SelectionChanged += OnSelectedServerChanged;
+			Resizable = true;
 
-			foreach (var server in servers)
-			{
-				_serversCombo.Items.Add(server);
-			}
-			_serversCombo.Items.Add("Add new server");
-			hbox.PackStart(_serversCombo);
-			vbox.PackStart(hbox);
-
-			vbox.PackStart(new HSeparator());
-
-			vbox.PackStart(new Label("Type:"));
 			_serverType = new ComboBox();
 			_serverType.Items.Add("TeamCity");
 			_serverType.SelectedIndex = 0;
-			_serverType.SelectionChanged += OnServerTypeChanged;
-			vbox.PackStart(_serverType);
+			_serverType.SelectedIndexChanged += OnServerTypeChanged;
 
-			vbox.PackStart(new Label("Name:"));
-			_name = new TextEntry();
-			_name.Changed += OnNameChanged;
-			vbox.PackStart(_name);
+			_name = new TextBox();
+			_name.TextChanged += OnNameChanged;
 
-			vbox.PackStart(new Label("URL:"));
-			_url = new TextEntry();
-			_url.Changed += OnUrlChanged;
-			vbox.PackStart(_url);
+			_url = new TextBox();
+			_url.TextChanged += OnUrlChanged;
 
-			Content = vbox;
+			_serversCombo = new ComboBox();
+			_serversCombo.SelectedIndexChanged += OnSelectedServerChanged;
+			_serversCombo.DataStore = _servers;
+			_serversCombo.SelectedIndex = 0;
 
-			if (_serversCombo.Items.Count > 0)
-				_serversCombo.SelectedIndex = 0;
+			var okButton = new Button { Text = "OK" };
+			okButton.Click += (sender, e) =>
+			{
+				Result = true;
+				Close();
+			};
+			var cancelButton = new Button { Text = "Cancel" };
+			cancelButton.Click += (sender, e) => Close();
+
+			var table = new TableLayout
+			{
+				Padding = new Padding(10, 10, 10, 5),
+				Spacing = new Size(3, 3),
+				Rows =
+				{
+					new TableRow(new Label { Text = "Available Servers:"}, _serversCombo),
+					new TableRow(),
+					new TableRow(new Label { Text = "Type:"}, _serverType),
+					new TableRow(new Label { Text = "Name:"}, _name),
+					new TableRow(new Label { Text = "URL:" }, _url),
+					new TableRow(),
+					new TableRow(null, new StackLayout
+						{
+							Orientation = Orientation.Horizontal,
+							Spacing = 5,
+
+							Items = { null, okButton, cancelButton }
+						})
+				}
+			};
+
+			Content = table;
+
+			DefaultButton = okButton;
+			AbortButton = cancelButton;
+
+//			if (_serversCombo.Items.Count > 0)
+//				_serversCombo.SelectedIndex = 0;
 		}
 
 		private void OnUrlChanged (object sender, EventArgs e)
 		{
-			var server = _serversCombo.SelectedItem as Server;
+			var server = _serversCombo.SelectedValue as Server;
 			if (server != null)
 				server.Url = _url.Text;
 		}
@@ -70,14 +91,13 @@ namespace BuildDependency.Dialogs
 			if (_inSelectedServerChanged)
 				return;
 			_inSelectedServerChanged = true;
-			var server = _serversCombo.SelectedItem as Server;
+			var server = _serversCombo.SelectedValue as Server;
 			if (server != null)
 			{
 				var selectedIndex = _serversCombo.SelectedIndex;
-				_serversCombo.Items.Remove(server);
-				Application.MainLoop.DispatchPendingEvents();
+				_servers.Remove(server);
 				server.Name = _name.Text;
-				_serversCombo.Items.Insert(selectedIndex, server);
+				_servers.Insert(selectedIndex, server);
 				_serversCombo.SelectedIndex = selectedIndex;
 			}
 
@@ -86,7 +106,6 @@ namespace BuildDependency.Dialogs
 
 		private void OnServerTypeChanged(object sender, EventArgs e)
 		{
-			
 		}
 
 		private void OnSelectedServerChanged(object sender, EventArgs e)
@@ -94,11 +113,11 @@ namespace BuildDependency.Dialogs
 			if (_inSelectedServerChanged)
 				return;
 			_inSelectedServerChanged = true;
-			var server = _serversCombo.SelectedItem as Server;
-			if (server == null)
+			var server = _serversCombo.SelectedValue as Server;
+			if (server == null || server is NullServer)
 			{
 				var selectedIndex = _serversCombo.SelectedIndex;
-				_serversCombo.Items.Insert(selectedIndex, Server.CreateServer(ServerType.TeamCity));
+				_servers.Insert(selectedIndex, Server.CreateServer(ServerType.TeamCity));
 				_serversCombo.SelectedIndex = selectedIndex;
 				_serverType.SelectedIndex = 0;
 				_name.Text = string.Empty;
@@ -111,21 +130,14 @@ namespace BuildDependency.Dialogs
 				_url.Text = server.Url;
 			}
 			_inSelectedServerChanged = false;
-			Application.MainLoop.DispatchPendingEvents();
 		}
 
 		public List<Server> Servers
 		{
 			get
 			{
-				var servers = new List<Server>();
-				foreach (var obj in _serversCombo.Items)
-				{
-					var server = obj as Server;
-					if (server != null)
-						servers.Add(server);
-				}
-				return servers;
+				_servers.Remove(new NullServer());
+				return _servers;
 			}
 		}
 	}

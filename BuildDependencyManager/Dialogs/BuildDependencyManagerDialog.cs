@@ -1,146 +1,136 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+﻿// Copyright (c) 2014-2015 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
-using Xwt;
+using Eto.Forms;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
+using BuildDependency.Artifacts;
 using System.IO;
+using Eto.Drawing;
 
 namespace BuildDependency.Dialogs
 {
-	public class BuildDependencyManagerDialog: Dialog
+	public class BuildDependencyManagerDialog: Form
 	{
 		private List<ArtifactTemplate> _artifacts;
 		private List<Server> _servers;
-		private ListStore _store;
-		private readonly ListView _listView;
-		private DataField<string> _artifactsSource;
-		private DataField<string> _artifactsPath;
+		private readonly GridView _gridView;
 
 		public BuildDependencyManagerDialog()
 		{
-			Title = "Build Dependency Manager";
-			Width = 700;
-			Height = 400;
-
-			var mainMenu = new Menu();
-			MainMenu = mainMenu;
-			var fileMenu = new MenuItem("_File");
-			fileMenu.SubMenu = new Menu();
-
-			var menuItem = new MenuItem("_New");
-			menuItem.Clicked += OnFileNew;
-			fileMenu.SubMenu.Items.Add(menuItem);
-			menuItem = new MenuItem("_Open");
-			menuItem.Clicked += OnFileOpen;
-			fileMenu.SubMenu.Items.Add(menuItem);
-			menuItem = new MenuItem("_Save");
-			menuItem.Clicked += OnFileSave;
-			fileMenu.SubMenu.Items.Add(menuItem);
-			menuItem = new MenuItem("_Import");
-			menuItem.Clicked += OnFileImport;
-			fileMenu.SubMenu.Items.Add(menuItem);
-			menuItem = new MenuItem("E_xit");
-			menuItem.Clicked += (sender, e) => Close();
-			fileMenu.SubMenu.Items.Add(menuItem);
-			mainMenu.Items.Add(fileMenu);
-
-			var toolsMenu = new MenuItem("_Tools");
-			toolsMenu.SubMenu = new Menu();
-
-			menuItem = new MenuItem("_Servers");
-			menuItem.Clicked += OnToolsServers;
-			toolsMenu.SubMenu.Items.Add(menuItem);
-			menuItem = new MenuItem("S_ort");
-			menuItem.Clicked += OnToolsSort;
-			;
-			toolsMenu.SubMenu.Items.Add(menuItem);
-
-			mainMenu.Items.Add(toolsMenu);
-
-			var button = new DialogButton("Add Artifact");
-			button.Clicked += OnAddArtifact;
-			Buttons.Add(button);
-
-			var vbox = new VBox();
-
-			_listView = new ListView();
-			_artifactsSource = new DataField<string>();
-			_artifactsPath = new DataField<string>();
-
-			_listView.Columns.Add(new ListViewColumn("Artifacts source", new TextCellView { TextField = _artifactsSource }));
-			_listView.Columns.Add(new ListViewColumn("Artifacts path", new TextCellView { TextField = _artifactsPath }));
-			_listView.GridLinesVisible = GridLines.Both;
-			_listView.HeadersVisible = true;
-			_listView.HeightRequest = 300;
-			_listView.VerticalPlacement = WidgetPlacement.Fill;
-			_listView.ExpandVertical = true;
-			_listView.ButtonPressed += HandleButtonPressed;
-
-			_store = new ListStore(_artifactsSource, _artifactsPath);
 			_artifacts = new List<ArtifactTemplate>();
-			_listView.DataSource = _store;
+			Title = "Build Dependency Manager";
+			ClientSize = new Size(700, 400);
 
-			vbox.PackStart(_listView, true);
+			Menu = new MenuBar
+			{
+				Items =
+				{
+					new ButtonMenuItem
+					{
+						Text = "&File",
+						Items =
+						{
+							new Command(OnFileNew) { MenuText = "&New" },
+							new Command(OnFileOpen) { MenuText = "&Open" },
+							new Command(OnFileSave) { MenuText = "&Save" },
+							new Command(OnFileImport) { MenuText = "&Import" },
+						}
+					},
+					new ButtonMenuItem
+					{
+						Text = "&Tools",
+						Items =
+						{
+							new Command(OnToolsServers) { MenuText = "&Servers" },
+							//new Command() { MenuText = "S&ort" }
+						}
+					}
+				},
+				QuitItem = new Command((sender, e) => Application.Instance.Quit())
+				{
+					MenuText = "E&xit", 
+				}
+			};
 
-			Content = vbox;
+			_gridView = new GridView();
+			_gridView.GridLines = GridLines.Both;
+			_gridView.ShowHeader = true;
+			_gridView.Size = new Size(680, 350);
+			_gridView.DataStore = new SelectableFilterCollection<ArtifactTemplate>(_gridView, _artifacts);
+			_gridView.Columns.Add(new GridColumn
+				{
+					HeaderText = "Artifacts source",
+					DataCell = new TextBoxCell("Source"),
+					AutoSize = true,
+					Resizable = true,
+					Sortable = true,
+				});
+			_gridView.Columns.Add(new GridColumn
+				{
+					HeaderText = "Artifacts path",
+					DataCell = new TextBoxCell("PathRules"),
+					AutoSize = true,
+					Resizable = true,
+					Sortable = true
+				});
+
+			var button = new Button();
+			button.Text = "Add Artifact";
+			button.Click += OnAddArtifact;
+
+			var stacklayout = new StackLayout() { Padding = new Padding(10), Spacing = 5 };
+
+			stacklayout.Items.Add(new StackLayoutItem(_gridView, HorizontalAlignment.Right, true));
+			stacklayout.Items.Add(new StackLayoutItem(button, HorizontalAlignment.Right));
+			Content = stacklayout;
 
 			OnFileNew(this, EventArgs.Empty);
-		}
-
-		private void AddArtifactToStore(int row, ArtifactTemplate artifact)
-		{
-			var source = string.Format("{0}::{1}\n({2})", artifact.Server.Name, artifact.ConfigName, artifact.TagLabel);
-			if ((artifact.Condition & Conditions.All) != Conditions.All && artifact.Condition != Conditions.None)
-				source = string.Format("{0}\nCondition: {1}", source, artifact.Condition);
-			_store.SetValue<string>(row, _artifactsSource, source);
-			_store.SetValue<string>(row, _artifactsPath, artifact.PathRules);
 		}
 
 		private void OnAddArtifact(object sender, EventArgs e)
 		{
 			using (var dlg = new AddOrEditArtifactDependencyDialog(true, _servers))
 			{
-				if (dlg.Run() == Command.Ok)
+				dlg.ShowModal(this);
+
+				if (dlg.Result)
 				{
 					var artifact = dlg.GetArtifact();
 					_artifacts.Add(artifact);
-					int row = _store.AddRow();
-					AddArtifactToStore(row, artifact);
 				}
 			}
 		}
 
 		private void OnEditArtifact(object sender, EventArgs e)
 		{
-			int row = (int)((MenuItem)sender).Tag;
-			Console.WriteLine("Editing row {0}", row);
-			if (row >= _artifacts.Count)
+			var item = _gridView.SelectedItem as ArtifactTemplate;
+			if (item == null)
 				return;
-			using (var dlg = new AddOrEditArtifactDependencyDialog(_servers, _artifacts[row]))
+			var artifactIndex = _artifacts.IndexOf(item);
+			using (var dlg = new AddOrEditArtifactDependencyDialog(_servers, item))
 			{
-				if (dlg.Run() == Command.Ok)
+				dlg.ShowModal();
+				if (dlg.Result)
 				{
 					var artifact = dlg.GetArtifact();
-					_artifacts[row] = artifact;
-					_store.InsertRowAfter(row);
-					_store.RemoveRow(row);
-					AddArtifactToStore(row, artifact);
+					_artifacts[artifactIndex] = artifact;
 				}
 			}
 		}
 
 		private void OnDeleteArtifact(object sender, EventArgs e)
 		{
-			Console.WriteLine("Deleting row {0}", ((MenuItem)sender).Tag);
-			_store.RemoveRow((int)((MenuItem)sender).Tag);
+			var item = _gridView.SelectedItem as ArtifactTemplate;
+			if (item == null)
+				return;
+			_artifacts.Remove(item);
 		}
 
 		private void OnFileNew(object sender, EventArgs e)
 		{
-			_store.Clear();
-			_artifacts = new List<ArtifactTemplate>();
+			_artifacts.Clear();
 			_servers = new List<Server>();
 			var server = Server.CreateServer(ServerType.TeamCity);
 			server.Name = "TC";
@@ -151,43 +141,28 @@ namespace BuildDependency.Dialogs
 		private void OnFileOpen(object sender, EventArgs e)
 		{
 			string fileName = null;
-			Content.Cursor = CursorType.Wait;
 			using (var dlg = new OpenFileDialog())
 			{
-				dlg.Filters.Add(new FileDialogFilter("Dependency File", "*.dep"));
-				dlg.Filters.Add(new FileDialogFilter("All Files", "*"));
-				dlg.ActiveFilter = dlg.Filters[0];
-				if (dlg.Run())
+				dlg.Filters.Add(new FileDialogFilter("Dependency File (*.dep)", "*.dep"));
+				dlg.Filters.Add(new FileDialogFilter("All Files (*.*)", "*"));
+				dlg.CurrentFilterIndex = 0;
+				if (dlg.ShowDialog(this) == DialogResult.Ok)
 				{
 					fileName = dlg.FileName;
 				}
 			}
-			Application.MainLoop.DispatchPendingEvents();
-			try
-			{
-				_store.Clear();
-				_artifacts = DependencyFile.LoadFile(fileName);
-				foreach (var artifact in _artifacts)
-				{
-					int row = _store.AddRow();
-					AddArtifactToStore(row, artifact);
-				}
-			}
-			finally
-			{
-				Content.Cursor = CursorType.Arrow;
-			}
+			_artifacts = DependencyFile.LoadFile(fileName);
 		}
 
 		private void OnFileSave(object sender, EventArgs e)
 		{
 			using (var dlg = new SaveFileDialog())
 			{
-				dlg.Filters.Add(new FileDialogFilter("Dependency File", "*.dep"));
-				dlg.Filters.Add(new FileDialogFilter("All Files", "*"));
-				dlg.ActiveFilter = dlg.Filters[0];
+				dlg.Filters.Add(new FileDialogFilter("Dependency File (*.dep)", "*.dep"));
+				dlg.Filters.Add(new FileDialogFilter("All Files (*.*)", "*"));
+				dlg.CurrentFilterIndex = 0;
 
-				if (dlg.Run())
+				if (dlg.ShowDialog(this) == DialogResult.Ok)
 				{
 					var fileName = dlg.FileName;
 					if (string.IsNullOrEmpty(Path.GetExtension(fileName)))
@@ -202,21 +177,21 @@ namespace BuildDependency.Dialogs
 		{
 			using (var dlg = new ImportDialog(_servers))
 			{
-				if (dlg.Run() == Command.Ok)
+				dlg.ShowModal();
+				if (dlg.Result)
 				{
 					var configId = dlg.SelectedBuildConfig;
 					var condition = dlg.Condition;
 
-					var server = ((TeamCityApi)_servers[0]);
+					var server = dlg.Server as TeamCityApi;
+					if (server == null)
+						return;
 					foreach (var dep in server.GetArtifactDependencies(configId))
 					{
 						var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.Properties));
 						artifact.Condition = condition;
 						_artifacts.Add(artifact);
-						int row = _store.AddRow();
-						AddArtifactToStore(row, artifact);
 					}
-
 				}
 			}
 		}
@@ -225,42 +200,43 @@ namespace BuildDependency.Dialogs
 		{
 			using (var dlg = new ServersDialog(_servers))
 			{
-				if (dlg.Run() == Command.Ok)
+				dlg.ShowModal();
+				if (dlg.Result)
 				{
 					_servers = dlg.Servers;
 				}
 			}
 		}
 
-		private void OnToolsSort(object sender, EventArgs e)
-		{
-			_artifacts.Sort((x, y) => x.ConfigName.CompareTo(y.ConfigName));
-			_store.Clear();
-			foreach (var artifact in _artifacts)
-			{
-				int row = _store.AddRow();
-				AddArtifactToStore(row, artifact);
-			}
-		}
-
-		private void HandleButtonPressed(object sender, ButtonEventArgs e)
-		{
-			if (e.Button != PointerButton.Right)
-				return;
-
-			var row = _listView.GetRowAtPosition(e.Position);
-			var menu = new Menu();
-			var menuItem = new MenuItem("_Edit");
-			menuItem.Tag = row;
-			menuItem.Clicked += OnEditArtifact;
-			menu.Items.Add(menuItem);
-			menuItem = new MenuItem("_Delete");
-			menuItem.Tag = row;
-			menuItem.Clicked += OnDeleteArtifact;
-			menu.Items.Add(menuItem);
-			menu.Popup();
-		}
-
+		//		private void OnToolsSort(object sender, EventArgs e)
+		//		{
+		//			_artifacts.Sort((x, y) => x.ConfigName.CompareTo(y.ConfigName));
+		//			_store.Clear();
+		//			foreach (var artifact in _artifacts)
+		//			{
+		//				int row = _store.AddRow();
+		//				AddArtifactToStore(row, artifact);
+		//			}
+		//		}
+		//
+		//		private void HandleButtonPressed(object sender, ButtonEventArgs e)
+		//		{
+		//			if (e.Button != PointerButton.Right)
+		//				return;
+		//
+		//			var row = _listView.GetRowAtPosition(e.Position);
+		//			var menu = new Menu();
+		//			var menuItem = new MenuItem("_Edit");
+		//			menuItem.Tag = row;
+		//			menuItem.Clicked += OnEditArtifact;
+		//			menu.Items.Add(menuItem);
+		//			menuItem = new MenuItem("_Delete");
+		//			menuItem.Tag = row;
+		//			menuItem.Clicked += OnDeleteArtifact;
+		//			menu.Items.Add(menuItem);
+		//			menu.Popup();
+		//		}
+		//
 
 	}
 

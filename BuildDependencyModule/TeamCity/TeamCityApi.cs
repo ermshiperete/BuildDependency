@@ -6,6 +6,8 @@ using RestSharp;
 using BuildDependency.TeamCity.RestClasses;
 using BuildDependency.RestClasses;
 using System.Threading.Tasks;
+using System.Net;
+using BuildDependency.Artifacts;
 
 namespace BuildDependency.TeamCity
 {
@@ -50,7 +52,7 @@ namespace BuildDependency.TeamCity
 
 			if (response.ErrorException != null)
 			{
-				if (throwException)
+				if (throwException && !(response.ErrorException is WebException))
 				{
 					const string message = "Error retrieving response.  Check inner details for more info.";
 					throw new ApplicationException(message, response.ErrorException);
@@ -81,7 +83,8 @@ namespace BuildDependency.TeamCity
 			request.Resource = "/projects";
 			request.RootElement = "projects";
 
-			return ExecuteApi<Projects>(request).Project;
+			var response = ExecuteApi<Projects>(request);
+			return response != null ? response.Project : null;
 		}
 
 		public List<BuildType> GetBuildTypes()

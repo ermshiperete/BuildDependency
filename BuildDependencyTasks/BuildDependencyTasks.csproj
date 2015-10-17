@@ -109,9 +109,6 @@
     <Compile Include="..\BuildDependencyModule\Tools\FileHelper.cs">
       <Link>Tools\FileHelper.cs</Link>
     </Compile>
-    <Compile Include="..\BuildDependencyModule\ArtifactTemplate.cs">
-      <Link>ArtifactTemplate.cs</Link>
-    </Compile>
     <Compile Include="Tools\LogWrapper.cs" />
     <Compile Include="..\BuildDependencyModule\Artifacts\ILog.cs">
       <Link>Artifacts\ILog.cs</Link>
@@ -121,6 +118,9 @@
     </Compile>
     <Compile Include="..\BuildDependencyModule\Tools\ConditionHelper.cs">
       <Link>Tools\ConditionHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\BuildDependencyModule\Artifacts\ArtifactTemplate.cs">
+      <Link>Artifacts\ArtifactTemplate.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

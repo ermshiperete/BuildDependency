@@ -7,7 +7,7 @@ using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
 using System.IO;
 
-namespace BuildDependency
+namespace BuildDependency.Artifacts
 {
 	public class ArtifactTemplate: ArtifactProperties
 	{
@@ -55,6 +55,17 @@ namespace BuildDependency
 			get
 			{
 				return string.Format("{0}/download/{1}/{2}", ((TeamCityApi)Server).BaseRepoUrl, Config.Id, RevisionValue);
+			}
+		}
+
+		public string Source
+		{
+			get
+			{
+				var source = string.Format("{0}::{1}\n({2})", Server.Name, ConfigName, TagLabel);
+				if ((Condition & Conditions.All) != Conditions.All && Condition != Conditions.None)
+					source = string.Format("{0}\nCondition: {1}", source, Condition);
+				return source;
 			}
 		}
 

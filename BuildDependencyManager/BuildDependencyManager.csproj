@@ -50,6 +50,15 @@
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\ICSharpCode.SharpZipLib.dll.0.85.4.369\lib\net20\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
+    <Reference Include="Eto">
+      <HintPath>..\packages\Eto.Forms.2.1.0\lib\net45\Eto.dll</HintPath>
+    </Reference>
+    <Reference Include="Eto.WinForms">
+      <HintPath>..\packages\Eto.Platform.Windows.2.1.0\lib\net45\Eto.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Eto.Gtk2">
+      <HintPath>..\packages\Eto.Platform.Gtk.2.1.0\lib\net45\Eto.Gtk2.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -60,9 +69,6 @@
     <Compile Include="Widgets\MultiLineTextEntry.cs" />
     <Compile Include="Dialogs\AddOrEditArtifactDependencyDialog.cs" />
     <Compile Include="Dialogs\ServersDialog.cs" />
-    <Compile Include="..\BuildDependencyModule\ArtifactTemplate.cs">
-      <Link>ArtifactTemplate.cs</Link>
-    </Compile>
     <Compile Include="..\BuildDependencyModule\Conditions.cs">
       <Link>Conditions.cs</Link>
     </Compile>
@@ -141,25 +147,14 @@
     <Compile Include="..\BuildDependencyModule\Tools\ConditionHelper.cs">
       <Link>Tools\ConditionHelper.cs</Link>
     </Compile>
+    <Compile Include="NullServer.cs" />
+    <Compile Include="..\BuildDependencyModule\Artifacts\ArtifactTemplate.cs">
+      <Link>Artifacts\ArtifactTemplate.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <None Include="Xwt.Gtk.dll.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config" />
-    <None Include="..\libs\Xwt.dll">
-      <Link>Xwt.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\libs\Xwt.Gtk.dll">
-      <Link>Xwt.Gtk.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\libs\Xwt.WPF.dll">
-      <Link>Xwt.WPF.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

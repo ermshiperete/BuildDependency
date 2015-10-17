@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+﻿// Copyright (c) 2014-2015 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using BuildDependency.TeamCity;
@@ -13,7 +13,6 @@ namespace BuildDependency
 				return new TeamCityApi();
 			throw new ArgumentException("Unknown server type");
 		}
-
 
 		protected Server(ServerType type)
 		{
