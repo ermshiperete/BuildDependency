@@ -19,7 +19,7 @@ namespace BuildDependency.Dialogs
 		private readonly ComboBox _projectCombo;
 		private readonly ComboBox _configCombo;
 		private readonly ComboBox _buildTagType;
-		private readonly TextBox _rulesTextBox;
+		private readonly TextArea _rulesTextBox;
 		private readonly ListBox _preview;
 		private Label _buildTagEntryLabel;
 		private readonly TextBox _buildTagEntry;
@@ -60,7 +60,7 @@ namespace BuildDependency.Dialogs
 			_buildTagType.SelectedIndexChanged += OnArtifactSourceChanged;
 			_buildTagEntryLabel = new Label { Text = "Build tag:", TextAlignment = TextAlignment.Right, Visible = false };
 			_buildTagEntry = new TextBox { Visible = false };
-			_rulesTextBox = new TextBox();
+			_rulesTextBox = new TextArea();
 			_rulesTextBox.Height = 150;
 			//_rulesTextBox.HorizontalPlacement = HorizontalAlignment.Left;
 			_rulesTextBox.TextChanged += (sender, e) => UpdatePreview();
@@ -234,6 +234,8 @@ namespace BuildDependency.Dialogs
 		{
 			_preview.Items.Clear();
 			var template = GetArtifact();
+			if (template == null)
+				return;
 			var jobs = template.GetJobs();
 			var jobsByFile = new Dictionary<string, List<IJob>>();
 			foreach (var job in jobs.OfType<DownloadFileJob>())
@@ -283,6 +285,9 @@ namespace BuildDependency.Dialogs
 			var server = _serversCombo.SelectedValue as Server;
 			var proj = _projectCombo.SelectedValue as Project;
 			var config = _configCombo.SelectedValue as BuildType;
+			if (config == null)
+				return null;
+
 			var artifact = new ArtifactTemplate(server, proj, config.Id);
 			artifact.PathRules = _rulesTextBox.Text;
 			artifact.Condition = GetConditionFromCheckBox(_windows, _linux32, _linux64);

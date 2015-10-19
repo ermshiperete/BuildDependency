@@ -35,6 +35,8 @@ namespace BuildDependency.TeamCity.RestClasses
 		{
 			return string.Format("[BuildType: Id={0}, Name={1}, Href={2}, ProjectName={3}, ProjectId={4}, WebUrl={5}]", Id, Name, Href, ProjectName, ProjectId, WebUrl);
 		}
+
+		public string Text { get { return Name; }}
 	}
 }
 

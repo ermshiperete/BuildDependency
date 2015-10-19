@@ -28,6 +28,8 @@ namespace BuildDependency.TeamCity.RestClasses
 		{
 			return string.Format("[Project: Name={0}, Id={1}, Href={2}]", Name, Id, Href);
 		}
+
+		public string Text { get { return Name; }}
 	}
 }
 

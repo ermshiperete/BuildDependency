@@ -66,7 +66,6 @@
     <Compile Include="Dialogs\BuildDependencyManagerDialog.cs" />
     <Compile Include="Dialogs\ImportDialog.cs" />
     <Compile Include="Dialogs\ImportDialogModel.cs" />
-    <Compile Include="Widgets\MultiLineTextEntry.cs" />
     <Compile Include="Dialogs\AddOrEditArtifactDependencyDialog.cs" />
     <Compile Include="Dialogs\ServersDialog.cs" />
     <Compile Include="..\BuildDependencyModule\Conditions.cs">

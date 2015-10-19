@@ -12,16 +12,14 @@ namespace BuildDependency.Tools
 			if (condition == Conditions.None)
 				return true;
 
-			bool ret = true;
-			if (Environment.OSVersion.Platform == PlatformID.Unix)
-				ret &= ((condition & Conditions.Linux) != 0);
-			else
-				ret &= ((condition & Conditions.Windows) != 0);
+			bool ret = Environment.OSVersion.Platform == PlatformID.Unix ?
+				((condition & Conditions.Linux) != 0) :
+				((condition & Conditions.Windows) != 0);
 
-			if (Environment.Is64BitOperatingSystem)
-				ret &= ((condition & Conditions.Bit64) != 0);
-			else
-				ret &= ((condition & Conditions.Bit32) != 0);
+			ret &= Environment.Is64BitOperatingSystem ?
+				((condition & Conditions.Bit64) != 0) :
+				((condition & Conditions.Bit32) != 0);
+
 			return ret;
 		}
 	}
