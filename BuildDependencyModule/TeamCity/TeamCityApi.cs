@@ -8,6 +8,7 @@ using BuildDependency.RestClasses;
 using System.Threading.Tasks;
 using System.Net;
 using BuildDependency.Artifacts;
+using GLib;
 
 namespace BuildDependency.TeamCity
 {
@@ -67,9 +68,9 @@ namespace BuildDependency.TeamCity
 			return Execute<T>(BaseUrl, request, throwException);
 		}
 
-		private T ExecuteRepo<T>(RestRequest request) where T : new()
+		private T ExecuteRepo<T>(RestRequest request, bool throwException = true) where T : new()
 		{
-			return Execute<T>(BaseRepoUrl, request);
+			return Execute<T>(BaseRepoUrl, request, throwException);
 		}
 
 		public List<Project> GetAllProjects()
@@ -140,7 +141,7 @@ namespace BuildDependency.TeamCity
 			request.Resource = string.Format("/download/{0}/{1}/teamcity-ivy.xml", template.Config.Id, template.RevisionValue);
 			request.RootElement = "publications";
 
-			var artifacts = ExecuteRepo<List<Artifact>>(request);
+			var artifacts = ExecuteRepo<List<Artifact>>(request, false) ?? new List<Artifact>();
 			return artifacts;
 		}
 

@@ -16,6 +16,7 @@ namespace BuildDependency.Dialogs
 		private List<ArtifactTemplate> _artifacts;
 		private List<Server> _servers;
 		private readonly GridView _gridView;
+		private SelectableFilterCollection<ArtifactTemplate> _dataStore;
 
 		public BuildDependencyManagerDialog()
 		{
@@ -58,7 +59,8 @@ namespace BuildDependency.Dialogs
 			_gridView.GridLines = GridLines.Both;
 			_gridView.ShowHeader = true;
 			_gridView.Size = new Size(680, 350);
-			_gridView.DataStore = new SelectableFilterCollection<ArtifactTemplate>(_gridView, _artifacts);
+			_dataStore = new SelectableFilterCollection<ArtifactTemplate>(_gridView, _artifacts);
+			_gridView.DataStore = _dataStore;
 			_gridView.Columns.Add(new GridColumn
 				{
 					HeaderText = "Artifacts source",
@@ -71,10 +73,13 @@ namespace BuildDependency.Dialogs
 				{
 					HeaderText = "Artifacts path",
 					DataCell = new TextBoxCell("PathRules"),
-					AutoSize = true,
+					//AutoSize = true,
 					Resizable = true,
 					Sortable = true
 				});
+			_gridView.ContextMenu = new ContextMenu(
+				new ButtonMenuItem(new Command(OnEditArtifact) { MenuText = "&Edit" }),
+				new ButtonMenuItem(new Command(OnDeleteArtifact) { MenuText = "&Delete" }));
 
 			var button = new Button();
 			button.Text = "Add Artifact";
@@ -98,7 +103,7 @@ namespace BuildDependency.Dialogs
 				if (dlg.Result)
 				{
 					var artifact = dlg.GetArtifact();
-					_artifacts.Add(artifact);
+					_dataStore.Add(artifact);
 				}
 			}
 		}
@@ -108,14 +113,14 @@ namespace BuildDependency.Dialogs
 			var item = _gridView.SelectedItem as ArtifactTemplate;
 			if (item == null)
 				return;
-			var artifactIndex = _artifacts.IndexOf(item);
+			var artifactIndex = _dataStore.IndexOf(item);
 			using (var dlg = new AddOrEditArtifactDependencyDialog(_servers, item))
 			{
 				dlg.ShowModal();
 				if (dlg.Result)
 				{
 					var artifact = dlg.GetArtifact();
-					_artifacts[artifactIndex] = artifact;
+					_dataStore[artifactIndex] = artifact;
 				}
 			}
 		}
@@ -125,12 +130,12 @@ namespace BuildDependency.Dialogs
 			var item = _gridView.SelectedItem as ArtifactTemplate;
 			if (item == null)
 				return;
-			_artifacts.Remove(item);
+			_dataStore.Remove(item);
 		}
 
 		private void OnFileNew(object sender, EventArgs e)
 		{
-			_artifacts.Clear();
+			_dataStore.Clear();
 			_servers = new List<Server>();
 			var server = Server.CreateServer(ServerType.TeamCity);
 			server.Name = "TC";
@@ -151,7 +156,7 @@ namespace BuildDependency.Dialogs
 					fileName = dlg.FileName;
 				}
 			}
-			_artifacts = DependencyFile.LoadFile(fileName);
+			_dataStore.AddRange(DependencyFile.LoadFile(fileName));
 		}
 
 		private void OnFileSave(object sender, EventArgs e)
@@ -190,7 +195,7 @@ namespace BuildDependency.Dialogs
 					{
 						var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.Properties));
 						artifact.Condition = condition;
-						_artifacts.Add(artifact);
+						_dataStore.Add(artifact);
 					}
 				}
 			}
