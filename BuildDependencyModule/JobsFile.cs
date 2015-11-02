@@ -10,7 +10,7 @@ namespace BuildDependency
 {
 	public static class JobsFile
 	{
-		public static void WriteJobsFile(string fileName, List<ArtifactTemplate> artifactTemplates)
+		public async static void WriteJobsFile(string fileName, List<ArtifactTemplate> artifactTemplates)
 		{
 			using (var file = new StreamWriter(fileName))
 			{
@@ -20,7 +20,7 @@ namespace BuildDependency
 					if (server == null)
 						continue;
 
-					foreach (var job in artifact.GetJobs())
+					foreach (var job in await artifact.GetJobs())
 					{
 						file.WriteLine(job);
 					}

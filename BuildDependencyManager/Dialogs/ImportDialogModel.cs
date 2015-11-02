@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
+using System.Threading.Tasks;
 
 namespace BuildDependency.Dialogs
 {
@@ -17,10 +18,18 @@ namespace BuildDependency.Dialogs
 		{
 			get
 			{
-				var allProjects = TeamCity.GetAllProjects();
-				if (allProjects != null)
-					allProjects.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
-				return allProjects;
+				if (TeamCity == null)
+					return null;
+
+				var task = Task.Run(() =>
+					{
+						var allProjects = TeamCity.GetAllProjects();
+						if (allProjects != null)
+							allProjects.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
+						return allProjects;
+					});
+				task.Wait();
+				return task.Result;
 			}
 		}
 
@@ -29,10 +38,10 @@ namespace BuildDependency.Dialogs
 			return TeamCity.GetBuildTypesForProject(projectId);
 		}
 
-		public void LoadArtifacts(string configId)
+		public async Task LoadArtifacts(string configId)
 		{
 			Artifacts = new List<ArtifactProperties>();
-			var deps = TeamCity.GetArtifactDependencies(configId);
+			var deps = await TeamCity.GetArtifactDependenciesAsync(configId);
 			if (deps != null)
 			{
 				foreach (var dep in deps)

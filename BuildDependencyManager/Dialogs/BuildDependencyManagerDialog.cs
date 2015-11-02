@@ -8,6 +8,8 @@ using BuildDependency.TeamCity.RestClasses;
 using BuildDependency.Artifacts;
 using System.IO;
 using Eto.Drawing;
+using BuildDependency.Tools;
+using System.Threading.Tasks;
 
 namespace BuildDependency.Dialogs
 {
@@ -17,6 +19,7 @@ namespace BuildDependency.Dialogs
 		private List<Server> _servers;
 		private readonly GridView _gridView;
 		private SelectableFilterCollection<ArtifactTemplate> _dataStore;
+		private readonly Spinner _spinner;
 
 		public BuildDependencyManagerDialog()
 		{
@@ -45,7 +48,7 @@ namespace BuildDependency.Dialogs
 						Items =
 						{
 							new Command(OnToolsServers) { MenuText = "&Servers" },
-							//new Command() { MenuText = "S&ort" }
+							new Command(OnToolsSort) { MenuText = "S&ort" }
 						}
 					}
 				},
@@ -55,12 +58,14 @@ namespace BuildDependency.Dialogs
 				}
 			};
 
+			_spinner = new Spinner { Size = new Size(30, 30), Visible = false };
 			_gridView = new GridView();
 			_gridView.GridLines = GridLines.Both;
 			_gridView.ShowHeader = true;
 			_gridView.Size = new Size(680, 350);
 			_dataStore = new SelectableFilterCollection<ArtifactTemplate>(_gridView, _artifacts);
 			_gridView.DataStore = _dataStore;
+			_gridView.CellDoubleClick += OnEditArtifact;
 			_gridView.Columns.Add(new GridColumn
 				{
 					HeaderText = "Artifacts source",
@@ -85,25 +90,40 @@ namespace BuildDependency.Dialogs
 			button.Text = "Add Artifact";
 			button.Click += OnAddArtifact;
 
-			var stacklayout = new StackLayout() { Padding = new Padding(10), Spacing = 5 };
+			var content = new TableLayout
+			{
+				Padding = new Padding(10, 10, 10, 5),
+				Spacing = new Size(5, 5),
+				Rows =
+				{
+					new TableRow(_gridView) { ScaleHeight = true },
+					new StackLayout
+					{
+						Orientation = Orientation.Horizontal,
+						Spacing = 5,
+						Items = { _spinner, null, button }
+					}
+				}
+			};
 
-			stacklayout.Items.Add(new StackLayoutItem(_gridView, HorizontalAlignment.Right, true));
-			stacklayout.Items.Add(new StackLayoutItem(button, HorizontalAlignment.Right));
-			Content = stacklayout;
+			Content = content;
 
 			OnFileNew(this, EventArgs.Empty);
 		}
 
 		private void OnAddArtifact(object sender, EventArgs e)
 		{
-			using (var dlg = new AddOrEditArtifactDependencyDialog(true, _servers))
+			using (new WaitSpinner(_spinner))
 			{
-				dlg.ShowModal(this);
-
-				if (dlg.Result)
+				using (var dlg = new AddOrEditArtifactDependencyDialog(true, _servers))
 				{
-					var artifact = dlg.GetArtifact();
-					_dataStore.Add(artifact);
+					dlg.ShowModal(this);
+
+					if (dlg.Result)
+					{
+						var artifact = dlg.GetArtifact();
+						_dataStore.Add(artifact);
+					}
 				}
 			}
 		}
@@ -143,23 +163,26 @@ namespace BuildDependency.Dialogs
 			_servers.Add(server);
 		}
 
-		private void OnFileOpen(object sender, EventArgs e)
+		private async void OnFileOpen(object sender, EventArgs e)
 		{
-			string fileName = null;
-			using (var dlg = new OpenFileDialog())
+			using (new WaitSpinner(_spinner))
 			{
-				dlg.Filters.Add(new FileDialogFilter("Dependency File (*.dep)", "*.dep"));
-				dlg.Filters.Add(new FileDialogFilter("All Files (*.*)", "*"));
-				dlg.CurrentFilterIndex = 0;
-				if (dlg.ShowDialog(this) == DialogResult.Ok)
+				string fileName = null;
+				using (var dlg = new OpenFileDialog())
 				{
-					fileName = dlg.FileName;
+					dlg.Filters.Add(new FileDialogFilter("Dependency File (*.dep)", "*.dep"));
+					dlg.Filters.Add(new FileDialogFilter("All Files (*.*)", "*"));
+					dlg.CurrentFilterIndex = 0;
+					if (dlg.ShowDialog(this) == DialogResult.Ok)
+					{
+						fileName = dlg.FileName;
+						await Task.Run(() => { _dataStore.AddRange(DependencyFile.LoadFile(fileName)); });
+					}
 				}
 			}
-			_dataStore.AddRange(DependencyFile.LoadFile(fileName));
 		}
 
-		private void OnFileSave(object sender, EventArgs e)
+		private async void OnFileSave(object sender, EventArgs e)
 		{
 			using (var dlg = new SaveFileDialog())
 			{
@@ -169,33 +192,47 @@ namespace BuildDependency.Dialogs
 
 				if (dlg.ShowDialog(this) == DialogResult.Ok)
 				{
-					var fileName = dlg.FileName;
-					if (string.IsNullOrEmpty(Path.GetExtension(fileName)))
-						fileName += ".dep";
-					DependencyFile.SaveFile(fileName, _servers, _artifacts);
-					JobsFile.WriteJobsFile(Path.ChangeExtension(fileName, ".files"), _artifacts);
+					using (new WaitSpinner(_spinner))
+					{
+						await Task.Run(() =>
+							{
+								var fileName = dlg.FileName;
+								if (string.IsNullOrEmpty(Path.GetExtension(fileName)))
+									fileName += ".dep";
+								DependencyFile.SaveFile(fileName, _servers, _artifacts);
+								JobsFile.WriteJobsFile(Path.ChangeExtension(fileName, ".files"), _artifacts);
+							});
+					}
 				}
 			}
 		}
 
-		private void OnFileImport(object sender, EventArgs e)
+		private async void OnFileImport(object sender, EventArgs e)
 		{
-			using (var dlg = new ImportDialog(_servers))
+			using (new WaitSpinner(_spinner))
 			{
-				dlg.ShowModal();
-				if (dlg.Result)
+				using (var dlg = new ImportDialog(_servers))
 				{
-					var configId = dlg.SelectedBuildConfig;
-					var condition = dlg.Condition;
-
-					var server = dlg.Server as TeamCityApi;
-					if (server == null)
-						return;
-					foreach (var dep in server.GetArtifactDependencies(configId))
+					dlg.ShowModal();
+					if (dlg.Result)
 					{
-						var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.Properties));
-						artifact.Condition = condition;
-						_dataStore.Add(artifact);
+						var configId = dlg.SelectedBuildConfig;
+						var condition = dlg.Condition;
+
+						var server = dlg.Server as TeamCityApi;
+						if (server == null)
+							return;
+						await Task.Run(() =>
+							{
+								foreach (var dep in server.GetArtifactDependencies(configId))
+								{
+									if (dep == null)
+										continue;
+									var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.Properties));
+									artifact.Condition = condition;
+									_dataStore.Add(artifact);
+								}
+							});
 					}
 				}
 			}
@@ -213,37 +250,15 @@ namespace BuildDependency.Dialogs
 			}
 		}
 
-		//		private void OnToolsSort(object sender, EventArgs e)
-		//		{
-		//			_artifacts.Sort((x, y) => x.ConfigName.CompareTo(y.ConfigName));
-		//			_store.Clear();
-		//			foreach (var artifact in _artifacts)
-		//			{
-		//				int row = _store.AddRow();
-		//				AddArtifactToStore(row, artifact);
-		//			}
-		//		}
-		//
-		//		private void HandleButtonPressed(object sender, ButtonEventArgs e)
-		//		{
-		//			if (e.Button != PointerButton.Right)
-		//				return;
-		//
-		//			var row = _listView.GetRowAtPosition(e.Position);
-		//			var menu = new Menu();
-		//			var menuItem = new MenuItem("_Edit");
-		//			menuItem.Tag = row;
-		//			menuItem.Clicked += OnEditArtifact;
-		//			menu.Items.Add(menuItem);
-		//			menuItem = new MenuItem("_Delete");
-		//			menuItem.Tag = row;
-		//			menuItem.Clicked += OnDeleteArtifact;
-		//			menu.Items.Add(menuItem);
-		//			menu.Popup();
-		//		}
-		//
-
+		private async void OnToolsSort(object sender, EventArgs e)
+		{
+			using (new WaitSpinner(_spinner))
+			{
+				await Task.Run(() =>
+					{
+						_dataStore.Sort = (x, y) => string.Compare(x.ConfigName, y.ConfigName, StringComparison.Ordinal);
+					});
+			}
+		}
 	}
-
 }
-

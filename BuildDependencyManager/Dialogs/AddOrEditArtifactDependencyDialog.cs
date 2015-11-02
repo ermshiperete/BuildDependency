@@ -9,6 +9,8 @@ using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
 using Eto.Drawing;
 using Eto.Forms;
+using BuildDependency.Tools;
+using System.Threading.Tasks;
 
 namespace BuildDependency.Dialogs
 {
@@ -30,6 +32,7 @@ namespace BuildDependency.Dialogs
 		private readonly CheckBox _windows;
 		private readonly CheckBox _linux32;
 		private readonly CheckBox _linux64;
+		private readonly Spinner _spinner;
 		private List<Artifact> _artifacts;
 		private ArtifactTemplate _artifactToLoad;
 
@@ -80,10 +83,11 @@ namespace BuildDependency.Dialogs
 			};
 			var cancelButton = new Button { Text = "Cancel" };
 			cancelButton.Click += (sender, e) => Close();
+			_spinner = new Spinner { Size = new Size(20, 20), Visible = false };
 
 			_table = new TableLayout
 			{
-				Padding = new Padding(10),
+				Padding = new Padding(10, 10, 10, 0),
 				Spacing = new Size(5, 5),
 				Rows =
 				{
@@ -112,7 +116,13 @@ namespace BuildDependency.Dialogs
 							Items = { _windows, _linux32, _linux64 }
 						}),
 					new TableRow("Preview:", _preview),
-					new TableRow(null, new StackLayout
+					new TableRow(new StackLayout
+						{
+							Orientation = Orientation.Horizontal,
+							Spacing = 5,
+
+							Items = { _spinner, null }
+						}, new StackLayout
 						{
 							Orientation = Orientation.Horizontal,
 							Spacing = 5,
@@ -207,53 +217,67 @@ namespace BuildDependency.Dialogs
 			_currentBuildSourceIndex = combobox.SelectedIndex;
 		}
 
-		private void OnProjectChanged(object sender, EventArgs e)
+		private async void OnProjectChanged(object sender, EventArgs e)
 		{
-			var project = _projectCombo.SelectedValue as Project;
-			_configCombo.DataStore = _model.GetConfigurationsForProject(project.Id);
-			_configCombo.SelectedIndex = 0;
-			OnConfigChanged(this, EventArgs.Empty);
+			using (new WaitSpinner(_spinner))
+			{
+				var project = _projectCombo.SelectedValue as Project;
+
+				await Task.Run(() =>
+					{
+						_configCombo.DataStore = _model.GetConfigurationsForProject(project.Id);
+					});
+				_configCombo.SelectedIndex = 0;
+			}
 		}
 
-		private void OnConfigChanged(object sender, EventArgs e)
+		private async void OnConfigChanged(object sender, EventArgs e)
 		{
-			// this updates _textView.Text
-			var config = _configCombo.SelectedValue as BuildType;
-			_model.LoadArtifacts(config.Id);
-			var server = _serversCombo.SelectedValue as Server;
-			var tcServer = server as TeamCityApi;
-			if (tcServer != null)
+			using (new WaitSpinner(_spinner))
 			{
-				var template = GetArtifact();
-				_artifacts = tcServer.GetArtifacts(template);
+				// this updates _textView.Text
+				var config = _configCombo.SelectedValue as BuildType;
+				if (config == null)
+					return;
+				await _model.LoadArtifacts(config.Id);
+				var server = _serversCombo.SelectedValue as Server;
+				var tcServer = server as TeamCityApi;
+				if (tcServer != null)
+				{
+					var template = GetArtifact();
+					_artifacts = await tcServer.GetArtifactsAsync(template);
+				}
 			}
 			UpdatePreview();
 		}
 
-		private void UpdatePreview()
+		private async void UpdatePreview()
 		{
-			_preview.Items.Clear();
-			var template = GetArtifact();
-			if (template == null)
-				return;
-			var jobs = template.GetJobs();
-			var jobsByFile = new Dictionary<string, List<IJob>>();
-			foreach (var job in jobs.OfType<DownloadFileJob>())
+			using (new WaitSpinner(_spinner))
 			{
-				if (!jobsByFile.ContainsKey(job.SourceFile))
-					jobsByFile.Add(job.SourceFile, new List<IJob>());
-				jobsByFile[job.SourceFile].Add(job);
-			}
-			foreach (var artifact in _artifacts)
-			{
-				List<IJob> jobsForThisFile;
-				if (!jobsByFile.TryGetValue(artifact.ToString(), out jobsForThisFile))
-					_preview.Items.Add(string.Format("**{0}**", artifact));
-				else
+				_preview.Items.Clear();
+				var template = GetArtifact();
+				if (template == null)
+					return;
+				var jobsByFile = new Dictionary<string, List<IJob>>();
+				var jobs = await template.GetJobs();
+				foreach (var job in jobs.OfType<DownloadFileJob>())
 				{
-					foreach (var job in jobsForThisFile)
+					if (!jobsByFile.ContainsKey(job.SourceFile))
+						jobsByFile.Add(job.SourceFile, new List<IJob>());
+					jobsByFile[job.SourceFile].Add(job);
+				}
+				foreach (var artifact in _artifacts)
+				{
+					List<IJob> jobsForThisFile;
+					if (!jobsByFile.TryGetValue(artifact.ToString(), out jobsForThisFile))
+						_preview.Items.Add(string.Format("**{0}**", artifact));
+					else
 					{
-						_preview.Items.Add(string.Format("{0} {1}", artifact, GetTarget(job)));
+						foreach (var job in jobsForThisFile)
+						{
+							_preview.Items.Add(string.Format("{0} {1}", artifact, GetTarget(job)));
+						}
 					}
 				}
 			}

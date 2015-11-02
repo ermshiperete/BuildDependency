@@ -6,6 +6,7 @@ using BuildDependency.Artifacts;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace BuildDependency.Artifacts
 {
@@ -69,7 +70,7 @@ namespace BuildDependency.Artifacts
 			}
 		}
 
-		public List<IJob> GetJobs()
+		public async Task<List<IJob>> GetJobs()
 		{
 			var rules = new List<ArtifactRule>();
 			foreach (var ruleString in PathRules.Split('\n'))
@@ -80,7 +81,8 @@ namespace BuildDependency.Artifacts
 			}
 
 			var jobs = new List<IJob>();
-			foreach (var file in ((TeamCityApi)Server).GetArtifacts(this))
+			var artifacts = await ((TeamCityApi)Server).GetArtifactsAsync(this);
+			foreach (var file in artifacts)
 			{
 				foreach (var rule in rules)
 				{

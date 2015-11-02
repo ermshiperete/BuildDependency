@@ -7,6 +7,8 @@ using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
 using Eto.Drawing;
 using Eto.Forms;
+using BuildDependency.Tools;
+using System.Threading.Tasks;
 
 namespace BuildDependency.Dialogs
 {
@@ -20,6 +22,8 @@ namespace BuildDependency.Dialogs
 		private readonly CheckBox _windows;
 		private readonly CheckBox _linux32;
 		private readonly CheckBox _linux64;
+		private readonly SelectableFilterCollection<ArtifactTemplate> _dataStore;
+		private readonly Spinner _spinner;
 
 		public ImportDialog(List<Server> servers)
 		{
@@ -27,9 +31,27 @@ namespace BuildDependency.Dialogs
 			_serversCombo = new ComboBox();
 			_serversCombo.SelectedIndexChanged += OnServerChanged;
 			_serversCombo.DataStore = servers;
-			_serversCombo.SelectedIndex = 0;
+			_projectCombo = new ComboBox();
+			_projectCombo.SelectedIndexChanged += OnProjectChanged;
+			_projectCombo.DataStore = _model.Projects;
+			_configCombo = new ComboBox();
+			_configCombo.SelectedIndexChanged += OnConfigChanged;
+			_windows = new CheckBox { Text = "Windows", Checked = true };
+			_linux32 = new CheckBox { Text = "Linux 32-bit", Checked = true };
+			_linux64 = new CheckBox { Text = "Linux 64-bit", Checked = true };
+			_spinner = new Spinner { Size = new Size(30, 30), Visible = false };
+			var importButton = new Button { Text = "Import" };
+			importButton.Click += (sender, e) =>
+			{
+				Result = true;
+				Close();
+			};
+			var cancelButton = new Button { Text = "Cancel" };
+			cancelButton.Click += (sender, e) => Close();
+
 			_gridView = new GridView();
-			_gridView.DataStore = new SelectableFilterCollection<ArtifactTemplate>(_gridView);
+			_dataStore = new SelectableFilterCollection<ArtifactTemplate>(_gridView);
+			_gridView.DataStore = _dataStore;
 
 			_gridView.Columns.Add(new GridColumn
 				{
@@ -52,23 +74,6 @@ namespace BuildDependency.Dialogs
 			_gridView.GridLines = GridLines.Both;
 			_gridView.ShowHeader = true;
 			_gridView.Height = 300;
-			_projectCombo = new ComboBox();
-			_projectCombo.SelectedIndexChanged += OnProjectChanged;
-			_projectCombo.DataStore = _model.Projects;
-			_projectCombo.SelectedIndex = 0;
-			_configCombo = new ComboBox();
-			_configCombo.SelectedIndexChanged += OnConfigChanged;
-			_windows = new CheckBox { Text = "Windows", Checked = true };
-			_linux32 = new CheckBox { Text = "Linux 32-bit", Checked = true };
-			_linux64 = new CheckBox { Text = "Linux 64-bit", Checked = true };
-			var importButton = new Button { Text = "Import" };
-			importButton.Click += (sender, e) =>
-			{
-				Result = true;
-				Close();
-			};
-			var cancelButton = new Button { Text = "Cancel" };
-			cancelButton.Click += (sender, e) => Close();
 
 			Title = "Import dependencies from TeamCity";
 			Width = 600;
@@ -106,7 +111,7 @@ namespace BuildDependency.Dialogs
 						{
 							Orientation = Orientation.Horizontal,
 							Spacing = 5,
-							Items = { null, importButton, cancelButton }
+							Items = { _spinner, null, importButton, cancelButton }
 						})
 				}
 			};
@@ -115,39 +120,70 @@ namespace BuildDependency.Dialogs
 
 			DefaultButton = importButton;
 			AbortButton = cancelButton;
-		}
 
-		private void OnServerChanged(object sender, EventArgs e)
-		{
-			_model.TeamCity = _serversCombo.SelectedValue as TeamCityApi;
-			var projects = _model.Projects;
-			if (projects == null)
-				return;
-
-			_projectCombo.DataStore = projects;
+			_serversCombo.SelectedIndex = 0;
 			_projectCombo.SelectedIndex = 0;
-			OnProjectChanged(this, EventArgs.Empty);
 		}
 
-		private void OnProjectChanged(object sender, EventArgs e)
+		private async void OnServerChanged(object sender, EventArgs e)
 		{
-			var project = _projectCombo.SelectedValue as Project;
-			if (project == null)
-				return;
-			_configCombo.DataStore = _model.GetConfigurationsForProject(project.Id);
-			_configCombo.SelectedIndex = 0;
-			OnConfigChanged(this, EventArgs.Empty);
+			using (new WaitSpinner(_spinner))
+			{
+				_model.TeamCity = _serversCombo.SelectedValue as TeamCityApi;
+				await Task.Run(() =>
+					{
+						var projects = _model.Projects;
+						if (projects == null)
+							return;
+
+						_projectCombo.DataStore = projects;
+					});
+				_projectCombo.SelectedIndex = 0;
+			}
 		}
 
-		private void OnConfigChanged(object sender, EventArgs e)
+		private async void OnProjectChanged(object sender, EventArgs e)
 		{
-			var config = _configCombo.DataStore as BuildType;
-			if (config == null)
-				return;
+			using (new WaitSpinner(_spinner))
+			{
+				var project = _projectCombo.SelectedValue as Project;
+						if (project == null)
+							return;
+				await Task.Run(() =>
+					{
+						_configCombo.DataStore = _model.GetConfigurationsForProject(project.Id);
+					});
+				_configCombo.SelectedIndex = 0;
+			}
+		}
 
-			SelectedBuildConfig = config.Id;
+		private async void OnConfigChanged(object sender, EventArgs e)
+		{
+			using (new WaitSpinner(_spinner))
+			{
+				var config = _configCombo.SelectedValue as BuildType;
+				if (config == null)
+					return;
 
-			_model.LoadArtifacts(config.Id);
+				SelectedBuildConfig = config.Id;
+
+				await Task.Run(() =>
+					{
+						_dataStore.Clear();
+						_model.LoadArtifacts(config.Id);
+						var dependencies = _model.TeamCity.GetArtifactDependencies(config.Id);
+						if (dependencies == null)
+							return;
+
+						foreach (var dep in dependencies)
+						{
+							if (dep == null)
+								continue;
+							var artifact = new ArtifactTemplate(_model.TeamCity, new ArtifactProperties(dep.Properties));
+							_dataStore.Add(artifact);
+						}
+					});
+			}
 		}
 
 		public string SelectedBuildConfig { get; private set; }

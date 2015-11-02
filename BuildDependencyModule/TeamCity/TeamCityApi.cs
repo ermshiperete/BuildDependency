@@ -8,7 +8,6 @@ using BuildDependency.RestClasses;
 using System.Threading.Tasks;
 using System.Net;
 using BuildDependency.Artifacts;
-using GLib;
 
 namespace BuildDependency.TeamCity
 {
@@ -32,14 +31,14 @@ namespace BuildDependency.TeamCity
 			get { return string.Format("{0}/guestAuth/repository", Url); }
 		}
 
-		private T Execute<T>(string baseUrl, RestRequest request, bool throwException = true) where T : new()
+		private async Task<T> Execute<T>(string baseUrl, RestRequest request, bool throwException = true) where T : new()
 		{
 			var client = new RestClient();
 			client.BaseUrl = new Uri(baseUrl);
 			IRestResponse<T> response = null;
 //			try
 //			{
-			response = client.Execute<T>(request);
+			response = await client.ExecuteGetTaskAsync<T>(request);
 //			}
 //			catch (Exception e)
 //			{
@@ -63,14 +62,14 @@ namespace BuildDependency.TeamCity
 			return response.Data;
 		}
 
-		private T ExecuteApi<T>(RestRequest request, bool throwException = true) where T : new()
+		private async Task<T> ExecuteApi<T>(RestRequest request, bool throwException = true) where T : new()
 		{
-			return Execute<T>(BaseUrl, request, throwException);
+			return await Execute<T>(BaseUrl, request, throwException);
 		}
 
-		private T ExecuteRepo<T>(RestRequest request, bool throwException = true) where T : new()
+		private async Task<T> ExecuteRepo<T>(RestRequest request, bool throwException = true) where T : new()
 		{
-			return Execute<T>(BaseRepoUrl, request, throwException);
+			return await Execute<T>(BaseRepoUrl, request, throwException);
 		}
 
 		public List<Project> GetAllProjects()
@@ -84,7 +83,7 @@ namespace BuildDependency.TeamCity
 			request.Resource = "/projects";
 			request.RootElement = "projects";
 
-			var response = ExecuteApi<Projects>(request);
+			var response = await ExecuteApi<Projects>(request);
 			return response != null ? response.Project : null;
 		}
 
@@ -99,7 +98,7 @@ namespace BuildDependency.TeamCity
 			request.Resource = string.Format("/buildTypes");
 			request.RootElement = "buildType";
 
-			return ExecuteApi<List<BuildType>>(request);
+			return await ExecuteApi<List<BuildType>>(request);
 		}
 
 		public List<BuildType> GetBuildTypesForProject(string projectId)
@@ -113,7 +112,7 @@ namespace BuildDependency.TeamCity
 			request.Resource = string.Format("/projects/id:{0}/buildTypes", projectId);
 			request.RootElement = "buildType";
 
-			return ExecuteApi<List<BuildType>>(request);
+			return await ExecuteApi<List<BuildType>>(request);
 		}
 
 		public List<ArtifactDependency> GetArtifactDependencies(string buildTypeId)
@@ -127,7 +126,7 @@ namespace BuildDependency.TeamCity
 			request.Resource = string.Format("/buildTypes/id:{0}/artifact-dependencies", buildTypeId);
 			request.RootElement = "artifact-dependency";
 
-			return ExecuteApi<List<ArtifactDependency>>(request, false);
+			return await ExecuteApi<List<ArtifactDependency>>(request, false);
 		}
 
 		public List<Artifact> GetArtifacts(ArtifactTemplate template)
@@ -141,7 +140,7 @@ namespace BuildDependency.TeamCity
 			request.Resource = string.Format("/download/{0}/{1}/teamcity-ivy.xml", template.Config.Id, template.RevisionValue);
 			request.RootElement = "publications";
 
-			var artifacts = ExecuteRepo<List<Artifact>>(request, false) ?? new List<Artifact>();
+			var artifacts = await ExecuteRepo<List<Artifact>>(request, false) ?? new List<Artifact>();
 			return artifacts;
 		}
 
@@ -151,12 +150,17 @@ namespace BuildDependency.TeamCity
 			{
 				if (_buildTypes == null)
 				{
-					_buildTypes = new Dictionary<string, BuildType>();
-					foreach (var buildType in GetBuildTypes())
-						_buildTypes.Add(buildType.Id, buildType);
+					FillBuildTypesDict();
 				}
 				return _buildTypes;
 			}
+		}
+
+		private async void FillBuildTypesDict()
+		{
+			_buildTypes = new Dictionary<string, BuildType>();
+			foreach (var buildType in await GetBuildTypesAsync())
+				_buildTypes.Add(buildType.Id, buildType);
 		}
 
 		public Dictionary<string, Project> Projects
