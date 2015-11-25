@@ -3,6 +3,7 @@
 using System;
 using BuildDependency.Artifacts;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Framework;
 
 namespace BuildDependency.Tools
 {
@@ -33,6 +34,14 @@ namespace BuildDependency.Tools
 			}
 		}
 
+
+		public void LogMessage(MessageImportance importance, string message, params object[] messageArgs)
+		{
+			lock (_taskLoggingHelper)
+			{
+				_taskLoggingHelper.LogMessage(importance, message, messageArgs);
+			}
+		}
 		#endregion
 	}
 }

@@ -3,7 +3,6 @@
 using System;
 using System.Linq;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using BuildDependency.Artifacts;
 using BuildDependency.Tools;
 using System.Threading.Tasks;
@@ -32,6 +31,11 @@ namespace BuildDependency
 				{
 					Console.WriteLine(message, messageArgs);
 				}
+			}
+
+			public void LogMessage(MessageImportance importance, string message, params object[] messageArgs)
+			{
+				LogMessage(message, messageArgs);
 			}
 		}
 
