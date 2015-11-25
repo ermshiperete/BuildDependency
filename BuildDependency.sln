@@ -11,6 +11,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildDependencyModule", "Bu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildDependencyTestApp", "BuildDependencyTestApp\BuildDependencyTestApp.csproj", "{33F48153-DB2B-4D64-8A1A-497FC40388D1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1DAB2CBF-8E00-4825-BAC1-46881619C513}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -35,5 +40,7 @@ Global
 		{D38A55EA-715A-4006-98D2-06CB1F8C67C6}.Release|x86.Build.0 = Release|x86
 		{FC592AFA-2172-45AA-B6EC-16D40D699AF0}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{FC592AFA-2172-45AA-B6EC-16D40D699AF0}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 EndGlobal

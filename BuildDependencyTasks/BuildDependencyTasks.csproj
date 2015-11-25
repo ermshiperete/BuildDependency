@@ -137,14 +137,16 @@
     <None Include="NuGetAssets\BuildDependencyTasks.targets" />
   </ItemGroup>
   <Target Name="AfterBuild">
+    <PropertyGroup>
+      <Runtime Condition="'$(OS)'=='Unix'">mono</Runtime>
+    </PropertyGroup>
     <ItemGroup>
       <FilesToDelete Include="$(SolutionDir)NuGetBuild\**\*.*" />
-      <FilesToCopy Include="$(TargetDir)*.*" />
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />
     <MakeDir Directories="$(SolutionDir)NuGetBuild" />
+    <Exec Command="$(Runtime) &quot;$(SolutionDir)packages/ILRepack.2.0.8/tools/ILRepack.exe&quot;  /allowDup /out:&quot;$(SolutionDir)NuGetBuild\$(TargetFileName)&quot; &quot;$(TargetDir)BuildDependencyTasks.dll&quot; &quot;$(TargetDir)ICSharpCode.SharpZipLib.dll&quot; &quot;$(TargetDir)RestSharp.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot; /ndebug /internalize" />
     <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).nuspec" DestinationFolder="$(SolutionDir)NuGetBuild" />
-    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(SolutionDir)NuGetBuild" />
     <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).targets" DestinationFolder="$(SolutionDir)NuGetBuild\build" />
     <PepitaPackage.CreatePackageTask NuGetBuildDirectory="$(SolutionDir)NuGetBuild" MetadataAssembly="$(TargetPath)" />
   </Target>
