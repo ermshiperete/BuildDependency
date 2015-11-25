@@ -10,8 +10,7 @@
     <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
     <projectUrl>http://github.com/ermshiperete/BuildDependency</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Provides a small msbuild task named "dependencies" that allows to download
-    dependencies from a TeamCity server.</description>
+    <description>Provides a small msbuild task named "dependencies" that allows to download dependencies from a TeamCity server.</description>
     <language>en-US</language>
     <tags>msbuild, dependencies, teamcity</tags>
     <dependencies>
