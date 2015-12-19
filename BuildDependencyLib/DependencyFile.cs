@@ -5,12 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using BuildDependency.Artifacts;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
-using System.Runtime.Serialization.Formatters;
-using System.Runtime.InteropServices;
-using BuildDependency.Artifacts;
-using System.Threading.Tasks;
 
 namespace BuildDependency
 {
@@ -42,6 +40,11 @@ namespace BuildDependency
 		public static List<ArtifactTemplate> LoadFile(string fileName)
 		{
 			return Instance.InternalLoadFile(fileName).Result;
+		}
+
+		public static async Task<List<ArtifactTemplate>> LoadFileAsync(string fileName)
+		{
+			return await Instance.InternalLoadFile(fileName);
 		}
 
 		private static void InternalSaveFile(string fileName, List<Server> servers, List<ArtifactTemplate> artifactTemplates)
@@ -108,6 +111,7 @@ namespace BuildDependency
 
 		private async Task<List<ArtifactTemplate>> InternalLoadFile(string fileName)
 		{
+			_servers.Clear();
 			var artifacts = new List<ArtifactTemplate>();
 			int lineNumber = 0;
 			ArtifactTemplate artifact = null;
@@ -129,7 +133,7 @@ namespace BuildDependency
 							var tc = parts[0];
 							var configId = parts[2];
 							var server = _servers[tc] as TeamCityApi;
-							var buildTypesTask = server.GetBuildTypesAsync();
+							var buildTypesTask = server.GetBuildTypesTask();
 							var projectsTask = server.GetAllProjectsAsync();
 							var buildTypes = await buildTypesTask;
 							var projects = await projectsTask;

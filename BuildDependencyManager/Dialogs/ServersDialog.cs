@@ -13,7 +13,6 @@ namespace BuildDependency.Manager.Dialogs
 		private readonly ComboBox _serverType;
 		private readonly TextBox _name;
 		private readonly TextBox _url;
-		private bool _inSelectedServerChanged;
 		private readonly List<Server> _servers;
 
 		public ServersDialog(List<Server> servers)
@@ -26,13 +25,8 @@ namespace BuildDependency.Manager.Dialogs
 			_serverType = new ComboBox();
 			_serverType.Items.Add("TeamCity");
 			_serverType.SelectedIndex = 0;
-			_serverType.SelectedIndexChanged += OnServerTypeChanged;
-
 			_name = new TextBox();
-			_name.TextChanged += OnNameChanged;
-
 			_url = new TextBox();
-			_url.TextChanged += OnUrlChanged;
 
 			_serversCombo = new ComboBox();
 			_serversCombo.SelectedIndexChanged += OnSelectedServerChanged;
@@ -40,11 +34,7 @@ namespace BuildDependency.Manager.Dialogs
 			_serversCombo.SelectedIndex = 0;
 
 			var okButton = new Button { Text = "OK" };
-			okButton.Click += (sender, e) =>
-			{
-				Result = true;
-				Close();
-			};
+			okButton.Click += OnOk;
 			var cancelButton = new Button { Text = "Cancel" };
 			cancelButton.Click += (sender, e) => Close();
 
@@ -79,46 +69,34 @@ namespace BuildDependency.Manager.Dialogs
 //				_serversCombo.SelectedIndex = 0;
 		}
 
-		private void OnUrlChanged (object sender, EventArgs e)
+		private void OnOk (object sender, EventArgs e)
 		{
-			var server = _serversCombo.SelectedValue as Server;
-			if (server != null)
-				server.Url = _url.Text;
-		}
-
-		private void OnNameChanged(object sender, EventArgs e)
-		{
-			if (_inSelectedServerChanged)
-				return;
-			_inSelectedServerChanged = true;
-			var server = _serversCombo.SelectedValue as Server;
-			if (server != null)
-			{
-				var selectedIndex = _serversCombo.SelectedIndex;
-				_servers.Remove(server);
-				server.Name = _name.Text;
-				_servers.Insert(selectedIndex, server);
-				_serversCombo.SelectedIndex = selectedIndex;
-			}
-
-			_inSelectedServerChanged = false;
-		}
-
-		private void OnServerTypeChanged(object sender, EventArgs e)
-		{
-		}
-
-		private void OnSelectedServerChanged(object sender, EventArgs e)
-		{
-			if (_inSelectedServerChanged)
-				return;
-			_inSelectedServerChanged = true;
 			var server = _serversCombo.SelectedValue as Server;
 			if (server == null || server is NullServer)
 			{
 				var selectedIndex = _serversCombo.SelectedIndex;
-				_servers.Insert(selectedIndex, Server.CreateServer(ServerType.TeamCity));
-				_serversCombo.SelectedIndex = selectedIndex;
+
+				server = Server.CreateServer((ServerType)Enum.Parse(typeof(ServerType), _serverType.SelectedKey));
+				server.Name = _name.Text;
+				var url = _url.Text;
+				Uri uri;
+				if (!string.IsNullOrEmpty(url) && !Uri.TryCreate(url, UriKind.Absolute, out uri))
+				{
+					url = "http://" + url;
+				}
+				server.Url = url;
+				_servers.Insert(selectedIndex, server);
+			}
+
+			Result = true;
+			Close();
+		}
+
+		private void OnSelectedServerChanged(object sender, EventArgs e)
+		{
+			var server = _serversCombo.SelectedValue as Server;
+			if (server == null || server is NullServer)
+			{
 				_serverType.SelectedIndex = 0;
 				_name.Text = string.Empty;
 				_url.Text = string.Empty;
@@ -129,7 +107,6 @@ namespace BuildDependency.Manager.Dialogs
 				_name.Text = server.Name;
 				_url.Text = server.Url;
 			}
-			_inSelectedServerChanged = false;
 		}
 
 		public List<Server> Servers

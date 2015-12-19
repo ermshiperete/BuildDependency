@@ -38,22 +38,48 @@ namespace BuildDependency.Manager.Dialogs
 
 		public AddOrEditArtifactDependencyDialog(bool isAddDialog, List<Server> servers)
 		{
+			_serversCombo = new ComboBox();
+			_projectCombo = new ComboBox();
+			_configCombo = new ComboBox();
+			_buildTagType = new ComboBox();
+			_buildTagEntry = new TextBox {
+				Visible = false
+			};
+			_rulesTextBox = new TextArea();
+			_windows = new CheckBox {
+				Text = "Windows",
+				Checked = true
+			};
+			_linux32 = new CheckBox {
+				Text = "Linux 32-bit",
+				Checked = true
+			};
+			_linux64 = new CheckBox {
+				Text = "Linux 64-bit",
+				Checked = true
+			};
+			_preview = new ListBox();
+			_spinner = new Spinner {
+				Size = new Size(20, 20),
+				Visible = true
+			};
+
+			Init(isAddDialog, servers);
+		}
+
+		private async void Init(bool isAddDialog, List<Server> servers)
+		{
 			_model = new ImportDialogModel();
 			Title = isAddDialog ? "Add New Artifact Dependency" : "Edit Artifact Dependency";
 			Width = 600;
 			Height = 600;
 			Resizable = true;
-
-			_serversCombo = new ComboBox();
 			_serversCombo.SelectedIndexChanged += OnServerChanged;
 			_serversCombo.DataStore = servers;
 			_serversCombo.SelectedIndex = 0;
-			_projectCombo = new ComboBox();
-			_projectCombo.DataStore = _model.Projects;
-			_projectCombo.SelectedIndexChanged += OnProjectChanged;
-			_configCombo = new ComboBox();
+			_projectCombo.DataStore = await _model.GetProjects();
+			_projectCombo.SelectedIndexChanged += OnProjectChangedInitial;
 			_configCombo.SelectedIndexChanged += OnConfigChanged;
-			_buildTagType = new ComboBox();
 			_buildTagType.Items.Add("Last successful build");
 			_buildTagType.Items.Add("Last pinned build");
 			_buildTagType.Items.Add("Last finished build");
@@ -61,81 +87,95 @@ namespace BuildDependency.Manager.Dialogs
 			_buildTagType.Items.Add("Last finished build with specified tag");
 			_buildTagType.SelectedIndex = 0;
 			_buildTagType.SelectedIndexChanged += OnArtifactSourceChanged;
-			_buildTagEntryLabel = new Label { Text = "Build tag:", TextAlignment = TextAlignment.Right, Visible = false };
-			_buildTagEntry = new TextBox { Visible = false };
-			_rulesTextBox = new TextArea();
+			_buildTagEntryLabel = new Label {
+				Text = "Build tag:",
+				TextAlignment = TextAlignment.Right,
+				Visible = false
+			};
 			_rulesTextBox.Height = 150;
 			//_rulesTextBox.HorizontalPlacement = HorizontalAlignment.Left;
 			_rulesTextBox.TextChanged += (sender, e) => UpdatePreview();
-			_windows = new CheckBox { Text = "Windows", Checked = true };
-			_linux32 = new CheckBox { Text = "Linux 32-bit", Checked = true };
-			_linux64 = new CheckBox { Text = "Linux 64-bit", Checked = true };
-			_preview = new ListBox();
 			_preview.Height = 150;
 			//_preview.HeightRequest = 200;
 			//_preview.HorizontalPlacement = WidgetPlacement.Start;
 			_preview.BackgroundColor = Colors.LightGrey;
-			var okButton = new Button { Text = "Save" };
+			var okButton = new Button {
+				Text = "Save"
+			};
 			okButton.Click += (sender, e) =>
 			{
 				Result = true;
 				Close();
 			};
-			var cancelButton = new Button { Text = "Cancel" };
+			var cancelButton = new Button {
+				Text = "Cancel"
+			};
 			cancelButton.Click += (sender, e) => Close();
-			_spinner = new Spinner { Size = new Size(20, 20), Visible = false };
-
-			_table = new TableLayout
-			{
+			_table = new TableLayout {
 				Padding = new Padding(10, 10, 10, 0),
 				Spacing = new Size(5, 5),
-				Rows =
-				{
+				Rows =  {
 					new TableRow("Server:", _serversCombo),
-					new TableRow("Depend on:", new StackLayout()
-						{
-							Orientation = Orientation.Vertical,
-							HorizontalContentAlignment = HorizontalAlignment.Stretch,
-							Items = { _projectCombo, _configCombo }
-						}),
+					new TableRow("Depend on:", new StackLayout() {
+						Orientation = Orientation.Vertical,
+						HorizontalContentAlignment = HorizontalAlignment.Stretch,
+						Items =  {
+							_projectCombo,
+							_configCombo
+						}
+					}),
 					new TableRow("Get Artifacts from:", _buildTagType),
 					new TableRow(_buildTagEntryLabel, _buildTagEntry),
-					new TableRow(new Label { Text = "Artifact rules:", VerticalAlignment = VerticalAlignment.Top },
-						new TableLayout
-						{
-							Rows =
-							{
-								new TableRow(_rulesTextBox) { ScaleHeight = true },
-								new TableRow(new Label { Text = "Newline-delimited set or rules in the form of\n[+:|-:]SourcePath[!ArchivePath][=>DestinationPath]" })
-							}
-						}) { ScaleHeight = true },
-					new TableRow("Condition:", new StackLayout
-						{
-							Spacing = 5,
-							Orientation = Orientation.Horizontal,
-							Items = { _windows, _linux32, _linux64 }
-						}),
+					new TableRow(new Label {
+						Text = "Artifact rules:",
+						VerticalAlignment = VerticalAlignment.Top
+					}, new TableLayout {
+						Rows =  {
+							new TableRow(_rulesTextBox) {
+								ScaleHeight = true
+							},
+							new TableRow(new Label {
+								Text = "Newline-delimited set or rules in the form of\n[+:|-:]SourcePath[!ArchivePath][=>DestinationPath]"
+							})
+						}
+					}) {
+						ScaleHeight = true
+					},
+					new TableRow("Condition:", new StackLayout {
+						Spacing = 5,
+						Orientation = Orientation.Horizontal,
+						Items =  {
+							_windows,
+							_linux32,
+							_linux64
+						}
+					}),
 					new TableRow("Preview:", _preview),
-					new TableRow(new StackLayout
-						{
-							Orientation = Orientation.Horizontal,
-							Spacing = 5,
-
-							Items = { _spinner, null }
-						}, new StackLayout
-						{
-							Orientation = Orientation.Horizontal,
-							Spacing = 5,
-
-							Items = { null, okButton, cancelButton }
-						})
+					new TableRow(new StackLayout {
+						Orientation = Orientation.Horizontal,
+						Spacing = 5,
+						Items =  {
+							_spinner,
+							null
+						}
+					}, new StackLayout {
+						Orientation = Orientation.Horizontal,
+						Spacing = 5,
+						Items =  {
+							null,
+							okButton,
+							cancelButton
+						}
+					})
 				}
 			};
-
 			DefaultButton = okButton;
 			AbortButton = cancelButton;
-
 			Content = _table;
+
+			// This can happen because we run async
+			if (_artifactToLoad != null)
+				LoadArtifact(_artifactToLoad);
 		}
 
 		public AddOrEditArtifactDependencyDialog(List<Server> servers, ArtifactTemplate artifact)
@@ -148,7 +188,7 @@ namespace BuildDependency.Manager.Dialogs
 		{
 			base.OnShown(e);
 			if (_artifactToLoad != null)
-				LoadArtifact(_artifactToLoad);
+				_spinner.Visible = false;
 		}
 
 		private void OnServerChanged(object sender, EventArgs e)
@@ -183,6 +223,7 @@ namespace BuildDependency.Manager.Dialogs
 					break;
 			}
 			_buildTagType.SelectedIndex = (int)revisionName;
+			_spinner.Visible = false;
 		}
 
 		private void OnArtifactSourceChanged(object sender, EventArgs e)
@@ -217,16 +258,30 @@ namespace BuildDependency.Manager.Dialogs
 			_currentBuildSourceIndex = combobox.SelectedIndex;
 		}
 
+		private async void OnProjectChangedInitial(object sender, EventArgs e)
+		{
+			using (new WaitSpinner(_spinner))
+			{
+				var project = _projectCombo.SelectedValue as Project;
+
+				_configCombo.DataStore = await _model.GetConfigurationsForProjectTask(project.Id);
+				if (_artifactToLoad != null)
+					_configCombo.SelectedValue = _artifactToLoad.Config;
+				else
+					_configCombo.SelectedIndex = 0;
+
+				_projectCombo.SelectedIndexChanged -= OnProjectChangedInitial;
+				_projectCombo.SelectedIndexChanged += OnProjectChanged;
+			}
+		}
+
 		private async void OnProjectChanged(object sender, EventArgs e)
 		{
 			using (new WaitSpinner(_spinner))
 			{
 				var project = _projectCombo.SelectedValue as Project;
 
-				await Task.Run(() =>
-					{
-						_configCombo.DataStore = _model.GetConfigurationsForProject(project.Id);
-					});
+				_configCombo.DataStore = await _model.GetConfigurationsForProjectTask(project.Id);
 				_configCombo.SelectedIndex = 0;
 			}
 		}

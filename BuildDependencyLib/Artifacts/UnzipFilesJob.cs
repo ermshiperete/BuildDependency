@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using ICSharpCode.SharpZipLib.Zip;
 using BuildDependency.Tools;
 using ICSharpCode.SharpZipLib.Core;
+using System.Threading.Tasks;
 
 namespace BuildDependency.Artifacts
 {
@@ -41,7 +42,7 @@ namespace BuildDependency.Artifacts
 
 		public Conditions Conditions { get; private set; }
 
-		public bool Execute(ILog log, string workDir)
+		public async Task<bool> Execute(ILog log, string workDir)
 		{
 			if (!ConditionHelper.IsTrue(Conditions))
 				return true;

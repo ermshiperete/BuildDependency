@@ -14,28 +14,20 @@ namespace BuildDependency.Manager.Dialogs
 
 		public List<ArtifactProperties> Artifacts { get; private set; }
 
-		public List<Project> Projects
+		public async Task<List<Project>> GetProjects()
 		{
-			get
-			{
-				if (TeamCity == null)
-					return null;
+			if (TeamCity == null)
+				return null;
 
-				var task = Task.Run(() =>
-					{
-						var allProjects = TeamCity.GetAllProjects();
-						if (allProjects != null)
-							allProjects.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
-						return allProjects;
-					});
-				task.Wait();
-				return task.Result;
-			}
+			var allProjects = await TeamCity.GetAllProjectsAsync();
+			if (allProjects != null)
+				allProjects.Sort((x, y) => string.Compare(x.Name, y.Name, StringComparison.OrdinalIgnoreCase));
+			return allProjects;
 		}
 
-		public List<BuildType> GetConfigurationsForProject(string projectId)
+		public Task<List<BuildType>> GetConfigurationsForProjectTask(string projectId)
 		{
-			return TeamCity.GetBuildTypesForProject(projectId);
+			return TeamCity.GetBuildTypesForProjectTask(projectId);
 		}
 
 		public async Task LoadArtifacts(string configId)

@@ -117,33 +117,43 @@ namespace BuildDependency.Tasks
 
 			var jobs = BuildDependency.JobsFile.ReadJobsFile(JobsFile);
 
+			bool retVal = true;
 			if (RunAsync)
 			{
-				Parallel.ForEach(jobs.OfType<DownloadFileJob>(), job =>
-					{
-						job.Execute(logHelper, WorkingDir);
-					});
-				Parallel.ForEach(jobs.OfType<UnzipFilesJob>(), job =>
-					{
-						job.Execute(logHelper, WorkingDir);
-					});
+				retVal = ExecuteAsync(jobs, logHelper).Result;
 			}
 			else
 			{
 				foreach (var job in jobs.OfType<DownloadFileJob>())
 				{
-					job.Execute(logHelper, WorkingDir);
+					retVal &= job.Execute(logHelper, WorkingDir).Result;
 				}
 				foreach (var job in jobs.OfType<UnzipFilesJob>())
 				{
-					job.Execute(logHelper, WorkingDir);
+					retVal &= job.Execute(logHelper, WorkingDir).Result;
 				}
 			}
 
 			if (UseDependencyFile && !KeepJobsFile)
 				File.Delete(JobsFile);
 
-			return true;
+			return retVal;
+		}
+
+		private async Task<bool> ExecuteAsync(List<IJob> jobs, ILog logHelper)
+		{
+			var retVal = true;
+			var tasks = jobs.OfType<DownloadFileJob>().Select(job => job.Execute(logHelper, WorkingDir)).ToArray();
+			foreach (var task in tasks)
+			{
+				retVal &= await task;
+			}
+			tasks = jobs.OfType<UnzipFilesJob>().Select(job => job.Execute(logHelper, WorkingDir)).ToArray();
+			foreach (var task in tasks)
+			{
+				retVal &= await task;
+			}
+			return retVal;
 		}
 	}
 }

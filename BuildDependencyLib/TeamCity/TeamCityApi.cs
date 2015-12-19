@@ -15,6 +15,7 @@ namespace BuildDependency.TeamCity
 	{
 		private Dictionary<string, BuildType> _buildTypes;
 		private Dictionary<string, Project> _projects;
+		private Task<List<BuildType>> _buildTypeTask;
 
 		public TeamCityApi()
 			: base(ServerType.TeamCity)
@@ -29,6 +30,23 @@ namespace BuildDependency.TeamCity
 		public string BaseRepoUrl
 		{
 			get { return string.Format("{0}/guestAuth/repository", Url); }
+		}
+
+		public override string Url
+		{
+			get { return base.Url; }
+			set
+			{
+				base.Url = value;
+				if (string.IsNullOrEmpty(value))
+					return;
+
+				var request = new RestRequest();
+				request.Resource = string.Format("/buildTypes");
+				request.RootElement = "buildType";
+
+				_buildTypeTask = ExecuteApi<List<BuildType>>(request);
+			}
 		}
 
 		private async Task<T> Execute<T>(string baseUrl, RestRequest request, bool throwException = true) where T : new()
@@ -89,30 +107,21 @@ namespace BuildDependency.TeamCity
 
 		public List<BuildType> GetBuildTypes()
 		{
-			return GetBuildTypesAsync().Result;
+			return GetBuildTypesTask().Result;
 		}
 
-		public async Task<List<BuildType>> GetBuildTypesAsync()
+		public Task<List<BuildType>> GetBuildTypesTask()
 		{
-			var request = new RestRequest();
-			request.Resource = string.Format("/buildTypes");
-			request.RootElement = "buildType";
-
-			return await ExecuteApi<List<BuildType>>(request);
+			return _buildTypeTask;
 		}
 
-		public List<BuildType> GetBuildTypesForProject(string projectId)
-		{
-			return GetBuildTypesForProjectAsync(projectId).Result;
-		}
-
-		public async Task<List<BuildType>> GetBuildTypesForProjectAsync(string projectId)
+		public Task<List<BuildType>> GetBuildTypesForProjectTask(string projectId)
 		{
 			var request = new RestRequest();
 			request.Resource = string.Format("/projects/id:{0}/buildTypes", projectId);
 			request.RootElement = "buildType";
 
-			return await ExecuteApi<List<BuildType>>(request);
+			return ExecuteApi<List<BuildType>>(request);
 		}
 
 		public List<ArtifactDependency> GetArtifactDependencies(string buildTypeId)
@@ -159,7 +168,7 @@ namespace BuildDependency.TeamCity
 		private async void FillBuildTypesDict()
 		{
 			_buildTypes = new Dictionary<string, BuildType>();
-			foreach (var buildType in await GetBuildTypesAsync())
+			foreach (var buildType in await _buildTypeTask)
 				_buildTypes.Add(buildType.Id, buildType);
 		}
 

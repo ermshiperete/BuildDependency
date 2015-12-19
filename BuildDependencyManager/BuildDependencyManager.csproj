@@ -43,6 +43,9 @@
     <Reference Include="Eto.Wpf">
       <HintPath>..\packages\Eto.Platform.Wpf.2.1.0\lib\net45\Eto.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="Eto.Gtk3">
+      <HintPath>..\packages\Eto.Platform.Gtk3.2.1.0\lib\net45\Eto.Gtk3.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />

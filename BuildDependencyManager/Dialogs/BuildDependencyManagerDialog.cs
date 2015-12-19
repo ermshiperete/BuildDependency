@@ -176,10 +176,17 @@ namespace BuildDependency.Manager.Dialogs
 					if (dlg.ShowDialog(this) == DialogResult.Ok)
 					{
 						fileName = dlg.FileName;
-						await Task.Run(() => { _dataStore.AddRange(DependencyFile.LoadFile(fileName)); });
+
+						await LoadFileAsync(fileName);
 					}
 				}
 			}
+		}
+
+		private async Task LoadFileAsync(string filename)
+		{
+			_dataStore.Clear();
+			_dataStore.AddRange(await DependencyFile.LoadFileAsync(filename));
 		}
 
 		private async void OnFileSave(object sender, EventArgs e)
@@ -222,9 +229,9 @@ namespace BuildDependency.Manager.Dialogs
 						var server = dlg.Server as TeamCityApi;
 						if (server == null)
 							return;
-						await Task.Run(() =>
+						await Task.Run(async () =>
 							{
-								foreach (var dep in server.GetArtifactDependencies(configId))
+								foreach (var dep in await server.GetArtifactDependenciesAsync(configId))
 								{
 									if (dep == null)
 										continue;

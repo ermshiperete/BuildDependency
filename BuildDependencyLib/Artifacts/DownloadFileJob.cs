@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.IO;
 using System.Net;
 using BuildDependency.Tools;
+using System.Threading.Tasks;
 
 namespace BuildDependency.Artifacts
 {
@@ -42,7 +43,7 @@ namespace BuildDependency.Artifacts
 
 		public Conditions Conditions { get; private set; }
 
-		public bool Execute(ILog log, string workDir)
+		public async Task<bool> Execute(ILog log, string workDir)
 		{
 			if (!ConditionHelper.IsTrue(Conditions))
 				return true;
@@ -85,7 +86,7 @@ namespace BuildDependency.Artifacts
 				}
 				if (File.Exists(tmpTargetFile))
 				{
-				// Interrupted download
+					// Interrupted download
 					var fi = new FileInfo(tmpTargetFile);
 					tmpFileLength = fi.Length;
 					request.AddRange(tmpFileLength);
@@ -94,7 +95,8 @@ namespace BuildDependency.Artifacts
 
 				// Send the request to the server and retrieve the
 				// WebResponse object
-				response = (HttpWebResponse)request.GetResponse();
+				response = (HttpWebResponse) await Task.Factory.FromAsync<WebResponse>(
+					request.BeginGetResponse, request.EndGetResponse, null);
 
 				// Once the WebResponse object has been retrieved,
 				// get the stream object associated with the response's data
