@@ -31,19 +31,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="Xwt, Version=0.1.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
-      <HintPath>..\libs\Xwt.dll</HintPath>
-    </Reference>
-    <Reference Include="Xwt.Gtk, Version=0.1.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" Condition="'$(OS)'!='Windows_NT'">
-      <Package>monodevelop</Package>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" Condition="'$(OS)'!='Windows_NT'" />
-    <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" Condition="'$(OS)'!='Windows_NT'" />
-    <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" Condition="'$(OS)'!='Windows_NT'" />
-    <Reference Include="Xwt.WPF" Condition="'$(OS)'=='Windows_NT'">
-      <HintPath>..\libs\Xwt.WPF.dll</HintPath>
-    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\ICSharpCode.SharpZipLib.dll.0.85.4.369\lib\net20\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
