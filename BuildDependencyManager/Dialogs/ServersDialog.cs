@@ -2,10 +2,10 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
-using Eto.Forms;
 using Eto.Drawing;
+using Eto.Forms;
 
-namespace BuildDependency.Dialogs
+namespace BuildDependency.Manager.Dialogs
 {
 	public class ServersDialog: Dialog<bool>
 	{

@@ -5,7 +5,7 @@ using Eto.Forms;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
-namespace BuildDependency.Tools
+namespace BuildDependency.Manager.Tools
 {
 	public class WaitSpinner: IDisposable
 	{

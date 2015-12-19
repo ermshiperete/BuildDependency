@@ -4,7 +4,7 @@ using System;
 using BuildDependency.Artifacts;
 using Microsoft.Build.Utilities;
 
-namespace BuildDependency.Tools
+namespace BuildDependency.Tasks.Tools
 {
 	public class LogWrapper: ILog
 	{

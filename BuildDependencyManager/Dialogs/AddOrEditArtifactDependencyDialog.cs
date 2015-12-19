@@ -3,16 +3,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BuildDependency.Artifacts;
+using BuildDependency.Manager.Tools;
 using BuildDependency.RestClasses;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
 using Eto.Drawing;
 using Eto.Forms;
-using BuildDependency.Tools;
-using System.Threading.Tasks;
 
-namespace BuildDependency.Dialogs
+namespace BuildDependency.Manager.Dialogs
 {
 	public class AddOrEditArtifactDependencyDialog: Dialog<bool>
 	{

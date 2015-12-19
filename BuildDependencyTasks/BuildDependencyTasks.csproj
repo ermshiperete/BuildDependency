@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{3C10C2D6-138D-4DC7-9C6E-B42EAAC25E32}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>BuildDependency</RootNamespace>
+    <RootNamespace>BuildDependency.Tasks</RootNamespace>
     <AssemblyName>BuildDependencyTasks</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
@@ -43,91 +43,11 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Dependencies.cs" />
-    <Compile Include="..\BuildDependencyModule\JobsFile.cs">
-      <Link>JobsFile.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Artifacts\ArtifactRule.cs">
-      <Link>Artifacts\ArtifactRule.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Artifacts\DownloadFileJob.cs">
-      <Link>Artifacts\DownloadFileJob.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Artifacts\DownloadZipJob.cs">
-      <Link>Artifacts\DownloadZipJob.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Artifacts\IJob.cs">
-      <Link>Artifacts\IJob.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Artifacts\UnzipFilesJob.cs">
-      <Link>Artifacts\UnzipFilesJob.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\DependencyFile.cs">
-      <Link>DependencyFile.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Conditions.cs">
-      <Link>Conditions.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Server.cs">
-      <Link>Server.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\ServerType.cs">
-      <Link>ServerType.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\TeamCityApi.cs">
-      <Link>TeamCity\TeamCityApi.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\Artifact.cs">
-      <Link>TeamCity\RestClasses\Artifact.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\ArtifactDependency.cs">
-      <Link>TeamCity\RestClasses\ArtifactDependency.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\ArtifactProperties.cs">
-      <Link>TeamCity\RestClasses\ArtifactProperties.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\BuildTagType.cs">
-      <Link>TeamCity\RestClasses\BuildTagType.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\BuildType.cs">
-      <Link>TeamCity\RestClasses\BuildType.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\IvyModule.cs">
-      <Link>TeamCity\RestClasses\IvyModule.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\Project.cs">
-      <Link>TeamCity\RestClasses\Project.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\Projects.cs">
-      <Link>TeamCity\RestClasses\Projects.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\Properties.cs">
-      <Link>TeamCity\RestClasses\Properties.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\TeamCity\RestClasses\Property.cs">
-      <Link>TeamCity\RestClasses\Property.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Tools\FileHelper.cs">
-      <Link>Tools\FileHelper.cs</Link>
-    </Compile>
     <Compile Include="Tools\LogWrapper.cs" />
-    <Compile Include="..\BuildDependencyModule\Artifacts\ILog.cs">
-      <Link>Artifacts\ILog.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Tools\WildcardToRegex.cs">
-      <Link>Tools\WildcardToRegex.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Tools\ConditionHelper.cs">
-      <Link>Tools\ConditionHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\BuildDependencyModule\Artifacts\ArtifactTemplate.cs">
-      <Link>Artifacts\ArtifactTemplate.cs</Link>
-    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets" Condition="Exists('..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets')" />
   <ItemGroup>
-    <Folder Include="Artifacts\" />
-    <Folder Include="TeamCity\" />
     <Folder Include="Tools\" />
     <Folder Include="NuGetAssets\" />
   </ItemGroup>
@@ -148,4 +68,10 @@
     <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).targets" DestinationFolder="$(SolutionDir)NuGetBuild\build" />
     <PepitaPackage.CreatePackageTask NuGetBuildDirectory="$(SolutionDir)NuGetBuild" MetadataAssembly="$(TargetPath)" />
   </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\BuildDependencyLib\BuildDependencyLib.csproj">
+      <Project>{FBC44E4E-5F09-40E1-9E36-A35A499172E7}</Project>
+      <Name>BuildDependencyLib</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

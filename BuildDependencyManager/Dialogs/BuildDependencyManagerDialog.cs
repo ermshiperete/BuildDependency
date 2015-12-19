@@ -2,16 +2,16 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
-using Eto.Forms;
+using System.IO;
+using System.Threading.Tasks;
+using BuildDependency.Artifacts;
+using BuildDependency.Manager.Tools;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
-using BuildDependency.Artifacts;
-using System.IO;
 using Eto.Drawing;
-using BuildDependency.Tools;
-using System.Threading.Tasks;
+using Eto.Forms;
 
-namespace BuildDependency.Dialogs
+namespace BuildDependency.Manager.Dialogs
 {
 	public class BuildDependencyManagerDialog: Form
 	{

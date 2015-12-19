@@ -48,6 +48,10 @@
       <Project>{D38A55EA-715A-4006-98D2-06CB1F8C67C6}</Project>
       <Name>BuildDependencyManager</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BuildDependencyLib\BuildDependencyLib.csproj">
+      <Project>{FBC44E4E-5F09-40E1-9E36-A35A499172E7}</Project>
+      <Name>BuildDependencyLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Tools\" />

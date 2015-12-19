@@ -2,7 +2,7 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 
-namespace BuildDependency
+namespace BuildDependency.Manager
 {
 	public class NullServer: Server
 	{

@@ -1,15 +1,16 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
-using System.Linq;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using BuildDependency.Artifacts;
-using BuildDependency.Tools;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using BuildDependency.Artifacts;
+using BuildDependency.Tasks.Tools;
+using Microsoft.Build.Framework;
+using Task = System.Threading.Tasks.Task;
 
-namespace BuildDependency
+namespace BuildDependency.Tasks
 {
 	public class Dependencies: Microsoft.Build.Utilities.Task
 	{

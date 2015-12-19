@@ -7,9 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildDependencyTests", "Bui
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildDependencyTasks", "BuildDependencyTasks\BuildDependencyTasks.csproj", "{3C10C2D6-138D-4DC7-9C6E-B42EAAC25E32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildDependencyModule", "BuildDependencyModule\BuildDependencyModule.csproj", "{FC592AFA-2172-45AA-B6EC-16D40D699AF0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildDependencyTestApp", "BuildDependencyTestApp\BuildDependencyTestApp.csproj", "{33F48153-DB2B-4D64-8A1A-497FC40388D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildDependencyLib", "BuildDependencyLib\BuildDependencyLib.csproj", "{FBC44E4E-5F09-40E1-9E36-A35A499172E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,7 +33,9 @@ Global
 		{D38A55EA-715A-4006-98D2-06CB1F8C67C6}.Debug|x86.Build.0 = Debug|x86
 		{D38A55EA-715A-4006-98D2-06CB1F8C67C6}.Release|x86.ActiveCfg = Release|x86
 		{D38A55EA-715A-4006-98D2-06CB1F8C67C6}.Release|x86.Build.0 = Release|x86
-		{FC592AFA-2172-45AA-B6EC-16D40D699AF0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FC592AFA-2172-45AA-B6EC-16D40D699AF0}.Release|x86.ActiveCfg = Release|Any CPU
+		{FBC44E4E-5F09-40E1-9E36-A35A499172E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FBC44E4E-5F09-40E1-9E36-A35A499172E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{FBC44E4E-5F09-40E1-9E36-A35A499172E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{FBC44E4E-5F09-40E1-9E36-A35A499172E7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

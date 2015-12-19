@@ -3,10 +3,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FC592AFA-2172-45AA-B6EC-16D40D699AF0}</ProjectGuid>
-    <OutputType>Module</OutputType>
+    <ProjectGuid>{FBC44E4E-5F09-40E1-9E36-A35A499172E7}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <RootNamespace>BuildDependency</RootNamespace>
-    <AssemblyName>BuildDependencyModule</AssemblyName>
+    <AssemblyName>BuildDependencyLib</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -29,17 +29,32 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\packages\ICSharpCode.SharpZipLib.dll.0.85.4.369\lib\net20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="RestSharp">
-      <HintPath>..\packages\RestSharp.105.0.1\lib\net4\RestSharp.dll</HintPath>
+      <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Artifacts\ArtifactRule.cs" />
+    <Compile Include="Artifacts\ArtifactTemplate.cs" />
     <Compile Include="Artifacts\DownloadFileJob.cs" />
     <Compile Include="Artifacts\DownloadZipJob.cs" />
     <Compile Include="Artifacts\IJob.cs" />
+    <Compile Include="Artifacts\ILog.cs" />
     <Compile Include="Artifacts\UnzipFilesJob.cs" />
+    <Compile Include="Tools\ConditionHelper.cs" />
+    <Compile Include="Tools\DownloadFile.cs" />
+    <Compile Include="Tools\FileHelper.cs" />
+    <Compile Include="Tools\WildcardToRegex.cs" />
+    <Compile Include="Conditions.cs" />
+    <Compile Include="DependencyFile.cs" />
+    <Compile Include="JobsFile.cs" />
+    <Compile Include="Server.cs" />
+    <Compile Include="ServerType.cs" />
+    <Compile Include="TeamCity\TeamCityApi.cs" />
     <Compile Include="TeamCity\RestClasses\Artifact.cs" />
     <Compile Include="TeamCity\RestClasses\ArtifactDependency.cs" />
     <Compile Include="TeamCity\RestClasses\ArtifactProperties.cs" />
@@ -50,18 +65,6 @@
     <Compile Include="TeamCity\RestClasses\Projects.cs" />
     <Compile Include="TeamCity\RestClasses\Properties.cs" />
     <Compile Include="TeamCity\RestClasses\Property.cs" />
-    <Compile Include="TeamCity\TeamCityApi.cs" />
-    <Compile Include="Tools\DownloadFile.cs" />
-    <Compile Include="Tools\FileHelper.cs" />
-    <Compile Include="ArtifactTemplate.cs" />
-    <Compile Include="Conditions.cs" />
-    <Compile Include="DependencyFile.cs" />
-    <Compile Include="JobsFile.cs" />
-    <Compile Include="Server.cs" />
-    <Compile Include="ServerType.cs" />
-    <Compile Include="Artifacts\ILog.cs" />
-    <Compile Include="Tools\WildcardToRegex.cs" />
-    <Compile Include="Tools\ConditionHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
