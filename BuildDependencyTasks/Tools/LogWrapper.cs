@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 
 namespace BuildDependency.Tasks.Tools
 {
-	public class LogWrapper: ILog
+	public class LogWrapper: ILog, ILogMsBuild
 	{
 		private readonly TaskLoggingHelper _taskLoggingHelper;
 
