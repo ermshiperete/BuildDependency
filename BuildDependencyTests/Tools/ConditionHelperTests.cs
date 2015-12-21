@@ -42,7 +42,7 @@ namespace BuildDependencyTests.Tools
 		[TestCase(Conditions.Linux64, true, true, TestName = "Linux64")]
 		public void IsTrue(Conditions condition, bool? expectLinux, bool? expect64bit)
 		{
-			Assert.That(ConditionHelper.IsTrue(condition), Is.EqualTo(ExpectedResult(expectLinux, expect64bit)));
+			Assert.That(condition.AreTrue(), Is.EqualTo(ExpectedResult(expectLinux, expect64bit)));
 		}
 
 

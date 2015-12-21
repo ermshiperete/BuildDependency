@@ -7,7 +7,7 @@ namespace BuildDependency.Tools
 {
 	public static class ConditionHelper
 	{
-		public static bool IsTrue(Conditions condition)
+		public static bool AreTrue(this Conditions condition)
 		{
 			if (condition == Conditions.None)
 				return true;

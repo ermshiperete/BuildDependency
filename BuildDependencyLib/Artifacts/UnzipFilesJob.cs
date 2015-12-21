@@ -44,7 +44,7 @@ namespace BuildDependency.Artifacts
 
 		public async Task<bool> Execute(ILog log, string workDir)
 		{
-			if (!ConditionHelper.IsTrue(Conditions))
+			if (!Conditions.AreTrue())
 				return true;
 
 			var fileFilter = WildcardToRegex.FileFilter(SourcePath);
