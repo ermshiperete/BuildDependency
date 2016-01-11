@@ -38,6 +38,7 @@
     <Compile Include="Tools\WildcardToRegexTests.cs" />
     <Compile Include="Tools\ConditionHelperTests.cs" />
     <Compile Include="Tools\FileHelperTests.cs" />
+    <Compile Include="BuildTypeTests.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

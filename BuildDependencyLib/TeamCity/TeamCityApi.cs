@@ -146,7 +146,8 @@ namespace BuildDependency.TeamCity
 		public async Task<List<Artifact>> GetArtifactsAsync(ArtifactTemplate template)
 		{
 			var request = new RestRequest();
-			request.Resource = string.Format("/download/{0}/{1}/teamcity-ivy.xml", template.Config.Id, template.RevisionValue);
+			request.Resource = string.Format("/download/{0}/{1}/teamcity-ivy.xml",
+				template.Config.IdForArtifacts,template.RevisionValue);
 			request.RootElement = "publications";
 
 			var artifacts = await ExecuteRepo<List<Artifact>>(request, false) ?? new List<Artifact>();

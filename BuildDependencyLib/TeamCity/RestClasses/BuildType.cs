@@ -16,6 +16,20 @@ namespace BuildDependency.TeamCity.RestClasses
 		public string ProjectId { get; set; }
 		public string WebUrl { get; set; }
 
+		public string IdForArtifacts
+		{
+			get
+			{
+				const string buildTypeIdString = "?buildTypeId=";
+				if (string.IsNullOrEmpty(WebUrl))
+					return null;
+				var idIndex = WebUrl.IndexOf(buildTypeIdString, StringComparison.Ordinal);
+				if (idIndex < 0)
+					return null;
+				return WebUrl.Substring(idIndex + buildTypeIdString.Length);
+			}
+		}
+
 		public override bool Equals(object obj)
 		{
 			var other = obj as BuildType;
