@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("SIL International")]
+[assembly: AssemblyCopyright("(c) 2014-2016 Eberhard Beilharz")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
