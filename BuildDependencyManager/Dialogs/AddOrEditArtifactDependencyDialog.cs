@@ -260,48 +260,45 @@ namespace BuildDependency.Manager.Dialogs
 
 		private async void OnProjectChangedInitial(object sender, EventArgs e)
 		{
-			using (new WaitSpinner(_spinner))
-			{
-				var project = _projectCombo.SelectedValue as Project;
+			var project = _projectCombo.SelectedValue as Project;
+			if (project == null)
+				return;
 
-				_configCombo.DataStore = await _model.GetConfigurationsForProjectTask(project.Id);
-				if (_artifactToLoad != null)
-					_configCombo.SelectedValue = _artifactToLoad.Config;
-				else
-					_configCombo.SelectedIndex = 0;
+			_configCombo.DataStore = await _model.GetConfigurationsForProjectTask(project.Id);
+			if (_artifactToLoad != null)
+				_configCombo.SelectedValue = _artifactToLoad.Config;
+			else
+				_configCombo.SelectedIndex = 0;
 
-				_projectCombo.SelectedIndexChanged -= OnProjectChangedInitial;
-				_projectCombo.SelectedIndexChanged += OnProjectChanged;
-			}
+			_projectCombo.SelectedIndexChanged -= OnProjectChangedInitial;
+			_projectCombo.SelectedIndexChanged += OnProjectChanged;
 		}
 
 		private async void OnProjectChanged(object sender, EventArgs e)
 		{
-			using (new WaitSpinner(_spinner))
-			{
-				var project = _projectCombo.SelectedValue as Project;
+			var project = _projectCombo.SelectedValue as Project;
+			if (project == null)
+				return;
 
-				_configCombo.DataStore = await _model.GetConfigurationsForProjectTask(project.Id);
-				_configCombo.SelectedIndex = 0;
-			}
+			_configCombo.DataStore = await _model.GetConfigurationsForProjectTask(project.Id);
+			_configCombo.SelectedIndex = 0;
 		}
 
 		private async void OnConfigChanged(object sender, EventArgs e)
 		{
-			using (new WaitSpinner(_spinner))
+			// this updates _textView.Text
+			var config = _configCombo.SelectedValue as BuildType;
+			if (config == null)
+				return;
+			await _model.LoadArtifacts(config.Id);
+			var server = _serversCombo.SelectedValue as Server;
+			var tcServer = server as TeamCityApi;
+			if (tcServer != null)
 			{
-				// this updates _textView.Text
-				var config = _configCombo.SelectedValue as BuildType;
-				if (config == null)
+				var template = GetArtifact();
+				if (template == null)
 					return;
-				await _model.LoadArtifacts(config.Id);
-				var server = _serversCombo.SelectedValue as Server;
-				var tcServer = server as TeamCityApi;
-				if (tcServer != null)
-				{
-					var template = GetArtifact();
-					_artifacts = await tcServer.GetArtifactsAsync(template);
-				}
+				_artifacts = await tcServer.GetArtifactsAsync(template);
 			}
 			UpdatePreview();
 		}
