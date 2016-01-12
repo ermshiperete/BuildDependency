@@ -114,21 +114,21 @@ namespace BuildDependency.Tasks
 				if (depFile.LastWriteTimeUtc > jobsFile.LastWriteTimeUtc)
 					replaceJobsFile = true;
 			}
-			if (replaceJobsFile)
-			{
-				var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile);
-				BuildDependency.JobsFile.WriteJobsFile(JobsFile, artifactTemplates);
-			}
-
-			var jobs = BuildDependency.JobsFile.ReadJobsFile(JobsFile);
-
 			bool retVal = true;
 			if (RunAsync)
 			{
-				retVal = ExecuteAsync(jobs, logHelper).Result;
+				retVal = ExecuteAsync(replaceJobsFile, logHelper).Result;
 			}
 			else
 			{
+				if (replaceJobsFile)
+				{
+					var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile);
+					BuildDependency.JobsFile.WriteJobsFile(JobsFile, artifactTemplates);
+				}
+
+				var jobs = BuildDependency.JobsFile.ReadJobsFile(JobsFile);
+
 				foreach (var job in jobs.OfType<DownloadFileJob>())
 				{
 					retVal &= job.Execute(logHelper, WorkingDir).Result;
@@ -145,9 +145,17 @@ namespace BuildDependency.Tasks
 			return retVal;
 		}
 
-		private async Task<bool> ExecuteAsync(List<IJob> jobs, ILog logHelper)
+		private async Task<bool> ExecuteAsync(bool replaceJobsFile, ILog logHelper)
 		{
 			var retVal = true;
+			if (replaceJobsFile)
+			{
+				var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile);
+				await BuildDependency.JobsFile.WriteJobsFileAsync(JobsFile, artifactTemplates);
+			}
+
+			var jobs = BuildDependency.JobsFile.ReadJobsFile(JobsFile);
+
 			var tasks = jobs.OfType<DownloadFileJob>().Select(job => job.Execute(logHelper, WorkingDir)).ToArray();
 			foreach (var task in tasks)
 			{

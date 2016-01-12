@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using BuildDependency.TeamCity;
 using BuildDependency.Artifacts;
 
@@ -11,6 +12,11 @@ namespace BuildDependency
 	public static class JobsFile
 	{
 		public async static void WriteJobsFile(string fileName, List<ArtifactTemplate> artifactTemplates)
+		{
+			await WriteJobsFileAsync(fileName, artifactTemplates);
+		}
+
+		public async static Task WriteJobsFileAsync(string fileName, List<ArtifactTemplate> artifactTemplates)
 		{
 			using (var file = new StreamWriter(fileName))
 			{
