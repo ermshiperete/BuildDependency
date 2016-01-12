@@ -47,7 +47,10 @@ namespace BuildDependency.TeamCity.RestClasses
 
 		public override string ToString()
 		{
-			return string.Format("[BuildType: Id={0}, Name={1}, Href={2}, ProjectName={3}, ProjectId={4}, WebUrl={5}]", Id, Name, Href, ProjectName, ProjectId, WebUrl);
+			// WPF doesn't use Text (see https://github.com/picoe/Eto/issues/414), so we have to
+			// return the desired value from ToString as well as Text.
+			return Text;
+			//return string.Format("[BuildType: Id={0}, Name={1}, Href={2}, ProjectName={3}, ProjectId={4}, WebUrl={5}]", Id, Name, Href, ProjectName, ProjectId, WebUrl);
 		}
 
 		public string Text { get { return Name; }}

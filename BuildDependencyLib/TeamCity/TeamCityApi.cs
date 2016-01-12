@@ -70,7 +70,7 @@ namespace BuildDependency.TeamCity
 
 			if (response.ErrorException != null)
 			{
-				if (throwException && !(response.ErrorException is WebException))
+				if (throwException && !(response.ErrorException is WebException) && !(response.ErrorException is NullReferenceException))
 				{
 					const string message = "Error retrieving response.  Check inner details for more info.";
 					throw new ApplicationException(message, response.ErrorException);

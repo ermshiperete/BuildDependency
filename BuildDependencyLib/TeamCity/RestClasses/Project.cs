@@ -13,20 +13,31 @@ namespace BuildDependency.TeamCity.RestClasses
 
 		public override bool Equals(object obj)
 		{
-			var otherProj = obj as Project;
-			if (otherProj != null)
-				return Id == otherProj.Id;
-			return base.Equals(obj);
+			if (ReferenceEquals(null, obj))
+				return false;
+			if (ReferenceEquals(this, obj))
+				return true;
+			if (obj.GetType() != GetType())
+				return false;
+			return Equals((Project) obj);
+		}
+
+		private bool Equals(Project other)
+		{
+			return Id == other.Id;
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode() ^ Id.GetHashCode();
+			return Id.GetHashCode();
 		}
 
 		public override string ToString()
 		{
-			return string.Format("[Project: Name={0}, Id={1}, Href={2}]", Name, Id, Href);
+			// WPF doesn't use Text (see https://github.com/picoe/Eto/issues/414), so we have to
+			// return the desired value from ToString as well as Text.
+			return Text;
+			//return string.Format("[Project: Name={0}, Id={1}, Href={2}]", Name, Id, Href);
 		}
 
 		public string Text { get { return Name; }}
