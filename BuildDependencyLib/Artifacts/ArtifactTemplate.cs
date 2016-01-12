@@ -55,7 +55,8 @@ namespace BuildDependency.Artifacts
 		{
 			get
 			{
-				return string.Format("{0}/download/{1}/{2}", ((TeamCityApi)Server).BaseRepoUrl, Config.Id, RevisionValue);
+				return string.Format("{0}/download/{1}/{2}", ((TeamCityApi)Server).BaseRepoUrl,
+					Config.IdForArtifacts, RevisionValue);
 			}
 		}
 
