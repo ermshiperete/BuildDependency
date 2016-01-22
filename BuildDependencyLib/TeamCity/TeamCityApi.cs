@@ -24,7 +24,7 @@ namespace BuildDependency.TeamCity
 
 		private string BaseUrl
 		{
-			get { return string.Format("{0}/guestAuth/app/rest/7.0", Url); }
+			get { return string.Format("{0}/guestAuth/app/rest/latest", Url); }
 		}
 
 		public string BaseRepoUrl
