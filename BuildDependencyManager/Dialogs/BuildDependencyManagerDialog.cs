@@ -199,11 +199,11 @@ namespace BuildDependency.Manager.Dialogs
 
 				if (dlg.ShowDialog(this) == DialogResult.Ok)
 				{
+					var fileName = dlg.FileName;
 					using (new WaitSpinner(_spinner))
 					{
 						await Task.Run(() =>
 							{
-								var fileName = dlg.FileName;
 								if (string.IsNullOrEmpty(Path.GetExtension(fileName)))
 									fileName += ".dep";
 								DependencyFile.SaveFile(fileName, _servers, _artifacts);
