@@ -35,6 +35,12 @@
     <Reference Include="RestSharp">
       <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="BugsnagMono">
+      <HintPath>..\packages\BugsnagMono.1.2.0.0\lib\Net45\BugsnagMono.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -64,6 +70,8 @@
     <Compile Include="TeamCity\RestClasses\Projects.cs" />
     <Compile Include="TeamCity\RestClasses\Properties.cs" />
     <Compile Include="TeamCity\RestClasses\Property.cs" />
+    <Compile Include="Tools\ExceptionLogging.cs" />
+    <Compile Include="Tools\Platform.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\GitVersionTask.4.0.1\Build\portable-net+sl+win+wpa+wp\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.4.0.1\Build\portable-net+sl+win+wpa+wp\GitVersionTask.targets')" />

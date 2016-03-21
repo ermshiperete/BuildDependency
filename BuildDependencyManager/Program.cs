@@ -2,6 +2,7 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using BuildDependency.Manager.Dialogs;
+using BuildDependency.Tools;
 using Eto.Forms;
 
 namespace BuildDependency.Manager
@@ -11,8 +12,8 @@ namespace BuildDependency.Manager
 		[STAThread]
 		public static void Main(string[] args)
 		{
+			ExceptionLogging.Initialize("4bae82b8c647df7fea786dbaecb4b351");
 			new Application().Run(new BuildDependencyManagerDialog());
 		}
-
 	}
 }

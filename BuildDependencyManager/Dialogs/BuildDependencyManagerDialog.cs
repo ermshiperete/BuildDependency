@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014-2015 Eberhard Beilharz
+// Copyright (c) 2014-2016 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,7 @@ using BuildDependency.Artifacts;
 using BuildDependency.Manager.Tools;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
+using BuildDependency.Tools;
 using Eto.Drawing;
 using Eto.Forms;
 
@@ -23,6 +24,8 @@ namespace BuildDependency.Manager.Dialogs
 
 		public BuildDependencyManagerDialog()
 		{
+			Application.Instance.UnhandledException += OnUnhandledException;
+			Application.Instance.Name = "Build Dependency Manager";
 			_artifacts = new List<ArtifactTemplate>();
 			Title = "Build Dependency Manager";
 			ClientSize = new Size(700, 400);
@@ -109,6 +112,22 @@ namespace BuildDependency.Manager.Dialogs
 			Content = content;
 
 			OnFileNew(this, EventArgs.Empty);
+		}
+
+		private void OnUnhandledException (object sender, Eto.UnhandledExceptionEventArgs e)
+		{
+			var ex = e.ExceptionObject as Exception;
+			var errorReport = new ErrorReport(ex);
+			if (errorReport.ShowModal())
+			{
+				if (ex != null)
+				{
+					ExceptionLogging.Client.Config.Metadata.AddToTab("Exception Details",
+						"stacktrace", ex.StackTrace);
+					ExceptionLogging.Client.Notify(ex, Bugsnag.Severity.Error);
+				}
+			}
+			Application.Instance.Quit();
 		}
 
 		private void OnAddArtifact(object sender, EventArgs e)

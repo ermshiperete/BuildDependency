@@ -49,6 +49,12 @@
     <Reference Include="Eto.Wpf">
       <HintPath>..\packages\Eto.Platform.Wpf.2.2.0\lib\net45\Eto.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="BugsnagMono">
+      <HintPath>..\packages\BugsnagMono.1.2.0.0\lib\Net45\BugsnagMono.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -60,6 +66,10 @@
     <Compile Include="Dialogs\ServersDialog.cs" />
     <Compile Include="NullServer.cs" />
     <Compile Include="Tools\WaitSpinner.cs" />
+    <Compile Include="Dialogs\ErrorReport.cs" />
+    <Compile Include="Dialogs\ErrorReport.eto.cs">
+      <DependentUpon>ErrorReport.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\GitVersionTask.4.0.1\Build\portable-net+sl+win+wpa+wp\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.4.0.1\Build\portable-net+sl+win+wpa+wp\GitVersionTask.targets')" />
