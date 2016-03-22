@@ -70,7 +70,7 @@
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />
     <MakeDir Directories="$(SolutionDir)NuGetBuild" />
-    <Exec Command="$(Runtime) &quot;$(SolutionDir)packages/ILRepack.2.0.9/tools/ILRepack.exe&quot;  /allowDup /out:&quot;$(SolutionDir)NuGetBuild\$(TargetFileName)&quot; &quot;$(TargetDir)BuildDependencyTasks.dll&quot; &quot;$(TargetDir)BuildDependencyLib.dll&quot; &quot;$(TargetDir)ICSharpCode.SharpZipLib.dll&quot; &quot;$(TargetDir)RestSharp.dll&quot; &quot;$(TargetDir)BugsnagMono.dll&quot; &quot;$(TargetDir)Newtonsoft.Json.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot; /ndebug /internalize" />
+    <Exec Command="$(Runtime) &quot;$(SolutionDir)packages/ILRepack.2.0.10/tools/ILRepack.exe&quot;  /allowDup /out:&quot;$(SolutionDir)NuGetBuild\$(TargetFileName)&quot; &quot;$(TargetDir)BuildDependencyTasks.dll&quot; &quot;$(TargetDir)BuildDependencyLib.dll&quot; &quot;$(TargetDir)ICSharpCode.SharpZipLib.dll&quot; &quot;$(TargetDir)RestSharp.dll&quot; &quot;$(TargetDir)BugsnagMono.dll&quot; &quot;$(TargetDir)Newtonsoft.Json.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot; /ndebug /internalize" />
     <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).nuspec" DestinationFolder="$(SolutionDir)NuGetBuild" />
     <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).targets" DestinationFolder="$(SolutionDir)NuGetBuild\build" />
     <PepitaPackage.CreatePackageTask NuGetBuildDirectory="$(SolutionDir)NuGetBuild" MetadataAssembly="$(TargetPath)" />

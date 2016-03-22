@@ -14,7 +14,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
@@ -28,6 +28,8 @@
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
     <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -76,10 +78,16 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Folder Include="Tools\" />
   </ItemGroup>
+  <Target Name="AfterBuild">
+    <PropertyGroup>
+      <Runtime Condition="'$(OS)'=='Unix'">mono</Runtime>
+    </PropertyGroup>
+    <MakeDir Directories="$(TargetDir)Output" />
+    <!--- <Exec Command="$(Runtime) &quot;$(SolutionDir)packages/ILRepack.2.0.10/tools/ILRepack.exe&quot;  /allowDup /out:&quot;$(TargetDir)Output\$(TargetFileName)&quot; &quot;$(TargetDir)BuildDependencyManager.exe&quot; &quot;$(TargetDir)BuildDependencyLib.dll&quot; &quot;$(TargetDir)ICSharpCode.SharpZipLib.dll&quot; &quot;$(TargetDir)RestSharp.dll&quot; &quot;$(TargetDir)BugsnagMono.dll&quot; &quot;$(TargetDir)Newtonsoft.Json.dll&quot; /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot; /internalize" /> -->
+  </Target>
   <ItemGroup>
     <ProjectReference Include="..\BuildDependencyLib\BuildDependencyLib.csproj">
       <Project>{FBC44E4E-5F09-40E1-9E36-A35A499172E7}</Project>
