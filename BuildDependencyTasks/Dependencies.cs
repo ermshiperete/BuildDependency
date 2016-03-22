@@ -1,4 +1,4 @@
-// Copyright (c) 2014 Eberhard Beilharz
+// Copyright (c) 2014-2016 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BuildDependency.Artifacts;
 using BuildDependency.Tasks.Tools;
+using BuildDependency.Tools;
 using Microsoft.Build.Framework;
 using Task = System.Threading.Tasks.Task;
 
@@ -38,11 +39,13 @@ namespace BuildDependency.Tasks
 			public void LogMessage(MessageImportance importance, string message, params object[] messageArgs)
 			{
 				LogMessage(message, messageArgs);
-		}
+			}
 		}
 
 		public Dependencies()
 		{
+			ExceptionLogging.Initialize("4bae82b8c647df7fea786dbaecb4b351");
+
 			WorkingDir = string.Empty;
 			RunAsync = true;
 		}

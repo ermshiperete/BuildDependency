@@ -33,11 +33,14 @@
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
-    <Reference Include="RestSharp">
-      <HintPath>..\packages\RestSharp.105.0.1\lib\net4\RestSharp.dll</HintPath>
-    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\ICSharpCode.SharpZipLib.dll.0.85.4.369\lib\net20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="BugsnagMono">
+      <HintPath>..\packages\BugsnagMono.1.2.0.0\lib\Net45\BugsnagMono.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -67,7 +70,7 @@
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />
     <MakeDir Directories="$(SolutionDir)NuGetBuild" />
-    <Exec Command="$(Runtime) &quot;$(SolutionDir)packages/ILRepack.2.0.9/tools/ILRepack.exe&quot;  /allowDup /out:&quot;$(SolutionDir)NuGetBuild\$(TargetFileName)&quot; &quot;$(TargetDir)BuildDependencyTasks.dll&quot; &quot;$(TargetDir)BuildDependencyLib.dll&quot; &quot;$(TargetDir)ICSharpCode.SharpZipLib.dll&quot; &quot;$(TargetDir)RestSharp.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot; /ndebug /internalize" />
+    <Exec Command="$(Runtime) &quot;$(SolutionDir)packages/ILRepack.2.0.9/tools/ILRepack.exe&quot;  /allowDup /out:&quot;$(SolutionDir)NuGetBuild\$(TargetFileName)&quot; &quot;$(TargetDir)BuildDependencyTasks.dll&quot; &quot;$(TargetDir)BuildDependencyLib.dll&quot; &quot;$(TargetDir)ICSharpCode.SharpZipLib.dll&quot; &quot;$(TargetDir)RestSharp.dll&quot; &quot;$(TargetDir)BugsnagMono.dll&quot; &quot;$(TargetDir)Newtonsoft.Json.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot; /ndebug /internalize" />
     <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).nuspec" DestinationFolder="$(SolutionDir)NuGetBuild" />
     <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).targets" DestinationFolder="$(SolutionDir)NuGetBuild\build" />
     <PepitaPackage.CreatePackageTask NuGetBuildDirectory="$(SolutionDir)NuGetBuild" MetadataAssembly="$(TargetPath)" />
