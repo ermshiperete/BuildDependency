@@ -52,10 +52,10 @@
       <HintPath>..\packages\Eto.Platform.Wpf.2.2.0\lib\net45\Eto.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="BugsnagMono">
-      <HintPath>..\packages\BugsnagMono.1.2.0.0\lib\Net45\BugsnagMono.dll</HintPath>
+      <HintPath>..\packages\BugsnagMonoImproved.1.2.0.0\lib\Net45\BugsnagMono.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
