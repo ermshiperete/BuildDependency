@@ -132,20 +132,27 @@ namespace BuildDependency
 						{
 							var tc = parts[0];
 							var configId = parts[2];
-							var server = _servers[tc] as TeamCityApi;
-							var buildTypesTask = server.GetBuildTypesTask();
-							var projectsTask = server.GetAllProjectsAsync();
-							var buildTypes = await buildTypesTask;
-							var projects = await projectsTask;
-							var config = buildTypes.First(type => type.Id == configId);
-							var proj = projects.First(project => project.Id == config.ProjectId);
-							artifact = new ArtifactTemplate(server, proj, configId);
-							artifacts.Add(artifact);
+							if (_servers.ContainsKey(tc))
+							{
+								var server = _servers[tc] as TeamCityApi;
+								var buildTypesTask = server.GetBuildTypesTask();
+								var projectsTask = server.GetAllProjectsAsync();
+								var buildTypes = await buildTypesTask;
+								var projects = await projectsTask;
+								var config = buildTypes.FirstOrDefault(type => type.Id == configId);
+								if (config != null)
+								{
+									var proj = projects.FirstOrDefault(project => project.Id == config.ProjectId);
+									if (proj != null)
+									{
+										artifact = new ArtifactTemplate(server, proj, configId);
+										artifacts.Add(artifact);
+										continue;
+									}
+								}
+							}
 						}
-						else
-						{
-							Console.WriteLine("Can't interpret line {0}. Skipping {1}.", lineNumber, line);
-						}
+						Console.WriteLine("Can't interpret line {0}. Skipping {1}.", lineNumber, line);
 					}
 					else if (string.IsNullOrEmpty(line.Trim()))
 					{
