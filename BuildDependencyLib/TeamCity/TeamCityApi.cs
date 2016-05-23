@@ -2,12 +2,12 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
-using RestSharp;
-using BuildDependency.TeamCity.RestClasses;
-using BuildDependency.RestClasses;
-using System.Threading.Tasks;
 using System.Net;
+using System.Threading.Tasks;
 using BuildDependency.Artifacts;
+using BuildDependency.RestClasses;
+using BuildDependency.TeamCity.RestClasses;
+using RestSharp;
 
 namespace BuildDependency.TeamCity
 {
@@ -102,7 +102,11 @@ namespace BuildDependency.TeamCity
 			request.RootElement = "projects";
 
 			var response = await ExecuteApi<Projects>(request);
-			return response != null ? response.Project : null;
+			if (response == null)
+				return null;
+			var projects = response.Project;
+			FillInProjectList(projects);
+			return projects;
 		}
 
 		public List<BuildType> GetBuildTypes()
@@ -173,16 +177,22 @@ namespace BuildDependency.TeamCity
 				_buildTypes.Add(buildType.Id, buildType);
 		}
 
+		private void FillInProjectList(List<Project> projectList)
+		{
+			if (_projects == null)
+			{
+				_projects = new Dictionary<string, Project>();
+				foreach (var proj in projectList)
+					_projects.Add(proj.Id, proj);
+			}
+		}
+
 		public Dictionary<string, Project> Projects
 		{
 			get
 			{
-				if (_projects == null)
-				{
-					_projects = new Dictionary<string, Project>();
-					foreach (var proj in GetAllProjects())
-						_projects.Add(proj.Id, proj);
-				}
+				var projectList = GetAllProjects();
+				FillInProjectList(projectList);
 				return _projects;
 			}
 		}

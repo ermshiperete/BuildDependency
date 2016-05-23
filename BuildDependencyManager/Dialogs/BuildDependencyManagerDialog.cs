@@ -254,7 +254,7 @@ namespace BuildDependency.Manager.Dialogs
 								{
 									if (dep == null)
 										continue;
-									var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.Properties));
+									var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.Properties), dep.BuildType);
 									artifact.Condition = condition;
 									_dataStore.Add(artifact);
 								}

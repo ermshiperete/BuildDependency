@@ -208,7 +208,7 @@ namespace BuildDependency.Manager.Dialogs
 						{
 							if (dep == null)
 								continue;
-							var artifact = new ArtifactTemplate(_model.TeamCity, new ArtifactProperties(dep.Properties));
+							var artifact = new ArtifactTemplate(_model.TeamCity, new ArtifactProperties(dep.Properties), dep.BuildType);
 							_dataStore.Add(artifact);
 						}
 					});

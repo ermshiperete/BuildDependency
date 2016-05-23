@@ -20,16 +20,19 @@ namespace BuildDependency.Artifacts
 			Condition = Conditions.All;
 		}
 
-		public ArtifactTemplate(Server server, ArtifactProperties artifact)
+		public ArtifactTemplate(Server server, ArtifactProperties artifact, BuildType buildType)
 		{
 			Server = server;
 			PathRules = artifact.PathRules;
 			RevisionName = artifact.RevisionName;
 			RevisionValue = artifact.RevisionValue;
-			SourceBuildTypeId = artifact.SourceBuildTypeId;
+			SourceBuildTypeId = artifact.SourceBuildTypeId ?? buildType.Id;
 			CleanDestinationDirectory = artifact.CleanDestinationDirectory;
-			Project = ((TeamCityApi)server).Projects[Config.ProjectId];
 			Condition = Conditions.All;
+			var tcServer = server as TeamCityApi;
+			if (tcServer == null || !tcServer.Projects.ContainsKey(Config.ProjectId))
+				return;
+			Project = tcServer.Projects[Config.ProjectId];
 		}
 
 		public string ConfigName
