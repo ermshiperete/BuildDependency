@@ -57,6 +57,14 @@ namespace BuildDependency.Manager.Dialogs
 							new Command(OnToolsServers) { MenuText = "&Servers" },
 							new Command(OnToolsSort) { MenuText = "S&ort" }
 						}
+					},
+					new ButtonMenuItem
+					{
+						Text = "&Help",
+						Items =
+						{
+							new Command(OnHelpAbout) { MenuText = "&About" }
+						}
 					}
 				},
 				QuitItem = new Command((sender, e) => Application.Instance.Quit())
@@ -340,6 +348,14 @@ namespace BuildDependency.Manager.Dialogs
 					{
 						_dataStore.Sort = (x, y) => string.Compare(x.ConfigName, y.ConfigName, StringComparison.Ordinal);
 					});
+			}
+		}
+
+		private void OnHelpAbout(object sender, EventArgs e)
+		{
+			using (var dlg = new AboutDialog())
+			{
+				dlg.ShowModal();
 			}
 		}
 	}

@@ -72,6 +72,7 @@
     <Compile Include="Dialogs\ErrorReport.eto.cs">
       <DependentUpon>ErrorReport.cs</DependentUpon>
     </Compile>
+    <Compile Include="Dialogs\AboutDialog.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\GitVersionTask.4.0.1\Build\portable-net+sl+win+wpa+wp\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.4.0.1\Build\portable-net+sl+win+wpa+wp\GitVersionTask.targets')" />
