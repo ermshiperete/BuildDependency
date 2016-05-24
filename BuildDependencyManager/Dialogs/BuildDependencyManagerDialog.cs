@@ -21,6 +21,7 @@ namespace BuildDependency.Manager.Dialogs
 		private readonly GridView _gridView;
 		private SelectableFilterCollection<ArtifactTemplate> _dataStore;
 		private readonly Spinner _spinner;
+		private string _fileName;
 
 		public BuildDependencyManagerDialog()
 		{
@@ -40,9 +41,10 @@ namespace BuildDependency.Manager.Dialogs
 						Items =
 						{
 							new Command(OnFileNew) { MenuText = "&New" },
-							new Command(OnFileOpen) { MenuText = "&Open" },
+							new Command(OnFileOpen) { MenuText = "&Open..." },
 							new Command(OnFileSave) { MenuText = "&Save" },
-							new Command(OnFileImport) { MenuText = "&Import" },
+							new Command(OnFileSaveAs) { MenuText = "Save &As..." },
+							new Command(OnFileImport) { MenuText = "&Import..." },
 						}
 					},
 					new ButtonMenuItem
@@ -114,7 +116,7 @@ namespace BuildDependency.Manager.Dialogs
 			OnFileNew(this, EventArgs.Empty);
 		}
 
-		private void OnUnhandledException (object sender, Eto.UnhandledExceptionEventArgs e)
+		private void OnUnhandledException(object sender, Eto.UnhandledExceptionEventArgs e)
 		{
 			var ex = e.ExceptionObject as Exception;
 			var errorReport = new ErrorReport(ex);
@@ -172,6 +174,16 @@ namespace BuildDependency.Manager.Dialogs
 			_dataStore.Remove(item);
 		}
 
+		private string FileName
+		{
+			get { return _fileName; }
+			set
+			{
+				_fileName = value;
+				Title = string.Format("Build Dependency Manager - {0}", Path.GetFileName(_fileName));
+			}
+		}
+
 		private void OnFileNew(object sender, EventArgs e)
 		{
 			_dataStore.Clear();
@@ -186,7 +198,6 @@ namespace BuildDependency.Manager.Dialogs
 		{
 			using (new WaitSpinner(_spinner))
 			{
-				string fileName = null;
 				using (var dlg = new OpenFileDialog())
 				{
 					dlg.Filters.Add(new FileDialogFilter("Dependency File (*.dep)", "*.dep"));
@@ -194,9 +205,9 @@ namespace BuildDependency.Manager.Dialogs
 					dlg.CurrentFilterIndex = 0;
 					if (dlg.ShowDialog(this) == DialogResult.Ok)
 					{
-						fileName = dlg.FileName;
+						FileName = dlg.FileName;
 
-						await LoadFileAsync(fileName);
+						await LoadFileAsync(FileName);
 					}
 				}
 			}
@@ -209,6 +220,22 @@ namespace BuildDependency.Manager.Dialogs
 		}
 
 		private async void OnFileSave(object sender, EventArgs e)
+		{
+			if (string.IsNullOrEmpty(FileName))
+			{
+				OnFileSaveAs(sender, e);
+				return;
+			}
+
+			var fileName = FileName;
+			await Task.Run(() =>
+				{
+					DependencyFile.SaveFile(fileName, _servers, _artifacts);
+					JobsFile.WriteJobsFile(Path.ChangeExtension(fileName, ".files"), _artifacts);
+				});
+		}
+
+		private async void OnFileSaveAs(object sender, EventArgs e)
 		{
 			using (var dlg = new SaveFileDialog())
 			{
@@ -228,6 +255,7 @@ namespace BuildDependency.Manager.Dialogs
 								DependencyFile.SaveFile(fileName, _servers, _artifacts);
 								JobsFile.WriteJobsFile(Path.ChangeExtension(fileName, ".files"), _artifacts);
 							});
+						FileName = fileName;
 					}
 				}
 			}
