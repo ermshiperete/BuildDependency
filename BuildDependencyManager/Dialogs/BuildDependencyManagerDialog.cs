@@ -22,10 +22,12 @@ namespace BuildDependency.Manager.Dialogs
 		private SelectableFilterCollection<ArtifactTemplate> _dataStore;
 		private readonly Spinner _spinner;
 		private string _fileName;
+		private bool _fileWaitingToBeLoaded;
 
-		public BuildDependencyManagerDialog()
+		public BuildDependencyManagerDialog(string fileName = null)
 		{
 			Application.Instance.UnhandledException += OnUnhandledException;
+			Application.Instance.Initialized += OnApplicationInitialized;
 			Application.Instance.Name = "Build Dependency Manager";
 			_artifacts = new List<ArtifactTemplate>();
 			Title = "Build Dependency Manager";
@@ -113,7 +115,25 @@ namespace BuildDependency.Manager.Dialogs
 
 			Content = content;
 
-			OnFileNew(this, EventArgs.Empty);
+			if (string.IsNullOrEmpty(fileName))
+				OnFileNew(this, EventArgs.Empty);
+			else
+			{
+				FileName = fileName;
+				_fileWaitingToBeLoaded = true;
+			}
+		}
+
+		private void OnApplicationInitialized(object sender, EventArgs e)
+		{
+			if (_fileWaitingToBeLoaded)
+			{
+				using (new WaitSpinner(_spinner))
+				{
+					OpenFile(FileName);
+					_fileWaitingToBeLoaded = false;
+				}
+			}
 		}
 
 		private void OnUnhandledException(object sender, Eto.UnhandledExceptionEventArgs e)
@@ -192,6 +212,12 @@ namespace BuildDependency.Manager.Dialogs
 			server.Name = "TC";
 			server.Url = "http://build.palaso.org";
 			_servers.Add(server);
+		}
+
+		public async void OpenFile(string fileName)
+		{
+			FileName = fileName;
+			await LoadFileAsync(FileName);
 		}
 
 		private async void OnFileOpen(object sender, EventArgs e)
