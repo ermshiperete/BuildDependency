@@ -38,7 +38,8 @@ namespace BuildDependency.Manager.Dialogs
 			{
 				foreach (var dep in deps)
 				{
-					Artifacts.Add(new ArtifactProperties(dep.Properties));
+					if (dep.Properties != null)
+						Artifacts.Add(new ArtifactProperties(dep.Properties));
 				}
 			}
 		}
