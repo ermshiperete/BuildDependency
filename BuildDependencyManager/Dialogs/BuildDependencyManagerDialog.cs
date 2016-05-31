@@ -93,8 +93,7 @@ namespace BuildDependency.Manager.Dialogs
 				new ButtonMenuItem(new Command(OnEditArtifact) { MenuText = "&Edit" }),
 				new ButtonMenuItem(new Command(OnDeleteArtifact) { MenuText = "&Delete" }));
 
-			var button = new Button();
-			button.Text = "Add Artifact";
+			var button = new Button { Text = "Add Artifact" };
 			button.Click += OnAddArtifact;
 
 			var content = new TableLayout
@@ -214,6 +213,13 @@ namespace BuildDependency.Manager.Dialogs
 			_servers.Add(server);
 		}
 
+		private static void AddFileFilters(FileDialog dlg)
+		{
+			dlg.Filters.Add(new FileDialogFilter("Dependency File (*.dep)", "*.dep"));
+			dlg.Filters.Add(new FileDialogFilter("All Files (*.*)", "*"));
+			dlg.CurrentFilterIndex = 0;
+		}
+
 		public async void OpenFile(string fileName)
 		{
 			FileName = fileName;
@@ -226,15 +232,13 @@ namespace BuildDependency.Manager.Dialogs
 			{
 				using (var dlg = new OpenFileDialog())
 				{
-					dlg.Filters.Add(new FileDialogFilter("Dependency File (*.dep)", "*.dep"));
-					dlg.Filters.Add(new FileDialogFilter("All Files (*.*)", "*"));
-					dlg.CurrentFilterIndex = 0;
-					if (dlg.ShowDialog(this) == DialogResult.Ok)
-					{
-						FileName = dlg.FileName;
+					AddFileFilters(dlg);
+					if (dlg.ShowDialog(this) != DialogResult.Ok)
+						return;
 
-						await LoadFileAsync(FileName);
-					}
+					FileName = dlg.FileName;
+
+					await LoadFileAsync(FileName);
 				}
 			}
 		}
@@ -265,24 +269,22 @@ namespace BuildDependency.Manager.Dialogs
 		{
 			using (var dlg = new SaveFileDialog())
 			{
-				dlg.Filters.Add(new FileDialogFilter("Dependency File (*.dep)", "*.dep"));
-				dlg.Filters.Add(new FileDialogFilter("All Files (*.*)", "*"));
-				dlg.CurrentFilterIndex = 0;
+				AddFileFilters(dlg);
 
-				if (dlg.ShowDialog(this) == DialogResult.Ok)
+				if (dlg.ShowDialog(this) != DialogResult.Ok)
+					return;
+
+				var fileName = dlg.FileName;
+				using (new WaitSpinner(_spinner))
 				{
-					var fileName = dlg.FileName;
-					using (new WaitSpinner(_spinner))
-					{
-						await Task.Run(() =>
-							{
-								if (string.IsNullOrEmpty(Path.GetExtension(fileName)))
-									fileName += ".dep";
-								DependencyFile.SaveFile(fileName, _servers, _artifacts);
-								JobsFile.WriteJobsFile(Path.ChangeExtension(fileName, ".files"), _artifacts);
-							});
-						FileName = fileName;
-					}
+					await Task.Run(() =>
+						{
+							if (string.IsNullOrEmpty(Path.GetExtension(fileName)))
+								fileName += ".dep";
+							DependencyFile.SaveFile(fileName, _servers, _artifacts);
+							JobsFile.WriteJobsFile(Path.ChangeExtension(fileName, ".files"), _artifacts);
+						});
+					FileName = fileName;
 				}
 			}
 		}
