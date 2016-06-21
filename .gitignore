@@ -8,4 +8,5 @@ obj/
 /testing/
 /NuGetBuild/
 /.idea/
+/.idea.BuildDependency/
 *.iml
