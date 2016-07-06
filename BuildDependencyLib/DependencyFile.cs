@@ -51,6 +51,10 @@ namespace BuildDependency
 		{
 			using (var file = new StreamWriter(fileName))
 			{
+				file.WriteLine("# This file lists dependencies");
+				file.WriteLine("# It can be edited with the BuildDependencyManager application.");
+				file.WriteLine("# See https://github.com/ermshiperete/BuildDependency for more information.");
+				file.WriteLine();
 				foreach (var server in servers)
 				{
 					file.WriteLine("[[{0}]]", server.Name);
@@ -121,11 +125,11 @@ namespace BuildDependency
 				{
 					var line = file.ReadLine();
 					lineNumber++;
-					if (line.StartsWith("[["))
+					if (line.StartsWith("[[", StringComparison.InvariantCulture))
 					{
 						lineNumber += ReadServer(file, line);
 					}
-					else if (line.StartsWith("["))
+					else if (line.StartsWith("[", StringComparison.InvariantCulture))
 					{
 						var parts = line.Trim('[', ']').Split(new[] { ':' }, 3);
 						if (parts.Length > 2)
@@ -154,9 +158,10 @@ namespace BuildDependency
 						}
 						Console.WriteLine("Can't interpret line {0}. Skipping {1}.", lineNumber, line);
 					}
-					else if (string.IsNullOrEmpty(line.Trim()))
+					else if (string.IsNullOrEmpty(line.Trim()) ||
+						line.Trim().StartsWith("#", StringComparison.InvariantCulture))
 					{
-						// ignore
+						// ignore empty lines and comments
 					}
 					else
 					{
@@ -179,7 +184,8 @@ namespace BuildDependency
 								if (Enum.TryParse<Conditions>(parts[1], out condition))
 									artifact.Condition = condition;
 								else
-									Console.WriteLine("Can't interpret condition on line {0}. Skipping {1}", lineNumber, line);
+									Console.WriteLine("Can't interpret condition on line {0}. Skipping {1}",
+										lineNumber, line);
 								break;
 							case "Path":
 								{
