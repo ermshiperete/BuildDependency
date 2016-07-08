@@ -2,6 +2,7 @@
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Reflection;
+using BuildDependency.Tools;
 using Eto.Drawing;
 using Eto.Forms;
 
@@ -31,9 +32,11 @@ namespace BuildDependency.Manager.Dialogs
 
 			var labelVersion = new Label();
 			labelVersion.TextAlignment = TextAlignment.Center;
-			labelVersion.Text = string.Format("{0}{1}", Assembly.GetExecutingAssembly().GetName().Version,
+
+			var version = Utils.GetVersion("BuildDependency.Manager");
+			labelVersion.Text = string.Format("{0} ({1}){2}", version.Item1, version.Item2,
 #if DEBUG
-				" (Debug)"
+				" - Debug"
 #else
 				""
 #endif

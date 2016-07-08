@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using BuildDependency.Artifacts;
 using BuildDependency.Tasks.Tools;
@@ -77,20 +76,6 @@ namespace BuildDependency.Tasks
 		public bool KeepJobsFile
 		{ get; set; }
 
-		private Tuple<object, string> Version
-		{
-			get
-			{
-				// Access fields in GitVersionInformation that GitVersion creates at compile time
-				var gitVersionInformationType = Assembly.GetExecutingAssembly()
-					.GetType("BuildDependency.Tasks.GitVersionInformation");
-				var fullSemVer = gitVersionInformationType.GetField("FullSemVer");
-				var sha = gitVersionInformationType.GetField("Sha");
-				return new Tuple<object, string>(fullSemVer.GetValue(null),
-					sha.GetValue(null).ToString());
-			}
-		}
-
 		public override bool Execute()
 		{
 			ILog logHelper;
@@ -99,8 +84,9 @@ namespace BuildDependency.Tasks
 			else
 				logHelper = new LogHelper();
 
-			logHelper.LogMessage("Dependencies task version {0} ({1}):", Version.Item1,
-				Version.Item2.Substring(0, 7));
+			var version = Utils.GetVersion("BuildDependency.Tasks");
+			logHelper.LogMessage("Dependencies task version {0} ({1}):", version.Item1,
+				version.Item2);
 
 			if (UseDependencyFile && string.IsNullOrEmpty(DependencyFile))
 			{
