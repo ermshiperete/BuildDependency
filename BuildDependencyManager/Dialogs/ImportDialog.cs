@@ -206,7 +206,7 @@ namespace BuildDependency.Manager.Dialogs
 
 						foreach (var dep in dependencies)
 						{
-							if (dep == null)
+							if (dep == null || dep.Properties == null || dep.BuildType == null)
 								continue;
 							var artifact = new ArtifactTemplate(_model.TeamCity, new ArtifactProperties(dep.Properties), dep.BuildType);
 							_dataStore.Add(artifact);

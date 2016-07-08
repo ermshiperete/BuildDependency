@@ -13,6 +13,9 @@ namespace BuildDependency.TeamCity.RestClasses
 
 		public ArtifactProperties(Properties properties)
 		{
+			if (properties == null)
+				return;
+
 			foreach (var prop in properties.Property)
 			{
 				switch (prop.Name)
