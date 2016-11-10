@@ -51,7 +51,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets" Condition="Exists('..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets')" />
-  <Import Project="..\packages\GitVersionTask.4.0.1\Build\portable-net+sl+win+wpa+wp\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.4.0.1\Build\portable-net+sl+win+wpa+wp\GitVersionTask.targets')" />
+  <Import Project="..\packages\GitVersionTask.4.0.0-beta0007\build\portable-net+sl+win+wpa+wp\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.4.0.0-beta0007\build\portable-net+sl+win+wpa+wp\GitVersionTask.targets')" />
   <ItemGroup>
     <Folder Include="Tools\" />
     <Folder Include="NuGetAssets\" />
