@@ -190,7 +190,8 @@ namespace BuildDependency.Manager.Dialogs
 				if (dlg.Result)
 				{
 					var artifact = dlg.GetArtifact();
-					_dataStore[artifactIndex] = artifact;
+					_dataStore.Remove(item);
+					_dataStore.Insert(artifactIndex, artifact);
 				}
 			}
 		}
