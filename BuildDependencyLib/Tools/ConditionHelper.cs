@@ -15,7 +15,7 @@ namespace BuildDependency.Tools
 				((condition & Conditions.Linux) != 0) :
 				((condition & Conditions.Windows) != 0);
 
-			ret &= Environment.Is64BitOperatingSystem ?
+			ret &= Environment.Is64BitProcess ?
 				((condition & Conditions.Bit64) != 0) :
 				((condition & Conditions.Bit32) != 0);
 

@@ -69,7 +69,7 @@ namespace BuildDependencyTests
 		public string GetTarget(string rule, string fileName)
 		{
 			var artifactRule = new ArtifactRule(0, null, rule);
-			return artifactRule.GetTarget(fileName);
+			return NormalizedPath(artifactRule.GetTarget(fileName));
 		}
 
 		[TestCase("*.txt=>lib", "bla.txt", Result = "lib/bla.txt")]
@@ -83,7 +83,7 @@ namespace BuildDependencyTests
 			Assert.That(jobs[0], Is.TypeOf<DownloadFileJob>());
 			var downloadJob = jobs[0] as DownloadFileJob;
 			Assert.That(downloadJob.Url, Is.EqualTo("http://example.com/download/" + file));
-			return downloadJob.TargetFile;
+			return NormalizedPath(downloadJob.TargetFile);
 		}
 
 		[Test]
@@ -96,12 +96,22 @@ namespace BuildDependencyTests
 			Assert.That(jobs[0], Is.TypeOf<DownloadZipJob>());
 			var downloadJob = jobs[0] as DownloadZipJob;
 			Assert.That(downloadJob.Url, Is.EqualTo("http://example.com/download/a.zip"));
-			Assert.That(downloadJob.TargetFile, Is.EqualTo("Downloads/a.zip"));
+			Assert.That(downloadJob.TargetFile, Is.EqualTo(Path("Downloads/a.zip")));
 			Assert.That(jobs[1], Is.TypeOf<UnzipFilesJob>());
 			var unzipJob = jobs[1] as UnzipFilesJob;
-			Assert.That(unzipJob.ZipFile, Is.EqualTo("Downloads/a.zip"));
+			Assert.That(unzipJob.ZipFile, Is.EqualTo(Path("Downloads/a.zip")));
 			Assert.That(unzipJob.SourcePath, Is.EqualTo("a/b/c/*/.dll"));
 			Assert.That(unzipJob.DestinationPath, Is.EqualTo("dlls"));
+		}
+
+		private static string Path(string inPath)
+		{
+			return inPath.Replace('/', System.IO.Path.DirectorySeparatorChar);
+		}
+
+		private static string NormalizedPath(string inPath)
+		{
+			return inPath?.Replace('\\', '/');
 		}
 	}
 }
