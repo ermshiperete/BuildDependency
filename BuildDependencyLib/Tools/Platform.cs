@@ -179,9 +179,14 @@ namespace BuildDependency.Tools
 		}
 
 		[System.Runtime.InteropServices.DllImport ("libc")]
-		static extern int uname (IntPtr buf);
+		private static extern int uname (IntPtr buf);
 
 		[System.Runtime.InteropServices.DllImport ("libc")]
-		static extern int readlink(string path, IntPtr buf, int bufsiz);
+		private static extern int readlink(string path, IntPtr buf, int bufsiz);
+
+		[System.Runtime.InteropServices.DllImport("__Internal", EntryPoint = "mono_get_runtime_build_info")]
+		private static extern string GetMonoVersion();
+
+		public static string MonoVersion => IsMono ? GetMonoVersion() : string.Empty;
 	}
 }
