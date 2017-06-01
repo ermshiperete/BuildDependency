@@ -1,6 +1,5 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
-using System;
 using NUnit.Framework;
 using BuildDependency.Artifacts;
 
@@ -9,7 +8,6 @@ namespace BuildDependencyTests
 	[TestFixture]
 	public class ArtifactRuleTests
 	{
-		[Test]
 		[TestCase("a/b/**=>lib", true, "a/b/**", "", "lib")]
 		[TestCase("a/b/** => lib", true, "a/b/**", "", "lib")]
 		[TestCase("*/.txt=>lib", true, "*/.txt", "", "lib")]
@@ -57,7 +55,6 @@ namespace BuildDependencyTests
 			return artifactRule.IsMatch(fileName);
 		}
 
-		[Test]
 		[TestCase("*.txt=>lib", "bla.txt", Result = "lib/bla.txt")]
 		[TestCase("**.txt=>lib", "bla/bla.txt", Result = "lib/bla/bla.txt")]
 		[TestCase("a/b/**=>lib", "a/b/c/file.txt", Result = "lib/c/file.txt")]
@@ -75,7 +72,6 @@ namespace BuildDependencyTests
 			return artifactRule.GetTarget(fileName);
 		}
 
-		[Test]
 		[TestCase("*.txt=>lib", "bla.txt", Result = "lib/bla.txt")]
 		[TestCase("**", "README", Result = "README")]
 		public string GetJobs_DownloadFile(string rule, string file)

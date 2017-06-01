@@ -10,15 +10,9 @@ namespace BuildDependencyTests.Tools
 	[TestFixture]
 	public class ConditionHelperTests
 	{
-		private static bool IsLinux
-		{
-			get { return Environment.OSVersion.Platform == PlatformID.Unix; }
-		}
+		private static bool IsLinux => Environment.OSVersion.Platform == PlatformID.Unix;
 
-		private static bool Is64Bit
-		{
-			get { return Environment.Is64BitProcess; }
-		}
+		private static bool Is64Bit => Environment.Is64BitProcess;
 
 		private static bool ExpectedResult(bool? expectLinux, bool? expect64Bit)
 		{
@@ -31,7 +25,6 @@ namespace BuildDependencyTests.Tools
 			return IsLinux ^ !expectLinux.Value && Is64Bit ^ !expect64Bit.Value;
 		}
 
-		[Test]
 		[TestCase(Conditions.All, null, null, TestName = "All is always true")]
 		[TestCase(Conditions.None, null, null, TestName = "None is always true")]
 		[TestCase(Conditions.Windows, false, null, TestName = "Windows")]

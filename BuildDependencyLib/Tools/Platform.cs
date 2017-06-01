@@ -7,31 +7,19 @@ namespace BuildDependency.Tools
 {
 	public static class Platform
 	{
-		private static readonly string UnixNameMac = "Darwin";
-		private static readonly string UnixNameLinux = "Linux";
+		private const string UnixNameMac = "Darwin";
+		private const string UnixNameLinux = "Linux";
 		private static bool? _isMono;
 		private static string _unixName;
 		private static string _sessionManager;
 
-		public static bool IsUnix
-		{
-			get { return Environment.OSVersion.Platform == PlatformID.Unix; }
-		}
+		public static bool IsUnix => Environment.OSVersion.Platform == PlatformID.Unix;
 
-		public static bool IsLinux
-		{
-			get { return IsUnix && (UnixName == UnixNameLinux); }
-		}
+		public static bool IsLinux => IsUnix && (UnixName == UnixNameLinux);
 
-		public static bool IsMac
-		{
-			get { return IsUnix && (UnixName == UnixNameMac); }
-		}
+		public static bool IsMac => IsUnix && (UnixName == UnixNameMac);
 
-		public static bool IsWindows
-		{
-			get { return !IsUnix; }
-		}
+		public static bool IsWindows => !IsUnix;
 
 		public static bool IsMono
 		{
@@ -44,10 +32,7 @@ namespace BuildDependency.Tools
 			}
 		}
 
-		public static bool IsDotNet
-		{
-			get { return !IsMono; }
-		}
+		public static bool IsDotNet => !IsMono;
 
 		private static string UnixName
 		{
@@ -65,7 +50,7 @@ namespace BuildDependency.Tools
 					}
 					catch
 					{
-						_unixName = String.Empty;
+						_unixName = string.Empty;
 					}
 					finally {
 						if (buf != IntPtr.Zero)
@@ -78,15 +63,9 @@ namespace BuildDependency.Tools
 		}
 
 
-		public static bool IsWasta
-		{
-			get { return IsUnix && System.IO.File.Exists("/etc/wasta-release"); }
-		}
+		public static bool IsWasta => IsUnix && System.IO.File.Exists("/etc/wasta-release");
 
-		public static bool IsCinnamon
-		{
-			get { return IsUnix && SessionManager.StartsWith("/usr/bin/cinnamon-session"); }
-		}
+		public static bool IsCinnamon => IsUnix && SessionManager.StartsWith("/usr/bin/cinnamon-session");
 
 		/// <summary>
 		/// On a Unix machine this gets the current desktop environment (gnome/xfce/...), on
@@ -96,32 +75,34 @@ namespace BuildDependency.Tools
 		{
 			get
 			{
-				if (!Platform.IsUnix)
-					return Environment.OSVersion.Platform.ToString();
-
-				// see http://unix.stackexchange.com/a/116694
-				// and http://askubuntu.com/a/227669
-				var currentDesktop = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP");
-				if (string.IsNullOrEmpty(currentDesktop))
+				if (IsUnix)
 				{
-					var dataDirs = Environment.GetEnvironmentVariable("XDG_DATA_DIRS");
-					if (dataDirs != null)
-					{
-						dataDirs = dataDirs.ToLowerInvariant();
-						if (dataDirs.Contains("xfce"))
-							currentDesktop = "XFCE";
-						else if (dataDirs.Contains("kde"))
-							currentDesktop = "KDE";
-						else if (dataDirs.Contains("gnome"))
-							currentDesktop = "Gnome";
-					}
+					// see http://unix.stackexchange.com/a/116694
+					// and http://askubuntu.com/a/227669
+					var currentDesktop = Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP");
 					if (string.IsNullOrEmpty(currentDesktop))
-						currentDesktop = Environment.GetEnvironmentVariable("GDMSESSION") ?? string.Empty;
+					{
+						var dataDirs = Environment.GetEnvironmentVariable("XDG_DATA_DIRS");
+						if (dataDirs != null)
+						{
+							dataDirs = dataDirs.ToLowerInvariant();
+							if (dataDirs.Contains("xfce"))
+								currentDesktop = "XFCE";
+							else if (dataDirs.Contains("kde"))
+								currentDesktop = "KDE";
+							else if (dataDirs.Contains("gnome"))
+								currentDesktop = "Gnome";
+						}
+						if (string.IsNullOrEmpty(currentDesktop))
+							currentDesktop = Environment.GetEnvironmentVariable("GDMSESSION") ?? string.Empty;
+					}
+					// Special case for Wasta 12
+					else if (currentDesktop == "GNOME" && Environment.GetEnvironmentVariable("GDMSESSION") == "cinnamon")
+						currentDesktop = Environment.GetEnvironmentVariable("GDMSESSION");
+					if (currentDesktop != null)
+						return currentDesktop.ToLowerInvariant();
 				}
-				// Special case for Wasta 12
-				else if (currentDesktop == "GNOME" && Environment.GetEnvironmentVariable("GDMSESSION") == "cinnamon")
-					currentDesktop = Environment.GetEnvironmentVariable("GDMSESSION");
-				return currentDesktop.ToLowerInvariant();
+				return Environment.OSVersion.Platform.ToString();
 			}
 		}
 
@@ -132,18 +113,18 @@ namespace BuildDependency.Tools
 		{
 			get
 			{
-				if (!Platform.IsUnix)
+				if (!IsUnix)
 					return string.Empty;
 
 				// see http://unix.stackexchange.com/a/116694
 				// and http://askubuntu.com/a/227669
-				var currentDesktop = Platform.DesktopEnvironment;
+				var currentDesktop = DesktopEnvironment;
 				var mirSession = Environment.GetEnvironmentVariable("MIR_SERVER_NAME");
 				var additionalInfo = string.Empty;
 				if (!string.IsNullOrEmpty(mirSession))
 					additionalInfo = " [display server: Mir]";
 				var gdmSession = Environment.GetEnvironmentVariable("GDMSESSION") ?? "not set";
-				return string.Format("{0} ({1}{2})", currentDesktop, gdmSession, additionalInfo);
+				return $"{currentDesktop} ({gdmSession}{additionalInfo})";
 			}
 		}
 
@@ -159,14 +140,11 @@ namespace BuildDependency.Tools
 						// This is the only way I've figured out to get the session manager.
 						buf = System.Runtime.InteropServices.Marshal.AllocHGlobal(8192);
 						var len = readlink("/etc/alternatives/x-session-manager", buf, 8192);
-						if (len > 0)
-							_sessionManager = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(buf);
-						else
-							_sessionManager = String.Empty;
+						_sessionManager = len > 0 ? System.Runtime.InteropServices.Marshal.PtrToStringAnsi(buf) : string.Empty;
 					}
 					catch
 					{
-						_sessionManager = String.Empty;
+						_sessionManager = string.Empty;
 					}
 					finally
 					{

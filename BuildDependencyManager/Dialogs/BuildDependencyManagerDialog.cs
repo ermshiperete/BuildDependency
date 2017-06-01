@@ -14,12 +14,12 @@ using Eto.Forms;
 
 namespace BuildDependency.Manager.Dialogs
 {
-	public class BuildDependencyManagerDialog: Form
+	public sealed class BuildDependencyManagerDialog: Form
 	{
-		private List<ArtifactTemplate> _artifacts;
+		private readonly List<ArtifactTemplate> _artifacts;
 		private List<Server> _servers;
 		private readonly GridView _gridView;
-		private SelectableFilterCollection<ArtifactTemplate> _dataStore;
+		private readonly SelectableFilterCollection<ArtifactTemplate> _dataStore;
 		private readonly Spinner _spinner;
 		private string _fileName;
 		private bool _fileWaitingToBeLoaded;
@@ -74,10 +74,12 @@ namespace BuildDependency.Manager.Dialogs
 			};
 
 			_spinner = new Spinner { Size = new Size(30, 30), Visible = false };
-			_gridView = new GridView();
-			_gridView.GridLines = GridLines.Both;
-			_gridView.ShowHeader = true;
-			_gridView.Size = new Size(680, 350);
+			_gridView = new GridView
+			{
+				GridLines = GridLines.Both,
+				ShowHeader = true,
+				Size = new Size(680, 350)
+			};
 			_dataStore = new SelectableFilterCollection<ArtifactTemplate>(_gridView, _artifacts);
 			_gridView.DataStore = _dataStore;
 			_gridView.CellDoubleClick += OnEditArtifact;
@@ -203,11 +205,11 @@ namespace BuildDependency.Manager.Dialogs
 
 		private string FileName
 		{
-			get { return _fileName; }
+			get => _fileName;
 			set
 			{
 				_fileName = value;
-				Title = string.Format("Build Dependency Manager - {0}", Path.GetFileName(_fileName));
+				Title = $"Build Dependency Manager - {Path.GetFileName(_fileName)}";
 			}
 		}
 
@@ -318,8 +320,8 @@ namespace BuildDependency.Manager.Dialogs
 								{
 									if (dep == null)
 										continue;
-									var artifact = new ArtifactTemplate(server, new ArtifactProperties(dep.Properties), dep.BuildType);
-									artifact.Condition = condition;
+									var artifact =
+										new ArtifactTemplate(server, new ArtifactProperties(dep.Properties), dep.BuildType) {Condition = condition};
 									_dataStore.Add(artifact);
 								}
 							});
