@@ -147,7 +147,7 @@ namespace BuildDependency.Manager.Dialogs
 		{
 			var ex = e.ExceptionObject as Exception;
 			var errorReport = new ErrorReport(ex);
-			if (errorReport.ShowModal())
+			if (errorReport.ShowModal(this))
 			{
 				if (ex != null)
 				{
