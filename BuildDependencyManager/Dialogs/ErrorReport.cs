@@ -4,12 +4,13 @@ using System;
 using System.Net;
 using Eto.Forms;
 using BuildDependency.Tools;
+using PlatformTools = BuildDependency.Tools.Platform;
 
 namespace BuildDependency.Manager.Dialogs
 {
 	public partial class ErrorReport
 	{
-		private Exception _exception;
+		private readonly Exception _exception;
 
 		public ErrorReport(Exception ex)
 		{
@@ -40,12 +41,16 @@ namespace BuildDependency.Manager.Dialogs
 
 		private void OnMoreInfoButtonClick(object sender, EventArgs e)
 		{
-			MessageBox.Show(string.Format("The following details will be sent:\nhostname={0}\n" +
-				"desktop={1}\nshell={2}\nprocessorCount={3}\nuser={4}\n\nStacktrace:\n{5}",
-				Dns.GetHostName(), BuildDependency.Tools.Platform.DesktopEnvironment,
-				BuildDependency.Tools.Platform.DesktopEnvironmentInfoString, Environment.ProcessorCount,
-				ExceptionLogging.Client.Config.UserId, _exception?.StackTrace),
-				Application.Instance.Name + " Error Report Details");
+			var runtime = PlatformTools.IsMono
+				? $"Mono\nmonoversion={PlatformTools.MonoVersion}" : ".NET";
+			MessageBox.Show(
+				$"The following details will be sent:\nhostname={Dns.GetHostName()}\n" +
+				$"desktop={PlatformTools.DesktopEnvironment}\n" +
+				$"shell={PlatformTools.DesktopEnvironmentInfoString}\n" +
+				$"processorCount={Environment.ProcessorCount}\n" +
+				$"user={ExceptionLogging.Client.Config.UserId}\n" +
+				$"runtime=${runtime}\n\nStacktrace:\n{_exception?.StackTrace}",
+				$"{Application.Instance.Name} Error Report Details");
 		}
 	}
 }

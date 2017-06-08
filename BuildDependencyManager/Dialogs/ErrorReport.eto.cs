@@ -15,7 +15,7 @@ namespace BuildDependency.Manager.Dialogs
 		private void InitializeComponent()
 		{
 			var appName = Application.Instance.Name;
-			Title = string.Format("{0} Error Report", appName);
+			Title = $"{appName} Error Report";
 
 			var sendButton = new Button { Text = "&Send" };
 			sendButton.Click += OnSendButtonClick;
@@ -24,11 +24,12 @@ namespace BuildDependency.Manager.Dialogs
 			var moreInfoButton = new Button { Text = "&More information" };
 			moreInfoButton.Click += OnMoreInfoButtonClick;
 
-			Func<Control> spacer = () => new Panel { Size = new Size(10, 10) };
+			Control Spacer() => new Panel {Size = new Size(10, 10)};
+
 			_label1 = new Label
 			{
-				Text = string.Format("{0} has encountered a problem and needs to close. " +
-					"We are sorry for the inconvenience.", appName),
+				Text = $"{appName} has encountered a problem and needs to close. " +
+					"We are sorry for the inconvenience.",
 				Wrap = WrapMode.None
 			};
 			_label2 = new Label { Text = "Please tell the developers about the problem." };
@@ -44,25 +45,25 @@ namespace BuildDependency.Manager.Dialogs
 				HorizontalContentAlignment = HorizontalAlignment.Stretch,
 				Items =
 				{
-					spacer(),
+					Spacer(),
 					new TableLayout(
 						new TableRow(
-							spacer(),
+							Spacer(),
 							new TableCell(_label1, true),
-							spacer()
+							Spacer()
 						),
-						spacer(),
+						Spacer(),
 						new TableRow(
-							spacer(),
+							Spacer(),
 							new TableCell(_label2, true),
-							spacer()
+							Spacer()
 						),
-						spacer(),
+						Spacer(),
 						new TableRow(
-							spacer(),
+							Spacer(),
 							new TableCell(_label3, true),
-							spacer())),
-					spacer(),
+							Spacer())),
+					Spacer(),
 					new StackLayoutItem(new StackLayout
 						{
 							HorizontalContentAlignment = HorizontalAlignment.Stretch,
