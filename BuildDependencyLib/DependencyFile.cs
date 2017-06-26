@@ -15,7 +15,7 @@ namespace BuildDependency
 	public class DependencyFile
 	{
 		private static DependencyFile _instance;
-		private Dictionary<string, Server> _servers;
+		private readonly Dictionary<string, Server> _servers;
 
 		private DependencyFile()
 		{
@@ -95,7 +95,7 @@ namespace BuildDependency
 					if (parts[0] == "Type")
 					{
 						ServerType type;
-						if (Enum.TryParse<ServerType>(parts[1], out type))
+						if (Enum.TryParse(parts[1], out type))
 						{
 							server = Server.CreateServer(type);
 							server.Name = name;
@@ -181,7 +181,7 @@ namespace BuildDependency
 								break;
 							case "Condition":
 								Conditions condition;
-								if (Enum.TryParse<Conditions>(parts[1], out condition))
+								if (Enum.TryParse(parts[1], out condition))
 									artifact.Condition = condition;
 								else
 									Console.WriteLine("Can't interpret condition on line {0}. Skipping {1}",

@@ -54,13 +54,13 @@ namespace BuildDependency.Artifacts
 
 			var fastZip = new FastZip(events) { CreateEmptyDirectories = true };
 			fastZip.ExtractZip(Path.Combine(workDir, ZipFile), Path.Combine(workDir, DestinationPath), FastZip.Overwrite.Always,
-				(fn) => true, fileFilter, directoryFilter, true);
+				fn => true, fileFilter, directoryFilter, true);
 			return true;
 		}
 
 		public override string ToString()
 		{
-			return string.Format("U\t{0}\t{1}\t{2}\t{3}", (int)Conditions, ZipFile, SourcePath, DestinationPath);
+			return $"U\t{(int) Conditions}\t{ZipFile}\t{SourcePath}\t{DestinationPath}";
 		}
 
 		#endregion

@@ -67,9 +67,9 @@ namespace BuildDependency.Artifacts
 		{
 			get
 			{
-				var source = string.Format("{0}::{1}\n({2})", Server.Name, ConfigName, TagLabel);
+				var source = $"{Server.Name}::{ConfigName}\n({TagLabel})";
 				if ((Condition & Conditions.All) != Conditions.All && Condition != Conditions.None)
-					source = string.Format("{0}\nCondition: {1}", source, Condition);
+					source = $"{source}\nCondition: {Condition}";
 				return source;
 			}
 		}

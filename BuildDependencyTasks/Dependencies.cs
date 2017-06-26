@@ -1,7 +1,6 @@
 // Copyright (c) 2014-2016 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +8,6 @@ using BuildDependency.Artifacts;
 using BuildDependency.Tasks.Tools;
 using BuildDependency.Tools;
 using Microsoft.Build.Framework;
-using Task = System.Threading.Tasks.Task;
 
 namespace BuildDependency.Tasks
 {
@@ -34,11 +32,6 @@ namespace BuildDependency.Tasks
 				{
 					Console.WriteLine(message, messageArgs);
 				}
-			}
-
-			public void LogMessage(MessageImportance importance, string message, params object[] messageArgs)
-			{
-				LogMessage(message, messageArgs);
 			}
 		}
 
@@ -112,16 +105,16 @@ namespace BuildDependency.Tasks
 			if (string.IsNullOrEmpty(JobsFile))
 				JobsFile = Path.ChangeExtension(DependencyFile, ".files");
 
-			var replaceJobsFile = (UseDependencyFile && !(KeepJobsFile && File.Exists(JobsFile))) ||
+			var replaceJobsFile = UseDependencyFile && !(KeepJobsFile && File.Exists(JobsFile)) ||
 				!File.Exists(JobsFile);
-			if (UseDependencyFile && File.Exists(JobsFile))
+			if (UseDependencyFile && DependencyFile != null && JobsFile != null && File.Exists(JobsFile))
 			{
 				var depFile = new FileInfo(DependencyFile);
 				var jobsFile = new FileInfo(JobsFile);
 				if (depFile.LastWriteTimeUtc > jobsFile.LastWriteTimeUtc)
 					replaceJobsFile = true;
 			}
-			bool retVal = true;
+			var retVal = true;
 			if (RunAsync)
 			{
 				retVal = ExecuteAsync(replaceJobsFile, logHelper).Result;
@@ -146,7 +139,7 @@ namespace BuildDependency.Tasks
 				}
 			}
 
-			if (UseDependencyFile && !KeepJobsFile)
+			if (UseDependencyFile && !KeepJobsFile && JobsFile != null)
 				File.Delete(JobsFile);
 
 			return retVal;

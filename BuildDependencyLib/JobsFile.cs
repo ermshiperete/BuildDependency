@@ -1,6 +1,5 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -53,7 +52,7 @@ namespace BuildDependency
 			var jobs = new List<IJob>();
 			using (var file = new StreamReader(fileName))
 			{
-				string line = null;
+				string line;
 				for (line = file.ReadLine(); !file.EndOfStream; line = file.ReadLine())
 				{
 					var job = ProcessLine(line);

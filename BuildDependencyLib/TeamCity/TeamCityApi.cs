@@ -22,38 +22,36 @@ namespace BuildDependency.TeamCity
 		{
 		}
 
-		private string BaseUrl
-		{
-			get { return string.Format("{0}/guestAuth/app/rest/latest", Url); }
-		}
+		private string BaseUrl => $"{Url}/guestAuth/app/rest/latest";
 
-		public string BaseRepoUrl
-		{
-			get { return string.Format("{0}/guestAuth/repository", Url); }
-		}
+		public string BaseRepoUrl => $"{Url}/guestAuth/repository";
 
 		public override string Url
 		{
-			get { return base.Url; }
+			get => base.Url;
 			set
 			{
 				base.Url = value;
 				if (string.IsNullOrEmpty(value))
 					return;
 
-				var request = new RestRequest();
-				request.Resource = string.Format("/buildTypes");
-				request.RootElement = "buildType";
+				var request = new RestRequest
+				{
+					Resource = "/buildTypes",
+					RootElement = "buildType"
+				};
 
 				_buildTypeTask = ExecuteApi<List<BuildType>>(request);
 			}
 		}
 
-		private async Task<T> Execute<T>(string baseUrl, RestRequest request, bool throwException = true) where T : new()
+		private static async Task<T> Execute<T>(string baseUrl, RestRequest request, bool throwException = true) where T : new()
 		{
-			var client = new RestClient();
-			client.BaseUrl = new Uri(baseUrl);
-			IRestResponse<T> response = null;
+			var client = new RestClient
+			{
+				BaseUrl = new Uri(baseUrl)
+			};
+			IRestResponse<T> response;
 //			try
 //			{
 			response = await client.ExecuteGetTaskAsync<T>(request);
@@ -97,9 +95,11 @@ namespace BuildDependency.TeamCity
 
 		public async Task<List<Project>> GetAllProjectsAsync()
 		{
-			var request = new RestRequest();
-			request.Resource = "/projects";
-			request.RootElement = "projects";
+			var request = new RestRequest
+			{
+				Resource = "/projects",
+				RootElement = "projects"
+			};
 
 			var response = await ExecuteApi<Projects>(request);
 			if (response == null)
@@ -121,9 +121,11 @@ namespace BuildDependency.TeamCity
 
 		public Task<List<BuildType>> GetBuildTypesForProjectTask(string projectId)
 		{
-			var request = new RestRequest();
-			request.Resource = string.Format("/projects/id:{0}/buildTypes", projectId);
-			request.RootElement = "buildType";
+			var request = new RestRequest
+				{
+					Resource = $"/projects/id:{projectId}/buildTypes",
+					RootElement = "buildType"
+				};
 
 			return ExecuteApi<List<BuildType>>(request);
 		}
@@ -135,9 +137,11 @@ namespace BuildDependency.TeamCity
 
 		public async Task<List<ArtifactDependency>> GetArtifactDependenciesAsync(string buildTypeId)
 		{
-			var request = new RestRequest();
-			request.Resource = string.Format("/buildTypes/id:{0}/artifact-dependencies", buildTypeId);
-			request.RootElement = "artifact-dependency";
+			var request = new RestRequest
+				{
+					Resource = $"/buildTypes/id:{buildTypeId}/artifact-dependencies",
+					RootElement = "artifact-dependency"
+				};
 
 			return await ExecuteApi<List<ArtifactDependency>>(request, false);
 		}
@@ -149,10 +153,12 @@ namespace BuildDependency.TeamCity
 
 		public async Task<List<Artifact>> GetArtifactsAsync(ArtifactTemplate template)
 		{
-			var request = new RestRequest();
-			request.Resource = string.Format("/download/{0}/{1}/teamcity-ivy.xml",
-				template.Config.IdForArtifacts,template.RevisionValue);
-			request.RootElement = "publications";
+			var request = new RestRequest
+			{
+				Resource =
+					$"/download/{template.Config.IdForArtifacts}/{template.RevisionValue}/teamcity-ivy.xml",
+				RootElement = "publications"
+			};
 
 			var artifacts = await ExecuteRepo<List<Artifact>>(request, false) ?? new List<Artifact>();
 			return artifacts;
@@ -179,12 +185,12 @@ namespace BuildDependency.TeamCity
 
 		private void FillInProjectList(List<Project> projectList)
 		{
-			if (_projects == null)
-			{
-				_projects = new Dictionary<string, Project>();
-				foreach (var proj in projectList)
-					_projects.Add(proj.Id, proj);
-			}
+			if (_projects != null)
+				return;
+
+			_projects = new Dictionary<string, Project>();
+			foreach (var proj in projectList)
+				_projects.Add(proj.Id, proj);
 		}
 
 		public Dictionary<string, Project> Projects
