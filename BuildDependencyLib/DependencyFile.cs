@@ -37,14 +37,14 @@ namespace BuildDependency
 			InternalSaveFile(fileName, servers, artifacts);
 		}
 
-		public static List<ArtifactTemplate> LoadFile(string fileName)
+		public static List<ArtifactTemplate> LoadFile(string fileName, ILog log)
 		{
-			return Instance.InternalLoadFile(fileName).Result;
+			return Instance.InternalLoadFile(fileName, log).WaitAndUnwrapException();
 		}
 
-		public static async Task<List<ArtifactTemplate>> LoadFileAsync(string fileName)
+		public static async Task<List<ArtifactTemplate>> LoadFileAsync(string fileName, ILog log)
 		{
-			return await Instance.InternalLoadFile(fileName);
+			return await Instance.InternalLoadFile(fileName, log);
 		}
 
 		private static void InternalSaveFile(string fileName, List<Server> servers, List<ArtifactTemplate> artifactTemplates)
@@ -76,7 +76,7 @@ namespace BuildDependency
 			}
 		}
 
-		private int ReadServer(StreamReader file, string line)
+		private int ReadServer(StreamReader file, string line, ILog log)
 		{
 			var name = line.Trim('[', ']');
 			var lineCount = 0;
@@ -102,7 +102,7 @@ namespace BuildDependency
 							_servers.Add(name, server);
 						}
 						else
-							Console.WriteLine("Can't interpret type {0}", parts[1]);
+							log.LogError("Can't interpret type {0}", parts[1]);
 					}
 					else if (parts[0] == "Url" && server != null)
 					{
@@ -113,7 +113,7 @@ namespace BuildDependency
 			return lineCount;
 		}
 
-		private async Task<List<ArtifactTemplate>> InternalLoadFile(string fileName)
+		private async Task<List<ArtifactTemplate>> InternalLoadFile(string fileName, ILog log)
 		{
 			_servers.Clear();
 			var artifacts = new List<ArtifactTemplate>();
@@ -127,7 +127,7 @@ namespace BuildDependency
 					lineNumber++;
 					if (line.StartsWith("[[", StringComparison.InvariantCulture))
 					{
-						lineNumber += ReadServer(file, line);
+						lineNumber += ReadServer(file, line, log);
 					}
 					else if (line.StartsWith("[", StringComparison.InvariantCulture))
 					{
@@ -156,7 +156,7 @@ namespace BuildDependency
 								}
 							}
 						}
-						Console.WriteLine("Can't interpret line {0}. Skipping {1}.", lineNumber, line);
+						log.LogError("Can't interpret line {0}. Skipping {1}.", lineNumber, line);
 					}
 					else if (string.IsNullOrEmpty(line.Trim()) ||
 						line.Trim().StartsWith("#", StringComparison.InvariantCulture))
@@ -168,7 +168,7 @@ namespace BuildDependency
 						var parts = line.Split(new []{ '=' }, 2);
 						if (parts.Length < 2)
 						{
-							Console.WriteLine("Can't interpret line {0}. Skipping {1}", lineNumber, line);
+							log.LogError("Can't interpret line {0}. Skipping {1}", lineNumber, line);
 							continue;
 						}
 						switch (parts[0])
@@ -184,7 +184,7 @@ namespace BuildDependency
 								if (Enum.TryParse(parts[1], out condition))
 									artifact.Condition = condition;
 								else
-									Console.WriteLine("Can't interpret condition on line {0}. Skipping {1}",
+									log.LogError("Can't interpret condition on line {0}. Skipping {1}",
 										lineNumber, line);
 								break;
 							case "Path":

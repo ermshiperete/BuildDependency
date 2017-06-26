@@ -90,7 +90,7 @@ namespace BuildDependency.TeamCity
 
 		public List<Project> GetAllProjects()
 		{
-			return GetAllProjectsAsync().Result;
+			return GetAllProjectsAsync().WaitAndUnwrapException();
 		}
 
 		public async Task<List<Project>> GetAllProjectsAsync()
@@ -111,7 +111,7 @@ namespace BuildDependency.TeamCity
 
 		public List<BuildType> GetBuildTypes()
 		{
-			return GetBuildTypesTask().Result;
+			return GetBuildTypesTask().WaitAndUnwrapException();
 		}
 
 		public Task<List<BuildType>> GetBuildTypesTask()
@@ -132,7 +132,7 @@ namespace BuildDependency.TeamCity
 
 		public List<ArtifactDependency> GetArtifactDependencies(string buildTypeId)
 		{
-			return GetArtifactDependenciesAsync(buildTypeId).Result;
+			return GetArtifactDependenciesAsync(buildTypeId).WaitAndUnwrapException();
 		}
 
 		public async Task<List<ArtifactDependency>> GetArtifactDependenciesAsync(string buildTypeId)
@@ -148,7 +148,7 @@ namespace BuildDependency.TeamCity
 
 		public List<Artifact> GetArtifacts(ArtifactTemplate template)
 		{
-			return GetArtifactsAsync(template).Result;
+			return GetArtifactsAsync(template).WaitAndUnwrapException();
 		}
 
 		public async Task<List<Artifact>> GetArtifactsAsync(ArtifactTemplate template)
@@ -160,8 +160,7 @@ namespace BuildDependency.TeamCity
 				RootElement = "publications"
 			};
 
-			var artifacts = await ExecuteRepo<List<Artifact>>(request, false) ?? new List<Artifact>();
-			return artifacts;
+			return await ExecuteRepo<List<Artifact>>(request, false) ?? new List<Artifact>();
 		}
 
 		public Dictionary<string, BuildType> BuildTypes
@@ -176,10 +175,10 @@ namespace BuildDependency.TeamCity
 			}
 		}
 
-		private async void FillBuildTypesDict()
+		private void FillBuildTypesDict()
 		{
 			_buildTypes = new Dictionary<string, BuildType>();
-			foreach (var buildType in await _buildTypeTask)
+			foreach (var buildType in _buildTypeTask.WaitAndUnwrapException())
 				_buildTypes.Add(buildType.Id, buildType);
 		}
 

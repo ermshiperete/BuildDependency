@@ -10,12 +10,12 @@ namespace BuildDependency
 {
 	public static class JobsFile
 	{
-		public async static void WriteJobsFile(string fileName, List<ArtifactTemplate> artifactTemplates)
+		public static void WriteJobsFile(string fileName, List<ArtifactTemplate> artifactTemplates)
 		{
-			await WriteJobsFileAsync(fileName, artifactTemplates);
+			WriteJobsFileAsync(fileName, artifactTemplates).WaitAndUnwrapException();
 		}
 
-		public async static Task WriteJobsFileAsync(string fileName, List<ArtifactTemplate> artifactTemplates)
+		public static async Task WriteJobsFileAsync(string fileName, List<ArtifactTemplate> artifactTemplates)
 		{
 			using (var file = new StreamWriter(fileName))
 			{

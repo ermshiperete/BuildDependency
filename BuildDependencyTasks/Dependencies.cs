@@ -123,7 +123,7 @@ namespace BuildDependency.Tasks
 			{
 				if (replaceJobsFile)
 				{
-					var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile);
+					var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile, logHelper);
 					BuildDependency.JobsFile.WriteJobsFile(JobsFile, artifactTemplates);
 				}
 
@@ -131,11 +131,11 @@ namespace BuildDependency.Tasks
 
 				foreach (var job in jobs.OfType<DownloadFileJob>())
 				{
-					retVal &= job.Execute(logHelper, WorkingDir).Result;
+					retVal &= job.Execute(logHelper, WorkingDir).WaitAndUnwrapException();
 				}
 				foreach (var job in jobs.OfType<UnzipFilesJob>())
 				{
-					retVal &= job.Execute(logHelper, WorkingDir).Result;
+					retVal &= job.Execute(logHelper, WorkingDir).WaitAndUnwrapException();
 				}
 			}
 
@@ -150,7 +150,7 @@ namespace BuildDependency.Tasks
 			var retVal = true;
 			if (replaceJobsFile)
 			{
-				var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile);
+				var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile, logHelper);
 				await BuildDependency.JobsFile.WriteJobsFileAsync(JobsFile, artifactTemplates);
 			}
 
