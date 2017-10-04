@@ -40,11 +40,11 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\BuildDependencyTasks\BuildDependencyTasks.csproj">
-      <Project>{3C10C2D6-138D-4DC7-9C6E-B42EAAC25E32}</Project>
+    <ProjectReference Include="..\..\BuildDependencyTasks\BuildDependencyTasks.csproj">
+      <Project>{3c10c2d6-138d-4dc7-9c6e-b42eaac25e32}</Project>
       <Name>BuildDependencyTasks</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

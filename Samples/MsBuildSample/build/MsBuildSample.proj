@@ -1,0 +1,28 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTarget="DownloadDependencies">
+	<PropertyGroup>
+		<RootDir Condition="'$(RootDir)'==''">$(MSBuildProjectDirectory)/..</RootDir>
+		<Solution Condition="'$(Solution)'=''">MsBuildSample.sln</Solution>
+		<SolutionPath Condition="'$(SolutionPath)'=''">$(RootDir)/$(Solution)</SolutionPath>
+	</PropertyGroup>
+
+	<Import Project="NuGet.targets"/>
+
+	<ItemGroup>
+		<AllBuildDependencyTasksFiles Include="$(RootDir)/packages/BuildDependencyTasks*/**"/>
+		<AllBuildDependencyTasksDirs Include="@(AllBuildDependencyTasksFiles->'%(RootDir)%(Directory)')"/>
+	</ItemGroup>
+
+	<Target Name="RemoveOldBuildDependencyTaskPackages">
+		<!-- Delete BuildDependencyTasks.* package directories so that we end up with having only the desired version -->
+		<!-- NOTE: because of limited functionality of msbuild on Linux we always delete the directories even when we have only one. -->
+		<RemoveDir Directories="@(AllBuildDependencyTasksDirs)" />
+	</Target>
+
+	<Target Name="DownloadDependencies" DependsOnTargets="RemoveOldBuildDependencyTaskPackages;RestorePackages">
+		<MSBuild
+			Projects="$(MSBuildThisFileDirectory)/MsBuildSample-DownloadDeps.xml"
+			Targets="DownloadDependenciesTarget"
+			Properties="RootDir=$(RootDir)" />
+	</Target>
+
+</Project>

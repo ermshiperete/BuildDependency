@@ -1,0 +1,6 @@
+bin/
+obj/
+packages/
+MercurialExtensions/
+NuGet.exe
+build/MsBuildSample.files
