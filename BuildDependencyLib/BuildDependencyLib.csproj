@@ -59,6 +59,7 @@
     <Compile Include="Artifacts\UnzipFilesJob.cs" />
     <Compile Include="Tools\ConditionHelper.cs" />
     <Compile Include="Tools\FileHelper.cs" />
+    <Compile Include="Tools\LogHelper.cs" />
     <Compile Include="Tools\TaskExtensions.cs" />
     <Compile Include="Tools\WildcardToRegex.cs" />
     <Compile Include="Conditions.cs" />

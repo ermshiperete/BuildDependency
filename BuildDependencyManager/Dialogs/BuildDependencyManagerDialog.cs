@@ -69,7 +69,7 @@ namespace BuildDependency.Manager.Dialogs
 				},
 				QuitItem = new Command((sender, e) => Application.Instance.Quit())
 				{
-					MenuText = "E&xit", 
+					MenuText = "E&xit",
 				}
 			};
 
@@ -257,7 +257,7 @@ namespace BuildDependency.Manager.Dialogs
 		private async Task LoadFileAsync(string filename)
 		{
 			_dataStore.Clear();
-			_dataStore.AddRange(await DependencyFile.LoadFileAsync(filename));
+			_dataStore.AddRange(await DependencyFile.LoadFileAsync(filename, new LogHelper()));
 		}
 
 		private async void OnFileSave(object sender, EventArgs e)
