@@ -153,10 +153,19 @@ namespace BuildDependency
 										artifacts.Add(artifact);
 										continue;
 									}
+									log.LogError($"Can't find project '{config.ProjectId}'. Skipping {line} (line {lineNumber}).");
 								}
+								else
+									log.LogError($"Can't find build configuration '{configId}'. Skipping {line} (line {lineNumber}).");
 							}
+							else
+								log.LogError($"Can't find server '{tc}' mentioned on line {lineNumber}. Skipping {line}.");
+
+							// just a dummy artifact so that we can skip the following lines
+							artifact = new ArtifactTemplate(Server.CreateServer(ServerType.TeamCity), new Project(), null);
 						}
-						log.LogError("Can't interpret line {0}. Skipping {1}.", lineNumber, line);
+						else
+							log.LogError($"Can't interpret line {lineNumber}. Skipping {line}.");
 					}
 					else if (string.IsNullOrEmpty(line.Trim()) ||
 						line.Trim().StartsWith("#", StringComparison.InvariantCulture))
@@ -168,7 +177,7 @@ namespace BuildDependency
 						var parts = line.Split(new []{ '=' }, 2);
 						if (parts.Length < 2)
 						{
-							log.LogError("Can't interpret line {0}. Skipping {1}", lineNumber, line);
+							log.LogError($"Can't interpret line {lineNumber}. Skipping {line}.");
 							continue;
 						}
 						switch (parts[0])
@@ -184,8 +193,7 @@ namespace BuildDependency
 								if (Enum.TryParse(parts[1], out condition))
 									artifact.Condition = condition;
 								else
-									log.LogError("Can't interpret condition on line {0}. Skipping {1}",
-										lineNumber, line);
+									log.LogError($"Can't interpret condition '{parts[1]}' on line {lineNumber}. Skipping {line}.");
 								break;
 							case "Path":
 								{
