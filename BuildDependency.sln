@@ -13,6 +13,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1DAB2CBF-8E00-4825-BAC1-46881619C513}"
 ProjectSection(SolutionItems) = preProject
 	.editorconfig = .editorconfig
+	CHANGELOG.md = CHANGELOG.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{0ED53BB9-112D-486E-B4FB-AC828C9D3883}"
