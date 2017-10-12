@@ -8,6 +8,7 @@ namespace BuildDependency.Artifacts
 	{
 		void LogError(string message, params object[] messageArgs);
 		void LogMessage(string message, params object[] messageArgs);
+		void LogMessage(LogMessageImportance importance, string message, params object[] messageArgs);
 	}
 }
 

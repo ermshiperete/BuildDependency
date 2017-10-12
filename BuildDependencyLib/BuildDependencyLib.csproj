@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Artifacts\LogMessageImportance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Artifacts\ArtifactRule.cs" />
     <Compile Include="Artifacts\ArtifactTemplate.cs" />

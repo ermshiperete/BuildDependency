@@ -16,6 +16,12 @@ namespace BuildDependency.Tasks
 		private class LogHelper: ILog
 		{
 			private readonly object _syncObj = new object();
+			private readonly LogMessageImportance _importance;
+
+			public LogHelper(LogMessageImportance importance = LogMessageImportance.High)
+			{
+				_importance = importance;
+			}
 
 			public void LogError(string message, params object[] messageArgs)
 			{
@@ -32,6 +38,12 @@ namespace BuildDependency.Tasks
 				{
 					Console.WriteLine(message, messageArgs);
 				}
+			}
+
+			public void LogMessage(LogMessageImportance importance, string message, params object[] messageArgs)
+			{
+				if ((int)importance <= (int)_importance)
+					LogMessage(message, messageArgs);
 			}
 		}
 

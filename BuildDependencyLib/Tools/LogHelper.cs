@@ -26,5 +26,10 @@ namespace BuildDependency.Tools
 				Console.WriteLine(message, messageArgs);
 			}
 		}
+
+		public void LogMessage(LogMessageImportance importance, string message, params object[] messageArgs)
+		{
+			LogMessage(message, messageArgs);
+		}
 	}
 }

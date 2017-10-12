@@ -22,12 +22,19 @@ namespace BuildDependencyTestApp
 			task.WorkingDir = "/tmp/bla";
 			Directory.CreateDirectory("/tmp/bla");
 			task.RunAsync = true;
-			task.BuildEngine = new TmpBuildEngine();
+			task.BuildEngine = new TmpBuildEngine(MessageImportance.Normal);
 			task.Execute();
 		}
 
 		class TmpBuildEngine : IBuildEngine
 		{
+			private MessageImportance _importance;
+
+			public TmpBuildEngine(MessageImportance importance)
+			{
+				_importance = importance;
+			}
+
 			public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties,
 				IDictionary targetOutputs)
 			{
@@ -46,7 +53,8 @@ namespace BuildDependencyTestApp
 
 			public void LogMessageEvent(BuildMessageEventArgs e)
 			{
-				Console.WriteLine($"Log message: {e.Message}");
+				if ((int)e.Importance <= (int)_importance)
+					Console.WriteLine($"Log message: {e.Message}");
 			}
 
 			public void LogWarningEvent(BuildWarningEventArgs e)

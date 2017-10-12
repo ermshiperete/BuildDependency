@@ -35,6 +35,26 @@ namespace BuildDependency.Tasks.Tools
 		}
 
 
+		public void LogMessage(LogMessageImportance importance, string message,
+			params object[] messageArgs)
+		{
+			MessageImportance msgImportance;
+			switch (importance)
+			{
+				case LogMessageImportance.High:
+					msgImportance = MessageImportance.High;
+					break;
+				case LogMessageImportance.Normal:
+					msgImportance = MessageImportance.Normal;
+					break;
+				case LogMessageImportance.Low:
+				default:
+					msgImportance = MessageImportance.Low;
+					break;
+			}
+			LogMessage(msgImportance, message, messageArgs);
+		}
+
 		public void LogMessage(MessageImportance importance, string message, params object[] messageArgs)
 		{
 			lock (_taskLoggingHelper)
