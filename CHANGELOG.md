@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Implement caching of dependencies (#16)
+
 ### Changed
 
 - Improve error message if server can't be reached

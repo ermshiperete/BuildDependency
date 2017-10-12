@@ -1,12 +1,13 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+﻿// Copyright (c) 2014-2017 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Diagnostics;
-using System.Runtime.Serialization;
 using System.IO;
 using System.Net;
-using BuildDependency.Tools;
+using System.Runtime.Remoting.Messaging;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using BuildDependency.Tools;
 
 namespace BuildDependency.Artifacts
 {
@@ -56,12 +57,38 @@ namespace BuildDependency.Artifacts
 			Stream remoteStream = null;
 			Stream localStream = null;
 			HttpWebResponse response = null;
-			DateTime lastModified = DateTime.Now;
-
-			log.LogMessage("Downloading {0}", TargetFile);
+			var lastModified = DateTime.Now;
 
 			var targetFile = Path.Combine(workDir, TargetFile);
 			var tmpTargetFile = targetFile + ".~tmp";
+
+			bool gotCachedFile = false;
+			if (FileCache.Enabled)
+			{
+				var cachedFile = FileCache.GetCachedFile(Url);
+				if (File.Exists(cachedFile))
+				{
+					gotCachedFile = true;
+					log.LogMessage($"Found cached file {targetFile}");
+					if (File.Exists(targetFile))
+					{
+						var targetFileInfo = new FileInfo(targetFile);
+						var cachedFileInfo = new FileInfo(cachedFile);
+						if (cachedFileInfo.LastWriteTimeUtc > targetFileInfo.LastWriteTimeUtc)
+							CopyCachedFile(log, cachedFile, targetFile);
+					}
+					else
+					{
+						CopyCachedFile(log, cachedFile, targetFile);
+					}
+				}
+			}
+			if (!Network.IsOnline)
+			{
+				return gotCachedFile;
+			}
+
+			log.LogMessage("Checking {0}, downloading if newer...", TargetFile);
 
 			// Use a try/catch/finally block as both the WebRequest and Stream
 			// classes throw exceptions upon error
@@ -126,6 +153,8 @@ namespace BuildDependency.Artifacts
 				localStream.Close();
 				File.Delete(targetFile);
 				File.Move(tmpTargetFile, targetFile);
+				if (FileCache.Enabled)
+					FileCache.CacheFile(Url, targetFile);
 			}
 			catch (WebException wex)
 			{
@@ -185,9 +214,16 @@ namespace BuildDependency.Artifacts
 				}
 			}
 
-			log.LogMessage("Download of {0} finished after {1}", TargetFile, DateTime.Now - lastModified);
+			log.LogMessage("Download of {0} finished after {1}.", TargetFile, DateTime.Now - lastModified);
 
 			return true;
+		}
+
+		private static void CopyCachedFile(ILog log, string cachedFile, string targetFile)
+		{
+			log.LogMessage($"Copying {targetFile} from cache");
+			Directory.CreateDirectory(Path.GetDirectoryName(targetFile));
+			File.Copy(cachedFile, targetFile);
 		}
 
 		public override string ToString()

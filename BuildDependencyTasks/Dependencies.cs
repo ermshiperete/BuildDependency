@@ -13,6 +13,7 @@ namespace BuildDependency.Tasks
 {
 	public class Dependencies: Microsoft.Build.Utilities.Task
 	{
+		#region LogHelper class
 		private class LogHelper: ILog
 		{
 			private readonly object _syncObj = new object();
@@ -46,6 +47,7 @@ namespace BuildDependency.Tasks
 					LogMessage(message, messageArgs);
 			}
 		}
+		#endregion
 
 		public Dependencies()
 		{
@@ -53,23 +55,34 @@ namespace BuildDependency.Tasks
 
 			WorkingDir = string.Empty;
 			RunAsync = true;
+			UseCache = true;
 		}
 
-		public string DependencyFile
-		{ get; set; }
+		/// <summary>
+		/// File name and path of the dependency file (*.dep)
+		/// </summary>
+		public string DependencyFile { get; set; }
 
-		public string JobsFile
-		{ get; set; }
+		/// <summary>
+		/// File name and path of the jobs file (*.files)
+		/// </summary>
+		public string JobsFile { get; set; }
 
+		/// <summary>
+		/// <c>true</c> to use the dependency file, <c>false</c> to rely on the jobs file.
+		/// </summary>
 		[Required]
-		public bool UseDependencyFile
-		{ get; set; }
+		public bool UseDependencyFile { get; set; }
 
-		public string WorkingDir
-		{ get; set; }
+		/// <summary>
+		/// Base directory. All paths for target files are relative to this directory.
+		/// </summary>
+		public string WorkingDir { get; set; }
 
-		public bool RunAsync
-		{ get; set; }
+		/// <summary>
+		/// <c>true</c> to download files asynchronously, otherwise <c>false</c>. Default: <c>true</c>
+		/// </summary>
+		public bool RunAsync { get; set; }
 
 		/// <summary>
 		/// Only relevant when <see cref="UseDependencyFile"/> is <c>true</c>.
@@ -78,8 +91,12 @@ namespace BuildDependency.Tasks
 		/// (and re-generate on the next build).
 		/// </summary>
 		/// <value><c>true</c> if keep jobs file; otherwise, <c>false</c>.</value>
-		public bool KeepJobsFile
-		{ get; set; }
+		public bool KeepJobsFile { get; set; }
+
+		/// <summary>
+		/// <c>true</c> to cache the downloaded files, otherwise <c>false</c>. Default: <c>true</c>
+		/// </summary>
+		public bool UseCache { get; set; }
 
 		public override bool Execute()
 		{
@@ -92,6 +109,11 @@ namespace BuildDependency.Tasks
 			var version = Utils.GetVersion("BuildDependency.Tasks");
 			logHelper.LogMessage("Dependencies task version {0} ({1}):", version.Item1,
 				version.Item2);
+
+			if (!Network.IsInternetAvailable())
+				logHelper.LogMessage(LogMessageImportance.High, "No network connection available. Working in offline mode.");
+
+			FileCache.Enabled = UseCache;
 
 			if (UseDependencyFile && string.IsNullOrEmpty(DependencyFile))
 			{
@@ -162,8 +184,19 @@ namespace BuildDependency.Tasks
 			var retVal = true;
 			if (replaceJobsFile)
 			{
-				var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile, logHelper);
-				await BuildDependency.JobsFile.WriteJobsFileAsync(JobsFile, artifactTemplates);
+				if (Network.IsOnline)
+				{
+					var artifactTemplates = BuildDependency.DependencyFile.LoadFile(DependencyFile, logHelper);
+					await BuildDependency.JobsFile.WriteJobsFileAsync(JobsFile, artifactTemplates);
+					if (FileCache.Enabled)
+						FileCache.CacheFile(JobsFile, JobsFile);
+				}
+				else if (FileCache.Enabled)
+				{
+					var cachedJobsFile = FileCache.GetCachedFile(JobsFile);
+					if (File.Exists(cachedJobsFile))
+						File.Copy(cachedJobsFile, JobsFile, true);
+				}
 			}
 
 			var jobs = BuildDependency.JobsFile.ReadJobsFile(JobsFile);
@@ -182,4 +215,3 @@ namespace BuildDependency.Tasks
 		}
 	}
 }
-

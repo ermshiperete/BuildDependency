@@ -3,12 +3,13 @@
 		<RootDir Condition="'$(RootDir)'==''">$(MSBuildProjectDirectory)/..</RootDir>
 		<SolutionDir Condition="'$(SolutionDir)'==''">$(RootDir)</SolutionDir>
 		<KeepJobsFile Condition="'$(KeepJobsFile)'==''">true</KeepJobsFile>
+		<CacheFiles Condition="'$(CacheFiles)'==''">true</CacheFiles>
 	</PropertyGroup>
 
 	<Import Project="$(SolutionDir)/packages/BuildDependencyTasks.*/tools/BuildDependencyTasks.targets"/>
 
 	<Target Name="DownloadDependenciesTarget">
 		<Dependencies DependencyFile="MsBuildSample.dep" UseDependencyFile="true" KeepJobsFile="$(KeepJobsFile)"
-			WorkingDir="$(RootDir)" />
+			WorkingDir="$(RootDir)" UseCache="$(CacheFiles)" />
 	</Target>
 </Project>
