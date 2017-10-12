@@ -199,11 +199,14 @@ namespace BuildDependency
 								{
 									var bldr = new StringBuilder();
 									line = parts[1];
-									while (!string.IsNullOrEmpty(line) && !file.EndOfStream)
+									if (string.IsNullOrEmpty(line))
+										break;
+
+									do
 									{
 										bldr.AppendLine(line);
 										line = file.ReadLine();
-									}
+									} while (!string.IsNullOrEmpty(line) && !file.EndOfStream);
 									artifact.PathRules = bldr.ToString();
 									break;
 								}
