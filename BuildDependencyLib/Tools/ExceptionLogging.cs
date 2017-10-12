@@ -3,6 +3,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Principal;
 using Bugsnag;
@@ -10,7 +12,7 @@ using Bugsnag.Clients;
 
 namespace BuildDependency.Tools
 {
-	public class ExceptionLogging: BaseClient
+	public class ExceptionLogging : BaseClient
 	{
 		private ExceptionLogging(string apiKey, string callerFilePath)
 			: base(apiKey)
@@ -32,6 +34,14 @@ namespace BuildDependency.Tools
 			Config.Metadata.AddToTab("Device", "desktop", Platform.DesktopEnvironment);
 			if (!string.IsNullOrEmpty(Platform.DesktopEnvironmentInfoString))
 				Config.Metadata.AddToTab("Device", "shell", Platform.DesktopEnvironmentInfoString);
+			Config.Metadata.AddToTab("App", "executable",
+				Path.GetFileName(Assembly.GetEntryAssembly().Location));
+			var executingAssembly = typeof(ExceptionLogging).Assembly;
+			Config.Metadata.AddToTab("App", "executingAssembly",
+				Path.GetFileName(executingAssembly.Location));
+			var fileVersion = executingAssembly.GetCustomAttributes(typeof(AssemblyFileVersionAttribute), true).FirstOrDefault() as AssemblyFileVersionAttribute;
+			Config.Metadata.AddToTab("App", "executingAssemblyVersion",
+				fileVersion.Version);
 			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 		}
 
