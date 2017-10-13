@@ -16,7 +16,7 @@ namespace BuildDependency.Artifacts
 		{
 			var parts = serializedJob.Split('\t');
 			if (parts.Length < 4 || parts[0] != JobTypeMarker)
-				throw new SerializationException("Unexpected line for DownloadFileJob: " + serializedJob);
+				throw new SerializationException($"Unexpected line for DownloadFileJob: {serializedJob}");
 
 			Conditions = (Conditions)Convert.ToInt32(parts[1]);
 			Url = parts[2];
@@ -31,25 +31,25 @@ namespace BuildDependency.Artifacts
 			SourceFile = sourceFile;
 		}
 
-		protected virtual string JobTypeMarker { get { return "F"; } }
+		protected virtual string JobTypeMarker => "F";
 
-		public string Url { get; private set; }
+		public string Url { get; }
 
-		public string TargetFile { get; private set; }
+		public string TargetFile { get; }
 
-		public string SourceFile { get; private set; }
+		public string SourceFile { get; }
 
 		#region IJob implementation
 
-		public Conditions Conditions { get; private set; }
+		public Conditions Conditions { get; }
 
 		public async Task<bool> Execute(ILog log, string workDir)
 		{
 			if (!Conditions.AreTrue())
 				return true;
 
-			string httpUsername;
-			string httpPassword;
+//			string httpUsername;
+//			string httpPassword;
 
 			// Assign values to these objects here so that they can
 			// be referenced in the finally block
@@ -95,7 +95,7 @@ namespace BuildDependency.Artifacts
 
 				// Send the request to the server and retrieve the
 				// WebResponse object
-				response = (HttpWebResponse) await Task.Factory.FromAsync<WebResponse>(
+				response = (HttpWebResponse) await Task.Factory.FromAsync(
 					request.BeginGetResponse, request.EndGetResponse, null);
 
 				// Once the WebResponse object has been retrieved,
@@ -151,16 +151,16 @@ namespace BuildDependency.Artifacts
 					}
 					return false;
 				}
-				string html = "";
 				if (wex.Response != null)
 				{
+					string html;
 					using (var sr = new StreamReader(wex.Response.GetResponseStream()))
 						html = sr.ReadToEnd();
-					log.LogMessage("Could not download from {0}. Server responds {1}", Url, html);
+					log.LogMessage("Could not download from {0}. Server responds {1}.", Url, html);
 				}
 				else
 				{
-					log.LogMessage("Could not download from {0}. no server response. Exception {1}. Status {2}",
+					log.LogMessage("Could not download from {0}. No server response. Exception {1}. Status {2}.",
 						Url, wex.Message, wex.Status);
 				}
 				return false;
@@ -176,15 +176,12 @@ namespace BuildDependency.Artifacts
 				// Close the response and streams objects here
 				// to make sure they're closed even if an exception
 				// is thrown at some point
-				if (response != null)
-					response.Close();
-				if (remoteStream != null)
-					remoteStream.Close();
+				response?.Close();
+				remoteStream?.Close();
 				if (localStream != null)
 				{
 					localStream.Close();
-					var fi = new FileInfo(targetFile);
-					fi.LastWriteTime = lastModified;
+					var fi = new FileInfo(targetFile) { LastWriteTime = lastModified };
 				}
 			}
 
@@ -195,7 +192,7 @@ namespace BuildDependency.Artifacts
 
 		public override string ToString()
 		{
-			return string.Format("{0}\t{1}\t{2}\t{3}", JobTypeMarker, (int)Conditions, Url, TargetFile);
+			return $"{JobTypeMarker}\t{(int) Conditions}\t{Url}\t{TargetFile}";
 		}
 
 		#endregion

@@ -18,7 +18,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+- Improve error message if server can't be reached
+
 ### Fixed
+
+- Don't ignore last line of dependency file
 
 ## [0.2.11] - 2017-10-06
 

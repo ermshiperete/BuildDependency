@@ -16,7 +16,7 @@ namespace BuildDependency.Artifacts
 		{
 		}
 
-		protected override string JobTypeMarker { get { return "D"; } }
+		protected override string JobTypeMarker => "D";
 	}
 }
 

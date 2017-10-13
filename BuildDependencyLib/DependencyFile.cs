@@ -141,22 +141,39 @@ namespace BuildDependency
 								var server = _servers[tc] as TeamCityApi;
 								var buildTypesTask = server.GetBuildTypesTask();
 								var projectsTask = server.GetAllProjectsAsync();
-								var buildTypes = await buildTypesTask;
-								var projects = await projectsTask;
-								var config = buildTypes.FirstOrDefault(type => type.Id == configId);
-								if (config != null)
+								try
 								{
-									var proj = projects.FirstOrDefault(project => project.Id == config.ProjectId);
-									if (proj != null)
+									var buildTypes = await buildTypesTask;
+									if (buildTypes != null)
 									{
-										artifact = new ArtifactTemplate(server, proj, configId);
-										artifacts.Add(artifact);
-										continue;
+										var config = buildTypes.FirstOrDefault(type => type.Id == configId);
+										if (config != null)
+										{
+											var projects = await projectsTask;
+											var proj = projects.FirstOrDefault(project => project.Id == config.ProjectId);
+											if (proj != null)
+											{
+												artifact = new ArtifactTemplate(server, proj, configId);
+												artifacts.Add(artifact);
+												continue;
+											}
+											log.LogError(
+												$"Can't find project '{config.ProjectId}'. Skipping {line} (line {lineNumber}).");
+										}
+										else
+											log.LogError(
+												$"Can't find build configuration '{configId}'. Skipping {line} (line {lineNumber}).");
 									}
-									log.LogError($"Can't find project '{config.ProjectId}'. Skipping {line} (line {lineNumber}).");
+									else
+										log.LogError(
+											$"Can't find build types on server {server.Name} ({server.Url}). Skipping {line} (line {lineNumber}).");
 								}
-								else
-									log.LogError($"Can't find build configuration '{configId}'. Skipping {line} (line {lineNumber}).");
+								catch (ApplicationException e)
+								{
+									log.LogError(
+										$"Got {e.InnerException.GetType()} exception trying to get build types from server {server.Name} ({server.Url}). Skipping {line} (line {lineNumber}).");
+									log.LogMessage(LogMessageImportance.Low, $"Exception details:\n{e.InnerException}");
+								}
 							}
 							else
 								log.LogError($"Can't find server '{tc}' mentioned on line {lineNumber}. Skipping {line}.");
