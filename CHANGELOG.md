@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Implement caching of dependencies (#16)
 - Implement offline mode (#17)
+- Add support for Windows 64-bit in UI (#25) - thanks @vkarthim
 
 ### Changed
 

@@ -19,7 +19,8 @@ namespace BuildDependency.Manager.Dialogs
 		private readonly ComboBox _projectCombo;
 		private readonly ComboBox _configCombo;
 		private readonly GridView _gridView;
-		private readonly CheckBox _windows;
+		private readonly CheckBox _win32;
+		private readonly CheckBox _win64;
 		private readonly CheckBox _linux32;
 		private readonly CheckBox _linux64;
 		private readonly SelectableFilterCollection<ArtifactTemplate> _dataStore;
@@ -30,8 +31,13 @@ namespace BuildDependency.Manager.Dialogs
 			_serversCombo = new ComboBox();
 			_projectCombo = new ComboBox();
 			_configCombo = new ComboBox();
-			_windows = new CheckBox {
-				Text = "Windows",
+			_win32 = new CheckBox {
+				Text = "Win 32-bit",
+				Checked = true
+			};
+			_win64 = new CheckBox
+			{
+				Text = "Win 64-bit",
 				Checked = true
 			};
 			_linux32 = new CheckBox {
@@ -116,7 +122,8 @@ namespace BuildDependency.Manager.Dialogs
 						Spacing = 5,
 						Orientation = Orientation.Horizontal,
 						Items =  {
-							_windows,
+							_win32,
+							_win64,
 							_linux32,
 							_linux64
 						}
@@ -221,7 +228,7 @@ namespace BuildDependency.Manager.Dialogs
 		{
 			get
 			{
-				return AddOrEditArtifactDependencyDialog.GetConditionFromCheckBox(_windows, _linux32, _linux64);
+				return AddOrEditArtifactDependencyDialog.GetConditionFromCheckBox(_win32, _win64, _linux32, _linux64);
 			}
 		}
 
