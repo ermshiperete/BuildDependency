@@ -1,6 +1,8 @@
 bin/
 obj/
 packages/
+Downloads/
+Mercurial/
 MercurialExtensions/
 NuGet.exe
 build/MsBuildSample.files

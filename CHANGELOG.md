@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+- overwrite existing file when copying file from cache
+
 ## [0.3.0] - 2017-10-16
 
 ### Added

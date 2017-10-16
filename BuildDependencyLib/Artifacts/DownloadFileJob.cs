@@ -223,7 +223,7 @@ namespace BuildDependency.Artifacts
 		{
 			log.LogMessage($"Copying {targetFile} from cache");
 			Directory.CreateDirectory(Path.GetDirectoryName(targetFile));
-			File.Copy(cachedFile, targetFile);
+			File.Copy(cachedFile, targetFile, true);
 		}
 
 		public override string ToString()
