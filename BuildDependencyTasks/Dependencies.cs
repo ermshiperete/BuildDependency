@@ -56,6 +56,7 @@ namespace BuildDependency.Tasks
 			WorkingDir = string.Empty;
 			RunAsync = true;
 			UseCache = true;
+			WorkOffline = false;
 		}
 
 		/// <summary>
@@ -98,6 +99,12 @@ namespace BuildDependency.Tasks
 		/// </summary>
 		public bool UseCache { get; set; }
 
+		/// <summary>
+		/// <c>true</c> to work offline, <c>false</c> to try to download files over the network
+		/// if the files on the server are newer than the local files. Default: <c>false</c>.
+		/// </summary>
+		public bool WorkOffline { get; set; }
+
 		public override bool Execute()
 		{
 			ILog logHelper;
@@ -112,8 +119,12 @@ namespace BuildDependency.Tasks
 
 			if (!Network.IsInternetAvailable())
 				logHelper.LogMessage(LogMessageImportance.High, "No network connection available. Working in offline mode.");
+			else if (WorkOffline)
+				logHelper.LogMessage("Working in offline mode.");
+
 
 			FileCache.Enabled = UseCache;
+			Network.WorkOffline = WorkOffline;
 
 			if (UseDependencyFile && string.IsNullOrEmpty(DependencyFile))
 			{

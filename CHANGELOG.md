@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - Implement caching of dependencies (#16)
+- Implement offline mode (#17)
 
 ### Changed
 
