@@ -220,7 +220,7 @@ namespace BuildDependency.Manager.Dialogs
 			_servers = new List<Server>();
 			var server = Server.CreateServer(ServerType.TeamCity);
 			server.Name = "TC";
-			server.Url = "http://build.palaso.org";
+			server.Url = "https://build.palaso.org";
 			_servers.Add(server);
 		}
 

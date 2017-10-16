@@ -36,8 +36,11 @@ namespace BuildDependency
 			if (otherServer == null)
 				return false;
 
+			// Allow difference in protocol or port (http vs https)
 			return ServerType == otherServer.ServerType && Name == otherServer.Name &&
-				Url == otherServer.Url;
+				(Url == otherServer.Url || Uri.Compare(new Uri(Url), new Uri(otherServer.Url),
+					 UriComponents.UserInfo | UriComponents.Host | UriComponents.PathAndQuery,
+					 UriFormat.UriEscaped, StringComparison.InvariantCulture) == 0);
 		}
 
 		public override int GetHashCode()
