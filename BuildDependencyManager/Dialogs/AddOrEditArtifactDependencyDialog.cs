@@ -29,7 +29,8 @@ namespace BuildDependency.Manager.Dialogs
 		private string _buildNumber;
 		private string _buildTag;
 		private int _currentBuildSourceIndex;
-		private readonly CheckBox _windows;
+		private readonly CheckBox _win32;
+		private readonly CheckBox _win64;
 		private readonly CheckBox _linux32;
 		private readonly CheckBox _linux64;
 		private readonly Spinner _spinner;
@@ -46,8 +47,13 @@ namespace BuildDependency.Manager.Dialogs
 				Visible = false
 			};
 			_rulesTextBox = new TextArea();
-			_windows = new CheckBox {
-				Text = "Windows",
+			_win32 = new CheckBox {
+				Text = "Win 32-bit",
+				Checked = true
+			};
+			_win64 = new CheckBox
+			{
+				Text = "Win 64-bit",
 				Checked = true
 			};
 			_linux32 = new CheckBox {
@@ -145,7 +151,8 @@ namespace BuildDependency.Manager.Dialogs
 						Spacing = 5,
 						Orientation = Orientation.Horizontal,
 						Items =  {
-							_windows,
+							_win32,
+							_win64,
 							_linux32,
 							_linux64
 						}
@@ -208,7 +215,8 @@ namespace BuildDependency.Manager.Dialogs
 			_configCombo.SelectedValue = artifact.Config;
 			_rulesTextBox.Text = artifact.PathRules;
 			UpdatePreview();
-			SetCheckBox(_windows, artifact, Conditions.Windows);
+			SetCheckBox(_win32, artifact, Conditions.Win32);
+			SetCheckBox(_win64, artifact, Conditions.Win64);
 			SetCheckBox(_linux32, artifact, Conditions.Linux32);
 			SetCheckBox(_linux64, artifact, Conditions.Linux64);
 			BuildTagType revisionName;
@@ -344,9 +352,9 @@ namespace BuildDependency.Manager.Dialogs
 			return string.Empty;
 		}
 
-		public static Conditions GetConditionFromCheckBox(CheckBox windows, CheckBox linux32, CheckBox linux64)
+		public static Conditions GetConditionFromCheckBox(CheckBox win32, CheckBox win64, CheckBox linux32, CheckBox linux64)
 		{
-			return (GetCheckBoxState(windows, Conditions.Windows) |
+			return (GetCheckBoxState(win32, Conditions.Win32) | GetCheckBoxState(win64, Conditions.Win64) |
 			GetCheckBoxState(linux32, Conditions.Linux32) |
 			GetCheckBoxState(linux64, Conditions.Linux64));
 		}
@@ -366,7 +374,7 @@ namespace BuildDependency.Manager.Dialogs
 
 			var artifact = new ArtifactTemplate(server, proj, config.Id);
 			artifact.PathRules = _rulesTextBox.Text;
-			artifact.Condition = GetConditionFromCheckBox(_windows, _linux32, _linux64);
+			artifact.Condition = GetConditionFromCheckBox(_win32, _win64, _linux32, _linux64);
 
 			artifact.RevisionName = Enum.GetName(typeof(BuildTagType), _buildTagType.SelectedIndex);
 			switch (_buildTagType.SelectedIndex)
