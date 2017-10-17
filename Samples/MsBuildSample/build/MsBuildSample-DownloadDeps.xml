@@ -4,7 +4,7 @@
 		<SolutionDir Condition="'$(SolutionDir)'==''">$(RootDir)</SolutionDir>
 		<KeepJobsFile Condition="'$(KeepJobsFile)'==''">true</KeepJobsFile>
 		<CacheFiles Condition="'$(CacheFiles)'==''">true</CacheFiles>
-		<Offline Condition="'$(Offline)'=''">false</Offline>
+		<Offline Condition="'$(Offline)'==''">false</Offline>
 	</PropertyGroup>
 
 	<Import Project="$(SolutionDir)/packages/BuildDependencyTasks.*/tools/BuildDependencyTasks.targets"/>

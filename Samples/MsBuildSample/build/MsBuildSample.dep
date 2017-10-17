@@ -28,3 +28,11 @@ RevisionName=lastSuccessful
 RevisionValue=latest.lastSuccessful
 Condition=Linux64
 Path=Mercurial-x86_64.zip!**=>.
+
+[TC::ChorusWin32LfmergeCont]
+Name=chorus-win32-lfmerge Continuous
+RevisionName=lastSuccessful
+RevisionValue=latest.lastSuccessful
+Condition=Windows
+Path=MercurialExtensions/**/*.py=>MercurialExtensions/
+Mercurial.zip!**=>.

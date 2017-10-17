@@ -1,8 +1,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTarget="DownloadDependencies">
 	<PropertyGroup>
 		<RootDir Condition="'$(RootDir)'==''">$(MSBuildProjectDirectory)/..</RootDir>
-		<Solution Condition="'$(Solution)'=''">MsBuildSample.sln</Solution>
-		<SolutionPath Condition="'$(SolutionPath)'=''">$(RootDir)/$(Solution)</SolutionPath>
+		<Solution Condition="'$(Solution)'==''">MsBuildSample.sln</Solution>
+		<SolutionPath Condition="'$(SolutionPath)'==''">$(RootDir)/$(Solution)</SolutionPath>
 	</PropertyGroup>
 
 	<Import Project="NuGet.targets"/>
