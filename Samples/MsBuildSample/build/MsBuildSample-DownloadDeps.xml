@@ -11,6 +11,6 @@
 
 	<Target Name="DownloadDependenciesTarget">
 		<Dependencies DependencyFile="MsBuildSample.dep" UseDependencyFile="true" KeepJobsFile="$(KeepJobsFile)"
-			WorkingDir="$(RootDir)" UseCache="$(CacheFiles)" WorkOffline="$(Offline)" />
+			WorkingDir="$(RootDir)" UseCache="$(CacheFiles)" WorkOffline="$(Offline)" Platform="$(Platform)" />
 	</Target>
 </Project>

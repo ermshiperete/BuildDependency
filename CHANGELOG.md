@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 
+## [0.4.0] - 2017-10-19
+
+### Added
+
+- Add _Platform_ property to task to allow to specify target platform
+
+### Fixed
+
+- Add support for Windows 64-bit to task (#27)
+
 ## [0.3.1] - 2017-10-17
 
 ### Fixed

@@ -105,6 +105,14 @@ namespace BuildDependency.Tasks
 		/// </summary>
 		public bool WorkOffline { get; set; }
 
+		/// <summary>
+		/// The platform to download files for. Can be <c>x86</c>, <c>x64</c>, or <c>AnyCPU</c>.
+		/// <c>AnyCPU</c> here means to download files for either <c>x86</c> or <c>x64</c>.
+		/// If not set, the bitness of the current process determines the platform.
+		/// Default: not set
+		/// </summary>
+		public string Platform { get; set; }
+
 		public override bool Execute()
 		{
 			ILog logHelper;
@@ -125,6 +133,7 @@ namespace BuildDependency.Tasks
 
 			FileCache.Enabled = UseCache;
 			Network.WorkOffline = WorkOffline;
+			ConditionHelper.PlatformString = Platform;
 
 			if (UseDependencyFile && string.IsNullOrEmpty(DependencyFile))
 			{
