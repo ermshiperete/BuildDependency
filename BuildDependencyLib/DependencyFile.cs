@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.Collections.Generic;
@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using BuildDependency.Artifacts;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
+using BuildDependency.Tools;
 
 namespace BuildDependency
 {
@@ -54,6 +55,8 @@ namespace BuildDependency
 				file.WriteLine("# This file lists dependencies");
 				file.WriteLine("# It can be edited with the BuildDependencyManager application.");
 				file.WriteLine("# See https://github.com/ermshiperete/BuildDependency for more information.");
+				var version = Utils.GetVersion("BuildDependency");
+				file.WriteLine($"# Edited with version {version.Item1} ({version.Item2})");
 				file.WriteLine();
 				foreach (var server in servers)
 				{
@@ -86,28 +89,27 @@ namespace BuildDependency
 			{
 				line = file.ReadLine();
 				lineCount++;
-				if (string.IsNullOrEmpty(line.Trim()))
+				if (string.IsNullOrEmpty(line?.Trim()))
 					break;
 
 				var parts = line.Split(new [] { '=' }, 2);
-				if (parts.Length == 2)
+				if (parts.Length != 2)
+					continue;
+				if (parts[0] == "Type")
 				{
-					if (parts[0] == "Type")
+					ServerType type;
+					if (Enum.TryParse(parts[1], out type))
 					{
-						ServerType type;
-						if (Enum.TryParse(parts[1], out type))
-						{
-							server = Server.CreateServer(type);
-							server.Name = name;
-							_servers.Add(name, server);
-						}
-						else
-							log.LogError("Can't interpret type {0}", parts[1]);
+						server = Server.CreateServer(type);
+						server.Name = name;
+						_servers.Add(name, server);
 					}
-					else if (parts[0] == "Url" && server != null)
-					{
-						server.Url = parts[1];
-					}
+					else
+						log.LogError("Can't interpret type {0}", parts[1]);
+				}
+				else if (parts[0] == "Url" && server != null)
+				{
+					server.Url = parts[1];
 				}
 			}
 			return lineCount;

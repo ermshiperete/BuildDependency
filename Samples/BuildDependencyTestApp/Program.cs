@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2015 Eberhard Beilharz
+// Copyright (c) 2015 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 
 using System;
@@ -14,15 +14,17 @@ namespace BuildDependencyTestApp
 	{
 		public static void Main(string[] args)
 		{
-			var task = new Dependencies();
-			task.DependencyFile = "/tmp/test.dep";
-			task.JobsFile = "/tmp/test.files";
-			task.UseDependencyFile = true;
-			task.KeepJobsFile = true;
-			task.WorkingDir = "/tmp/bla";
-			Directory.CreateDirectory("/tmp/bla");
-			task.RunAsync = true;
-			task.BuildEngine = new TmpBuildEngine(MessageImportance.Normal);
+			var task = new Dependencies
+			{
+				BuildEngine = new TmpBuildEngine(MessageImportance.Normal),
+				DependencyFile = Path.Combine(Path.GetTempPath(), "test.dep"),
+				JobsFile = Path.Combine(Path.GetTempPath(), "test.files"),
+				WorkingDir = Path.Combine(Path.GetTempPath(), "bla"),
+				UseDependencyFile = true,
+				KeepJobsFile = true,
+				RunAsync = true,
+			};
+			Directory.CreateDirectory(task.WorkingDir);
 			task.Execute();
 		}
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
 using System;
 using System.IO;
@@ -32,15 +32,15 @@ namespace BuildDependency.Artifacts
 			DestinationPath = destinationPath;
 		}
 
-		public string ZipFile { get; private set; }
+		public string ZipFile { get; }
 
-		public string SourcePath { get; private set; }
+		public string SourcePath { get; }
 
-		public string DestinationPath { get; private set; }
+		public string DestinationPath { get; }
 
 		#region IJob implementation
 
-		public Conditions Conditions { get; private set; }
+		public Conditions Conditions { get; }
 
 		public async Task<bool> Execute(ILog log, string workDir)
 		{
