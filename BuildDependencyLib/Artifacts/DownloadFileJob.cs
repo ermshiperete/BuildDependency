@@ -49,18 +49,9 @@ namespace BuildDependency.Artifacts
 			if (!Conditions.AreTrue())
 				return true;
 
-//			string httpUsername;
-//			string httpPassword;
-
-			// Assign values to these objects here so that they can
-			// be referenced in the finally block
-			Stream remoteStream = null;
-			Stream localStream = null;
-			HttpWebResponse response = null;
 			var lastModified = DateTime.Now;
 
 			var targetFile = Path.Combine(workDir, TargetFile);
-			var tmpTargetFile = targetFile + ".~tmp";
 
 			bool gotCachedFile = false;
 			if (FileCache.Enabled)
@@ -69,7 +60,7 @@ namespace BuildDependency.Artifacts
 				if (File.Exists(cachedFile))
 				{
 					gotCachedFile = true;
-					log.LogMessage($"Found cached file {targetFile}");
+					log.LogMessage($"Found cached file {TargetFile}");
 					if (File.Exists(targetFile))
 					{
 						var targetFileInfo = new FileInfo(targetFile);
@@ -88,12 +79,34 @@ namespace BuildDependency.Artifacts
 				return gotCachedFile;
 			}
 
-			log.LogMessage("Checking {0}, downloading if newer...", TargetFile);
+			var success = await DownloadFile(log, targetFile);
+
+			if (File.Exists(targetFile))
+				new FileInfo(targetFile) {LastWriteTime = lastModified};
+
+			if (success)
+				log.LogMessage("Download of {0} finished after {1}.", TargetFile, DateTime.Now - lastModified);
+
+			return success;
+		}
+
+		private async Task<bool> DownloadFile(ILog log, string targetFile)
+		{
+//			string httpUsername;
+//			string httpPassword;
+
+			// Assign values to these objects here so that they can
+			// be referenced in the finally block
+			Stream remoteStream = null;
+			Stream localStream = null;
+			HttpWebResponse response = null;
 
 			// Use a try/catch/finally block as both the WebRequest and Stream
 			// classes throw exceptions upon error
 			try
 			{
+				var tmpTargetFile = targetFile + ".~tmp";
+
 				// Create a request for the specified remote file name
 				var request = WebRequest.Create(Url) as HttpWebRequest;
 //				// If a username or password have been given, use them
@@ -104,26 +117,47 @@ namespace BuildDependency.Artifacts
 //					request.Credentials = new NetworkCredential(username, password);
 //				}
 
+				// REVIEW: would it be better to use ETag in the HTTP header instead of relying
+				// on the timestamp for caching and continuing incomplete downloads?
+
 				bool appendFile = false;
 				long tmpFileLength = 0;
-				if (File.Exists(targetFile))
-				{
-					var fi = new FileInfo(targetFile);
-					request.IfModifiedSince = fi.LastWriteTimeUtc;
-				}
 				if (File.Exists(tmpTargetFile))
 				{
 					// Interrupted download
+					log.LogMessage("Found incomplete download file, continuing download of {0}...", TargetFile);
+
 					var fi = new FileInfo(tmpTargetFile);
+					request.Headers.Add("If-Unmodified-Since", fi.LastWriteTimeUtc.ToString("r"));
 					tmpFileLength = fi.Length;
 					request.AddRange(tmpFileLength);
 					appendFile = true;
 				}
+				else if (File.Exists(targetFile))
+				{
+					log.LogMessage("Checking {0}, downloading if newer...", TargetFile);
+
+					var fi = new FileInfo(targetFile);
+					request.IfModifiedSince = fi.LastWriteTimeUtc;
+				}
+				else
+					log.LogMessage("Downloading {0}...", TargetFile);
 
 				// Send the request to the server and retrieve the
 				// WebResponse object
 				response = (HttpWebResponse) await Task.Factory.FromAsync(
 					request.BeginGetResponse, request.EndGetResponse, null);
+
+				if (File.Exists(tmpTargetFile) && (response.StatusCode == HttpStatusCode.PreconditionFailed ||
+					response.LastModified > new FileInfo(tmpTargetFile).LastWriteTimeUtc))
+				{
+					// file got changed on the server since we downloaded the incomplete file
+					log.LogMessage("File {0} changed on server since start of incomplete download; initiating complete download",
+						TargetFile);
+					File.Delete(tmpTargetFile);
+					response.Close();
+					return await DownloadFile(log, targetFile);
+				}
 
 				// Once the WebResponse object has been retrieved,
 				// get the stream object associated with the response's data
@@ -150,11 +184,24 @@ namespace BuildDependency.Artifacts
 					localStream.Write(buffer, 0, bytesRead);
 				} while (bytesRead > 0);
 
+				var localStreamLength = localStream.Length;
 				localStream.Close();
+
+				if (localStreamLength != response.ContentLength + tmpFileLength)
+				{
+					log.LogMessage(LogMessageImportance.High,
+						"WARNING: couldn't download complete file {0}, continuing next time", TargetFile);
+					log.LogMessage(LogMessageImportance.Low,
+						"{2}: Expected file length: {0}, but received {1} bytes",
+						response.ContentLength + tmpFileLength, localStreamLength, TargetFile);
+					return false;
+				}
+
 				File.Delete(targetFile);
 				File.Move(tmpTargetFile, targetFile);
 				if (FileCache.Enabled)
 					FileCache.CacheFile(Url, targetFile);
+				return true;
 			}
 			catch (WebException wex)
 			{
@@ -207,16 +254,8 @@ namespace BuildDependency.Artifacts
 				// is thrown at some point
 				response?.Close();
 				remoteStream?.Close();
-				if (localStream != null)
-				{
-					localStream.Close();
-					var fi = new FileInfo(targetFile) { LastWriteTime = lastModified };
-				}
+				localStream?.Close();
 			}
-
-			log.LogMessage("Download of {0} finished after {1}.", TargetFile, DateTime.Now - lastModified);
-
-			return true;
 		}
 
 		private static void CopyCachedFile(ILog log, string cachedFile, string targetFile)

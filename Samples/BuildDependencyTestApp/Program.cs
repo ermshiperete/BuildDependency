@@ -23,6 +23,7 @@ namespace BuildDependencyTestApp
 				UseDependencyFile = true,
 				KeepJobsFile = true,
 				RunAsync = true,
+				UseCache = true,
 				// Platform = "x64",
 			};
 			Directory.CreateDirectory(task.WorkingDir);
