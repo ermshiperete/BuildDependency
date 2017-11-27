@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using BuildDependency.TeamCity;
 using BuildDependency.Artifacts;
+using BuildDependency.Tools;
 
 namespace BuildDependency
 {
@@ -21,6 +22,8 @@ namespace BuildDependency
 			{
 				foreach (var artifact in artifactTemplates)
 				{
+					if (!artifact.Condition.AreTrue())
+						continue;
 					var server = artifact.Server as TeamCityApi;
 					if (server == null)
 						continue;
