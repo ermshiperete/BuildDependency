@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.2] - 2018-04-11
+
 ### Changed
 
 - Updated Bugsnag library and exception handling to v2 API
