@@ -14,11 +14,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Security
 -->
 
-<!--
 ## [Unreleased]
 
-### Fixed
--->
+### Changed
+
+- Updated Bugsnag library and exception handling to v2 API
 
 ## [0.4.1] - 2017-10-20
 

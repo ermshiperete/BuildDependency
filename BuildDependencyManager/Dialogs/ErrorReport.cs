@@ -41,15 +41,10 @@ namespace BuildDependency.Manager.Dialogs
 
 		private void OnMoreInfoButtonClick(object sender, EventArgs e)
 		{
-			var runtime = PlatformTools.IsMono
-				? $"Mono\nmonoversion={PlatformTools.MonoVersion}" : ".NET";
 			MessageBox.Show(
-				$"The following details will be sent:\nhostname={Dns.GetHostName()}\n" +
-				$"desktop={PlatformTools.DesktopEnvironment}\n" +
-				$"shell={PlatformTools.DesktopEnvironmentInfoString}\n" +
-				$"processorCount={Environment.ProcessorCount}\n" +
-				$"user={ExceptionLogging.Client.Config.UserId}\n" +
-				$"runtime=${runtime}\n\nStacktrace:\n{_exception?.StackTrace}",
+				$"The following details will be sent:\n{ExceptionLogging.Client.DataThatWillBeSent}\n" +
+				$"Exception: {_exception?.GetType().Name}\n{_exception?.Message}\n\n" +
+				$"Stacktrace:\n{_exception?.StackTrace}",
 				$"{Application.Instance.Name} Error Report Details");
 		}
 	}

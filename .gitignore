@@ -10,3 +10,4 @@ obj/
 /.idea/
 /.idea.BuildDependency/
 *.iml
+*.DotSettings.user

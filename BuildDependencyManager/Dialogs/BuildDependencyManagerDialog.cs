@@ -153,8 +153,6 @@ namespace BuildDependency.Manager.Dialogs
 			{
 				if (ex != null)
 				{
-					ExceptionLogging.Client.Config.Metadata.AddToTab("Exception Details",
-						"stacktrace", ex.StackTrace);
 					ExceptionLogging.Client.Notify(ex, Bugsnag.Severity.Error);
 				}
 			}

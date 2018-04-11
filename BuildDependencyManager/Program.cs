@@ -7,13 +7,13 @@ using Eto.Forms;
 
 namespace BuildDependency.Manager
 {
-	class MainClass
+	internal static class MainClass
 	{
 		[STAThread]
 		public static void Main(string[] args)
 		{
 			ExceptionLogging.Initialize("4bae82b8c647df7fea786dbaecb4b351");
-			string fileName = args.Length > 0 ? args[0] : null;
+			var fileName = args.Length > 0 ? args[0] : null;
 			new Application().Run(new BuildDependencyManagerDialog(fileName));
 		}
 	}
