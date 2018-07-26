@@ -224,8 +224,8 @@ namespace BuildDependency.Manager.Dialogs
 
 		private static void AddFileFilters(FileDialog dlg)
 		{
-			dlg.Filters.Add(new FileDialogFilter("Dependency File (*.dep)", "*.dep"));
-			dlg.Filters.Add(new FileDialogFilter("All Files (*.*)", "*"));
+			dlg.Filters.Add(new FileFilter("Dependency File (*.dep)", "*.dep"));
+			dlg.Filters.Add(new FileFilter("All Files (*.*)", "*"));
 			dlg.CurrentFilterIndex = 0;
 		}
 

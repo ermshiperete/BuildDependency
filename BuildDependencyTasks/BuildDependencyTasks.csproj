@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>BuildDependency.Tasks</RootNamespace>
     <AssemblyName>BuildDependencyTasks</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
@@ -31,8 +31,12 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Bugsnag, Version=2.0.2.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Bugsnag.2.0.2\lib\net45\Bugsnag.dll</HintPath>
+    <Reference Include="Bugsnag, Version=2.2.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Bugsnag.2.2.0\lib\net45\Bugsnag.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -42,9 +46,6 @@
     <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\ICSharpCode.SharpZipLib.dll.0.85.4.369\lib\net20\ICSharpCode.SharpZipLib.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />

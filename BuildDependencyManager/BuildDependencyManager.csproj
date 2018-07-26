@@ -7,7 +7,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>BuildDependency.Manager</RootNamespace>
     <AssemblyName>BuildDependencyManager</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -35,34 +35,40 @@
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Bugsnag, Version=2.0.2.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\Bugsnag.2.0.2\lib\net45\Bugsnag.dll</HintPath>
+    <Reference Include="Bugsnag, Version=2.2.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Bugsnag.2.2.0\lib\net45\Bugsnag.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Eto, Version=2.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Eto.Forms.2.3.0\lib\net45\Eto.dll</HintPath>
+    <Reference Include="Eto, Version=2.4.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Eto.Forms.2.4.1\lib\netstandard1.0\Eto.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Eto.Gtk3, Version=2.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Eto.Platform.Gtk3.2.3.0\lib\net45\Eto.Gtk3.dll</HintPath>
+    <Reference Include="Eto.Gtk3, Version=2.4.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Eto.Platform.Gtk3.2.4.1\lib\net45\Eto.Gtk3.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Eto.Wpf, Version=2.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Eto.Platform.Wpf.2.3.0\lib\net45\Eto.Wpf.dll</HintPath>
+    <Reference Include="Eto.Wpf, Version=2.4.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Eto.Platform.Wpf.2.4.1\lib\net45\Eto.Wpf.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="RestSharp, Version=106.3.1.0, Culture=neutral, PublicKeyToken=598062e77f915f75">
+      <HintPath>..\packages\RestSharp.106.3.1\lib\net452\RestSharp.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\ICSharpCode.SharpZipLib.dll.0.85.4.369\lib\net20\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="RestSharp">
-      <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Build.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
@@ -107,5 +113,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\GitVersionTask.4.0.0-beta0012\build\GitVersionTask.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GitVersionTask.4.0.0-beta0012\build\GitVersionTask.targets'))" />
+    <Error Condition="!Exists('..\packages\Eto.Forms.2.4.1\build\Eto.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Eto.Forms.2.4.1\build\Eto.Forms.targets'))" />
   </Target>
+  <Import Project="..\packages\Eto.Forms.2.4.1\build\Eto.Forms.targets" Condition="Exists('..\packages\Eto.Forms.2.4.1\build\Eto.Forms.targets')" />
 </Project>
