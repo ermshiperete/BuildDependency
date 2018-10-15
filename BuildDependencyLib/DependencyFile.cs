@@ -79,7 +79,7 @@ namespace BuildDependency
 			}
 		}
 
-		private int ReadServer(StreamReader file, string line, ILog log)
+		private int ReadServerSpec(StreamReader file, string line, ILog log)
 		{
 			var name = line.Trim('[', ']');
 			var lineCount = 0;
@@ -129,7 +129,7 @@ namespace BuildDependency
 					lineNumber++;
 					if (line.StartsWith("[[", StringComparison.InvariantCulture))
 					{
-						lineNumber += ReadServer(file, line, log);
+						lineNumber += ReadServerSpec(file, line, log);
 					}
 					else if (line.StartsWith("[", StringComparison.InvariantCulture))
 					{
@@ -217,15 +217,14 @@ namespace BuildDependency
 							case "Path":
 								{
 									var bldr = new StringBuilder();
-									line = parts[1];
-									if (string.IsNullOrEmpty(line))
-										break;
-
-									do
+									for (line = parts[1];
+										!string.IsNullOrEmpty(line);
+										line = file.ReadLine())
 									{
-										bldr.AppendLine(line);
-										line = file.ReadLine();
-									} while (!string.IsNullOrEmpty(line) && !file.EndOfStream);
+										var pathParts = line.Split(',');
+										foreach (var pathPart in pathParts)
+											bldr.AppendLine(pathPart);
+									}
 									artifact.PathRules = bldr.ToString();
 									break;
 								}
