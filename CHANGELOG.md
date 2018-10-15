@@ -16,9 +16,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.3] - 2018-10-15
+
 ### Changed
 
 - now compiled against .NET Framework 4.6.2
+
+### Fixed
+
+- add default values for RevisionName and RevisionValue
 
 ## [0.4.2] - 2018-04-11
 
