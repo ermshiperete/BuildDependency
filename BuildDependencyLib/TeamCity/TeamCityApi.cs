@@ -66,16 +66,15 @@ namespace BuildDependency.TeamCity
 //			if (response == null)
 //				return default(T);
 
-			if (response.ErrorException != null)
-			{
-				if (throwException && !(response.ErrorException is WebException) && !(response.ErrorException is NullReferenceException))
-				{
-					const string message = "Error retrieving response.  Check inner details for more info.";
-					throw new ApplicationException(message, response.ErrorException);
-				}
+			if (response.ErrorException == null)
+				return response.Data;
+
+			if (!throwException || response.ErrorException is WebException ||
+				response.ErrorException is NullReferenceException)
 				return default(T);
-			}
-			return response.Data;
+
+			const string message = "Error retrieving response.  Check inner details for more info.";
+			throw new ApplicationException(message, response.ErrorException);
 		}
 
 		private async Task<T> ExecuteApi<T>(RestRequest request, bool throwException = true) where T : new()

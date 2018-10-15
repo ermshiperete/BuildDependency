@@ -1,11 +1,9 @@
-﻿// Copyright (c) 2014 Eberhard Beilharz
+﻿// Copyright (c) 2014-2018 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
-using System;
+
 using System.Collections.Generic;
-using BuildDependency.Artifacts;
 using BuildDependency.TeamCity;
 using BuildDependency.TeamCity.RestClasses;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace BuildDependency.Artifacts
@@ -18,6 +16,8 @@ namespace BuildDependency.Artifacts
 			Project = project;
 			SourceBuildTypeId = buildTypeId;
 			Condition = Conditions.All;
+			RevisionName = "lastSuccessful";
+			RevisionValue = "latest.lastSuccessful";
 		}
 
 		public ArtifactTemplate(Server server, ArtifactProperties artifact, BuildType buildType)
@@ -29,24 +29,14 @@ namespace BuildDependency.Artifacts
 			SourceBuildTypeId = artifact.SourceBuildTypeId ?? buildType.Id;
 			CleanDestinationDirectory = artifact.CleanDestinationDirectory;
 			Condition = Conditions.All;
-			var tcServer = server as TeamCityApi;
-			if (tcServer == null || !tcServer.Projects.ContainsKey(Config.ProjectId))
+			if (!(server is TeamCityApi tcServer) || !tcServer.Projects.ContainsKey(Config.ProjectId))
 				return;
 			Project = tcServer.Projects[Config.ProjectId];
 		}
 
-		public string ConfigName
-		{
-			get
-			{
-				return Config.Name;
-			}
-		}
+		public string ConfigName => Config.Name;
 
-		public BuildType Config
-		{
-			get { return ((TeamCityApi)Server).BuildTypes[SourceBuildTypeId]; }
-		}
+		public BuildType Config => ((TeamCityApi)Server).BuildTypes[SourceBuildTypeId];
 
 		public Conditions Condition { get; set; }
 
@@ -54,14 +44,7 @@ namespace BuildDependency.Artifacts
 
 		public Server Server { get; set; }
 
-		public string RepoUrl
-		{
-			get
-			{
-				return string.Format("{0}/download/{1}/{2}", ((TeamCityApi)Server).BaseRepoUrl,
-					Config.IdForArtifacts, RevisionValue);
-			}
-		}
+		private string RepoUrl => $"{((TeamCityApi) Server).BaseRepoUrl}/download/{Config.IdForArtifacts}/{RevisionValue}";
 
 		public string Source
 		{
