@@ -3,6 +3,12 @@
 Provides a cross-platform compatible msbuild task named "dependencies" that allows to download
 artifacts from a TeamCity server, as well as a GUI to edit the dependencies.
 
+## Special Thanks To
+
+[![Bugsnag logo](bugsnag-logo.png "Bugsnag")](https://www.bugsnag.com/open-source)
+
+for providing error reporting.
+
 ## What does it do?
 
 TeamCity allows to define dependencies as part of a build job definition. However, that helps
@@ -36,7 +42,6 @@ server are not available.
 
 The `*.dep` dependency file can be edited by the BuildDependencyManager GUI app, or directly
 in a text editor.
-
 
 ## Installation
 
