@@ -11,3 +11,5 @@ obj/
 /.idea.BuildDependency/
 *.iml
 *.DotSettings.user
+.vs/
+gitversion.json
