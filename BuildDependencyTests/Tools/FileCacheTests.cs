@@ -58,9 +58,9 @@ namespace BuildDependency
 			FileCache.Instance = _fileCache;
 		}
 
-		[TestCase(null, Result = true, Description = "Can write")]
-		[TestCase("/", Result = false, Description = "CacheDir exists, but we're not allowed to write")]
-		[TestCase("/nonexistant", Result = false, Description = "CacheDir doesn't exist, we can't write")]
+		[TestCase(null, ExpectedResult = true, Description = "Can write")]
+		[TestCase("/", ExpectedResult = false, Description = "CacheDir exists, but we're not allowed to write")]
+		[TestCase("/nonexistant", ExpectedResult = false, Description = "CacheDir doesn't exist, we can't write")]
 		public bool Enabled(string baseDir)
 		{
 			// Setup

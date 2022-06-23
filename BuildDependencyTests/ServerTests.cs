@@ -8,10 +8,10 @@ namespace BuildDependency
 	[TestFixture]
 	public class ServerTests
 	{
-		[TestCase("https://build.example.org", Result = true)]
-		[TestCase("http://build.example.org", Result = true)]
-		[TestCase("https://build.example.org:123", Result = true)]
-		[TestCase("https://test.example.org", Result = false)]
+		[TestCase("https://build.example.org", ExpectedResult = true)]
+		[TestCase("http://build.example.org", ExpectedResult = true)]
+		[TestCase("https://build.example.org:123", ExpectedResult = true)]
+		[TestCase("https://test.example.org", ExpectedResult = false)]
 		public bool Equals(string otherUrl)
 		{
 			// Setup

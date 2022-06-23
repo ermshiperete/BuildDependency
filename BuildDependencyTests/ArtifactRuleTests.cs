@@ -27,53 +27,53 @@ namespace BuildDependencyTests
 		}
 
 		[Test]
-		[TestCase("*.txt=>lib", "bla.txt", Result = true)]
-		[TestCase("?.txt=>lib", "bla.txt", Result = false)]
-		[TestCase("???.txt=>lib", "bla.txt", Result = true)]
-		[TestCase("*.txt=>lib", "bla/bla.txt", Result = false)]
-		[TestCase("**.txt=>lib", "bla/bla.txt", Result = true)]
-		[TestCase("*.txt=>lib", "blatxt", Result = false)]
-		[TestCase("*/.txt=>lib", ".txt", Result = false)]
-		[TestCase("*/.txt=>lib", "a/bla.txt", Result = false)]
-		[TestCase("*/.txt=>lib", "a/.txt", Result = true)]
-		[TestCase("**=>lib", "a/b/c/def", Result = true)]
-		[TestCase("a/**=>lib", "a/b/c/def", Result = true)]
-		[TestCase("a/**=>lib", "b/c/def", Result = false)]
-		[TestCase("a/**/*.txt=>lib", "a/b/c/def", Result = false)]
-		[TestCase("a/**/*.txt=>lib", "a/b/c/def.txt", Result = true)]
-		[TestCase("a/**/*.txt=>lib", "a/b/c/d/def.txt", Result = true)]
-		[TestCase("a/*/*.txt=>lib", "a/b/c/d/def.txt", Result = false)]
-		[TestCase("a/b/c/**/.dll=>dlls", "a/b/c/d/e/.dll", Result = true)]
-		[TestCase("a/b/c/**/.dll=>dlls", "a/b/c/d/e/f.dll", Result = false)]
-		[TestCase("a/b/c/**/*.dll=>dlls", "f.dll", Result = false)]
-		[TestCase("-:*.txt=>lib", "bla.txt", Result = false)]
-		[TestCase("+:*.txt=>lib", "bla.txt", Result = true)]
-		[TestCase("a/b/c/**d/*.dll=>dlls", "a/b/c/d/g.dll", Result = true)]
+		[TestCase("*.txt=>lib", "bla.txt", ExpectedResult = true)]
+		[TestCase("?.txt=>lib", "bla.txt", ExpectedResult = false)]
+		[TestCase("???.txt=>lib", "bla.txt", ExpectedResult = true)]
+		[TestCase("*.txt=>lib", "bla/bla.txt", ExpectedResult = false)]
+		[TestCase("**.txt=>lib", "bla/bla.txt", ExpectedResult = true)]
+		[TestCase("*.txt=>lib", "blatxt", ExpectedResult = false)]
+		[TestCase("*/.txt=>lib", ".txt", ExpectedResult = false)]
+		[TestCase("*/.txt=>lib", "a/bla.txt", ExpectedResult = false)]
+		[TestCase("*/.txt=>lib", "a/.txt", ExpectedResult = true)]
+		[TestCase("**=>lib", "a/b/c/def", ExpectedResult = true)]
+		[TestCase("a/**=>lib", "a/b/c/def", ExpectedResult = true)]
+		[TestCase("a/**=>lib", "b/c/def", ExpectedResult = false)]
+		[TestCase("a/**/*.txt=>lib", "a/b/c/def", ExpectedResult = false)]
+		[TestCase("a/**/*.txt=>lib", "a/b/c/def.txt", ExpectedResult = true)]
+		[TestCase("a/**/*.txt=>lib", "a/b/c/d/def.txt", ExpectedResult = true)]
+		[TestCase("a/*/*.txt=>lib", "a/b/c/d/def.txt", ExpectedResult = false)]
+		[TestCase("a/b/c/**/.dll=>dlls", "a/b/c/d/e/.dll", ExpectedResult = true)]
+		[TestCase("a/b/c/**/.dll=>dlls", "a/b/c/d/e/f.dll", ExpectedResult = false)]
+		[TestCase("a/b/c/**/*.dll=>dlls", "f.dll", ExpectedResult = false)]
+		[TestCase("-:*.txt=>lib", "bla.txt", ExpectedResult = false)]
+		[TestCase("+:*.txt=>lib", "bla.txt", ExpectedResult = true)]
+		[TestCase("a/b/c/**d/*.dll=>dlls", "a/b/c/d/g.dll", ExpectedResult = true)]
 		public bool FileIsMatch(string rule, string fileName)
 		{
 			var artifactRule = new ArtifactRule(0, null, rule);
 			return artifactRule.IsMatch(fileName);
 		}
 
-		[TestCase("*.txt=>lib", "bla.txt", Result = "lib/bla.txt")]
-		[TestCase("**.txt=>lib", "bla/bla.txt", Result = "lib/bla/bla.txt")]
-		[TestCase("a/b/**=>lib", "a/b/c/file.txt", Result = "lib/c/file.txt")]
-		[TestCase("a/b/c/*/.dll=>dlls", "a/b/c/d/.dll", Result = "dlls/d/.dll")]
-		[TestCase("a/b/c/**/.dll=>dlls", "a/b/c/d/e/f/.dll", Result = "dlls/d/e/f/.dll")]
-		[TestCase("a/b/c/**/*.dll=>dlls", "a/b/c/d/e/f/g.dll", Result = "dlls/d/e/f/g.dll")]
-		[TestCase("a/b/c/**d/*.dll=>dlls", "a/b/c/d/g.dll", Result = "dlls/d/g.dll")]
-		[TestCase("a/b/c/**d/*.dll=>dlls", "a/b/c/e/f/d/g.dll", Result = "dlls/e/f/d/g.dll")]
-		[TestCase("*.txt=>lib", "blatxt", Result = null)]
-		[TestCase("abc.dll*=>lib", "abc.dll.config", Result = "lib/abc.dll.config")]
-		[TestCase("**", "README", Result = "README")]
+		[TestCase("*.txt=>lib", "bla.txt", ExpectedResult = "lib/bla.txt")]
+		[TestCase("**.txt=>lib", "bla/bla.txt", ExpectedResult = "lib/bla/bla.txt")]
+		[TestCase("a/b/**=>lib", "a/b/c/file.txt", ExpectedResult = "lib/c/file.txt")]
+		[TestCase("a/b/c/*/.dll=>dlls", "a/b/c/d/.dll", ExpectedResult = "dlls/d/.dll")]
+		[TestCase("a/b/c/**/.dll=>dlls", "a/b/c/d/e/f/.dll", ExpectedResult = "dlls/d/e/f/.dll")]
+		[TestCase("a/b/c/**/*.dll=>dlls", "a/b/c/d/e/f/g.dll", ExpectedResult = "dlls/d/e/f/g.dll")]
+		[TestCase("a/b/c/**d/*.dll=>dlls", "a/b/c/d/g.dll", ExpectedResult = "dlls/d/g.dll")]
+		[TestCase("a/b/c/**d/*.dll=>dlls", "a/b/c/e/f/d/g.dll", ExpectedResult = "dlls/e/f/d/g.dll")]
+		[TestCase("*.txt=>lib", "blatxt", ExpectedResult = null)]
+		[TestCase("abc.dll*=>lib", "abc.dll.config", ExpectedResult = "lib/abc.dll.config")]
+		[TestCase("**", "README", ExpectedResult = "README")]
 		public string GetTarget(string rule, string fileName)
 		{
 			var artifactRule = new ArtifactRule(0, null, rule);
 			return NormalizedPath(artifactRule.GetTarget(fileName));
 		}
 
-		[TestCase("*.txt=>lib", "bla.txt", Result = "lib/bla.txt")]
-		[TestCase("**", "README", Result = "README")]
+		[TestCase("*.txt=>lib", "bla.txt", ExpectedResult = "lib/bla.txt")]
+		[TestCase("**", "README", ExpectedResult = "README")]
 		public string GetJobs_DownloadFile(string rule, string file)
 		{
 			var artifactRule = new ArtifactRule(0, "http://example.com/download", rule);
