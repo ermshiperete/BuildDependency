@@ -1,8 +1,6 @@
 ﻿// Copyright (c) 2014 Eberhard Beilharz
 // This software is licensed under the MIT license (http://opensource.org/licenses/MIT)
-using System;
-using BuildDependency.TeamCity.RestClasses;
-using RestSharp.Deserializers;
+using System.Text.Json.Serialization;
 
 namespace BuildDependency.TeamCity.RestClasses
 {
@@ -23,7 +21,7 @@ namespace BuildDependency.TeamCity.RestClasses
 
 		public Properties Properties { get; set; }
 
-		[DeserializeAs(Name = "source-buildType")]
+		[JsonPropertyName("source-buildType")]
 		public BuildType BuildType { get; set; }
 	}
 }

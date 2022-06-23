@@ -47,14 +47,12 @@ namespace BuildDependency.TeamCity
 
 		private static async Task<T> Execute<T>(string baseUrl, RestRequest request, bool throwException = true) where T : new()
 		{
-			var client = new RestClient
-			{
-				BaseUrl = new Uri(baseUrl)
-			};
-			IRestResponse<T> response;
+			var client = new RestClient();
+			client.Options.BaseUrl = new Uri(baseUrl);
+			RestResponse<T> response;
 //			try
 //			{
-			response = await client.ExecuteGetTaskAsync<T>(request);
+			response = await client.ExecuteGetAsync<T>(request);
 //			}
 //			catch (Exception e)
 //			{

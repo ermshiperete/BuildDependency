@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\ILRepack.2.0.13\build\ILRepack.props" Condition="Exists('..\packages\ILRepack.2.0.13\build\ILRepack.props')" />
+  <Import Project="..\packages\ILRepack.2.0.18\build\ILRepack.props" Condition="Exists('..\packages\ILRepack.2.0.18\build\ILRepack.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -59,6 +59,7 @@
   <Import Project="..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets" Condition="Exists('..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets')" />
   <ItemGroup />
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="NuGetAssets\BuildDependencyTasks.nuspec" />
     <None Include="NuGetAssets\BuildDependencyTasks.targets" />
@@ -72,7 +73,8 @@
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />
     <MakeDir Directories="$(SolutionDir)NuGetBuild" />
-    <Exec Command="$(Runtime) &quot;$(SolutionDir)packages/ILRepack.2.0.13/tools/ILRepack.exe&quot;  /allowDup /out:&quot;$(SolutionDir)NuGetBuild\$(TargetFileName)&quot; &quot;$(TargetDir)BuildDependencyTasks.dll&quot; &quot;$(TargetDir)BuildDependencyLib.dll&quot; &quot;$(TargetDir)ICSharpCode.SharpZipLib.dll&quot; &quot;$(TargetDir)RestSharp.dll&quot; &quot;$(TargetDir)Bugsnag.dll&quot; &quot;$(TargetDir)Newtonsoft.Json.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot; /ndebug /internalize" />
+    <Exec 
+      Command="$(Runtime) &quot;$(SolutionDir)packages/ILRepack.2.0.18/tools/ILRepack.exe&quot;  /allowDup /out:&quot;$(SolutionDir)NuGetBuild\$(TargetFileName)&quot; &quot;$(TargetDir)BuildDependencyTasks.dll&quot; &quot;$(TargetDir)BuildDependencyLib.dll&quot; &quot;$(TargetDir)ICSharpCode.SharpZipLib.dll&quot; &quot;$(TargetDir)RestSharp.dll&quot; &quot;$(TargetDir)Bugsnag.dll&quot; &quot;$(TargetDir)Newtonsoft.Json.dll&quot; &quot;$(TargetDir)System.Text.Json.dll&quot; &quot;$(TargetDir)Microsoft.Bcl.AsyncInterfaces.dll&quot; /target:library /targetplatform:&quot;v4,$(FrameworkPathOverride)&quot; /ndebug /internalize" />
     <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).nuspec" DestinationFolder="$(SolutionDir)NuGetBuild" />
     <Copy SourceFiles="$(ProjectDir)NuGetAssets\$(TargetName).targets" DestinationFolder="$(SolutionDir)NuGetBuild\tools" />
     <PepitaPackage.CreatePackageTask NuGetBuildDirectory="$(SolutionDir)NuGetBuild" MetadataAssembly="$(TargetPath)" />
@@ -87,8 +89,8 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\ILRepack.2.0.13\build\ILRepack.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.2.0.13\build\ILRepack.props'))" />
     <Error Condition="!Exists('..\packages\GitVersionTask.4.0.0-beta0012\build\GitVersionTask.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GitVersionTask.4.0.0-beta0012\build\GitVersionTask.targets'))" />
+    <Error Condition="!Exists('..\packages\ILRepack.2.0.18\build\ILRepack.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.2.0.18\build\ILRepack.props'))" />
   </Target>
   <Import Project="..\packages\GitVersionTask.4.0.0-beta0012\build\GitVersionTask.targets" Condition="Exists('..\packages\GitVersionTask.4.0.0-beta0012\build\GitVersionTask.targets')" />
 </Project>
